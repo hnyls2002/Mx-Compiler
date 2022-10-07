@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "configurations": [
+        {
+            "name": "Debug ANTLR4 grammar",
+            "type": "antlr-debug",
+            "request": "launch",
+            //"input": "src/MxStarGrammar/sema/breakcontinue-package/breakcontinue-5.mx",
+            "input": "src/MxStarGrammar/sema/misc-package/misc-37.mx",
+            "grammar": "src/MxStarGrammar/MxStarParser.g4",
+            "actionFile": "src/MxStarGrammar/NoneUse.js",
+            "startRule": "program",
+            "printParseTree": true,
+            "visualParseTree": true
+        }
+    ]
+}

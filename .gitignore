@@ -1,2 +1,4 @@
 .antlr/
 antlr4-runtime/
+*.class
+testcases/
