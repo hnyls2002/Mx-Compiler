@@ -74,13 +74,14 @@ literalExpression: (IntLiteral | StringLiteral | True | False | Null);
 
 // ------class-types--------
 // A a; means "a = null"
-// A a = new A();
+// A a = new A(); FUCK THE GRAMMAR!!! "A a = new A" is ok;
+// Then, "A [] a = new A[10]" can conflict with "A [] a = (new A)[10]"
 // A []a = new A[10];
 // A [][]a = new A[10][];
 
 creatorExpression:
-	New typeNameUnit LParen RParen
-	| New typeNameUnit (LBracket expression RBracket)+ (LBracket RBracket)*;
+	New typeNameUnit (LBracket expression RBracket)+ (LBracket RBracket)*
+	| New typeNameUnit (LParen RParen)?;
 /*
 creatorExpression:
 	New typeNameUnit (LBracket expression RBracket)+ (LParen RParen)?

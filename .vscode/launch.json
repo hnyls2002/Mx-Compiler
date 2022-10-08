@@ -2,11 +2,18 @@
     "version": "2.0.0",
     "configurations": [
         {
+            "type": "java",
+            "name": "Attach",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": "<debug port of the debuggee>"
+        },
+        {
             "name": "Debug ANTLR4 grammar",
             "type": "antlr-debug",
             "request": "launch",
-            "input": "testcases/sema/class-package/class-5.mx",
-            //"input": "src/MxStarGrammar/sema/misc-package/misc-37.mx",
+            //"input": "testcases/sema/class-package/class-5.mx",
+            "input": "testcases/sema/test.mx",
             "grammar": "src/MxStarGrammar/MxStarParser.g4",
             "actionFile": "src/MxStarGrammar/NoneUse.js",
             "startRule": "program",
