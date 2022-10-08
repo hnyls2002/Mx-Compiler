@@ -66,15 +66,28 @@ expression:
 
 literalExpression: (IntLiteral | StringLiteral | True | False | Null);
 
-// int a;
-// int a[10]; not (int a)[10];!!!
-// int a[10][];
-// int a();
-// int a[10]();
+// ------builtin-types------
+// int a; undefined value
+// int a = <expression>; cannot be "new int"
+// int [] a = new int[10]; not (new int)[10];!!!
+// int [][] a = new int[10][];
+
+// ------class-types--------
+// A a; means "a = null"
+// A a = new A();
+// A []a = new A[10];
+// A [][]a = new A[10][];
+
+creatorExpression:
+	New typeNameUnit LParen RParen
+	| New typeNameUnit (LBracket expression RBracket)+ (LBracket RBracket)*;
+/*
 creatorExpression:
 	New typeNameUnit (LBracket expression RBracket)+ (LParen RParen)?
 	| New typeNameUnit (LBracket expression RBracket)+ (LBracket RBracket)*
 	| New typeNameUnit (LParen RParen)?;
+	*/
+
 lambdaExpression:
 	LambdaStart LParen parameterList RParen RightArrow suite LParen argumentList RParen;
 
