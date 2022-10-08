@@ -58,6 +58,7 @@ SlashStar: '/*';
 StarSlash: '*/';
 SingleQuote: '\'';
 DoubleQuote: '"';
+LambdaStart: '[&]';
 RightArrow: '->';
 
 // keywords

@@ -6,7 +6,7 @@ options {
 
 program: (funcDeclarStatement | classDeclarStatement | varDeclarStatement)* EOF;
 
-// regulation : suite contains the statements
+// REGULATION : suite contains the statements
 suite: LBrace (statement | suite)* RBrace | statement;
 
 statement: // for side-effects
@@ -33,7 +33,8 @@ emptyStatement: Semicolon;
 
 // for create a value (with some possible side-effects)
 expression:
-	expression (Inc | Dec)												// suffix ++ --
+	LParen expression RParen											// (self)
+	| expression (Inc | Dec)											// suffix ++ --
 	| funcCall															// ()
 	| expression (LBracket expression RBracket)							// []...
 	| expression Dot (Identifier | funcCall)							// a.b.c().d.e()
@@ -55,12 +56,13 @@ expression:
 	| <assoc = right>expression Assign expression						// assignmnet
 	| expression (Comma expression)+									// expr1 , expr2 , expr3 , ...
 	// -----------------------------------
-	| creatorExpression			// special case : create new variables
-	| lambdaExpression			// [&] (args) -> type { body }();
-	| LParen expression RParen	// (self)
-	| This						// self-pointer expression
-	| literalExpression			// literal
-	| Identifier;				// just a single variable?
+	// No conflicts with the previous rules
+	| creatorExpression	// special case : create new variables
+	| lambdaExpression	// [&] (args) -> type { body }();
+	| This				// self-pointer expression
+	// -----------------------------------
+	| literalExpression	// literal
+	| Identifier;		// just a single variable?
 
 literalExpression: (IntLiteral | StringLiteral | True | False | Null);
 
@@ -74,7 +76,7 @@ creatorExpression:
 	| New typeNameUnit (LBracket expression RBracket)+ (LBracket RBracket)*
 	| New typeNameUnit (LParen RParen)?;
 lambdaExpression:
-	LBracket BitAnd RBracket LParen parameterList RParen RightArrow suite LParen argumentList RParen;
+	LambdaStart LParen parameterList RParen RightArrow suite LParen argumentList RParen;
 
 // Variable and array declaration
 varDeclarStatement: varDeclar Semicolon;
