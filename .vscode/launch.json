@@ -2,7 +2,14 @@
     "version": "2.0.0",
     "configurations": [
         {
-            "name": "Debug ANTLR4 grammar",
+            "type": "java",
+            "name": "Launch Main",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "Mx-Compiler_5cbe46eb"
+        },
+        {
+            "name": "ANTLR4",
             "type": "antlr-debug",
             "request": "launch",
             "input": "testcases/sema/test.mx",
