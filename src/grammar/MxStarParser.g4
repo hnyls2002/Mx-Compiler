@@ -1,5 +1,8 @@
 parser grammar MxStarParser;
 
+@header {
+package grammar;
+}
 options {
 	tokenVocab = MxStarLexer;
 }

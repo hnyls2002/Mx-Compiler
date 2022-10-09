@@ -1,5 +1,9 @@
 lexer grammar MxStarLexer;
 
+@header {
+package grammar;
+}
+
 // Standard Operators
 Add: '+';
 Sub: '-';

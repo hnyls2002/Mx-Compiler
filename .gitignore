@@ -2,3 +2,4 @@
 antlr4-runtime/
 *.class
 testcases/
+bin/
