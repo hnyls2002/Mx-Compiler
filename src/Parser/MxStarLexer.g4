@@ -1,7 +1,7 @@
 lexer grammar MxStarLexer;
 
 @header {
-package grammar;
+package Parser;
 }
 
 // Standard Operators

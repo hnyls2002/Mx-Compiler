@@ -1,6 +1,6 @@
-package test.fuck;
+package test.test1;
 
-public class Fuck {
+public class Test1 {
     public static void showShowWay() {
         System.out.println("Fuck!");
     }
