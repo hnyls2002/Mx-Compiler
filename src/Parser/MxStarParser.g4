@@ -10,20 +10,20 @@ options {
 program: (funcDeclarStatement | classDeclarStatement | varDeclarStatement)* EOF;
 
 // REGULATION : suite contains the statements
-suite: LBrace (statement | suite)* RBrace | statement;
+suite: LBrace (statement | suite)* RBrace # suiteWithBrace | statement # suiteWithoutBrace;
 
 statement: // for side-effects
-	expression Semicolon
-	| varDeclarStatement
-	| funcDeclarStatement
-	| classDeclarStatement
-	| ifStatement		// If statement
-	| whileStatement	// While statement
-	| forStatement		// For statement
-	| returnStatement	// return;
-	| breakStatement	// break;
-	| continueStatement	// continue;
-	| emptyStatement;
+	expression Semicolon	# exprStmt
+	| varDeclarStatement	# varDeclStmt
+	| funcDeclarStatement	# funcDeclStmt
+	| classDeclarStatement	# classDeclStmt
+	| ifStatement			# ifStmt
+	| whileStatement		# whileStmt
+	| forStatement			# forStmt
+	| returnStatement		# returnStmt
+	| breakStatement		# breakStmt
+	| continueStatement		# continueStmt
+	| emptyStatement		# emptyStmt;
 
 ifStatement: If LParen expression RParen suite (Else suite)?;
 whileStatement: While LParen expression RParen suite;
@@ -36,36 +36,36 @@ emptyStatement: Semicolon;
 
 // for create a value (with some possible side-effects)
 expression:
-	LParen expression RParen											// (self)
-	| expression (Inc | Dec)											// suffix ++ --
-	| funcCall															// ()
-	| expression (LBracket expression RBracket)							// []...
-	| expression Dot (Identifier | funcCall)							// a.b.c().d.e()
-	| expression Dot LParen (Identifier | funcCall) RParen				// a.(b).(c()).(d)
-	| <assoc = right>(Inc | Dec) expression								// prefix ++ --
-	| <assoc = right> (Add | Sub) expression							// +a, -b
-	| <assoc = right> LogicNot expression								// logical not !
-	| <assoc = right> BitNot expression									// bitwise not ~
-	| expression (Mul | Div | Mod) expression							// * / %
-	| expression (Add | Sub) expression									// + -
-	| expression (ShiftLeft | ShiftRight) expression					// << >>
-	| expression (Less | LessEqual | Greater | GreaterEqual) expression	// < <= > >=
-	| expression (Equal | NotEqual) expression							// == !=
-	| expression BitAnd expression										// &
-	| expression BitXor expression										// ^
-	| expression BitOr expression										// |
-	| expression LogicAnd expression									// &&
-	| expression LogicOr expression										// ||
-	| <assoc = right>expression Assign expression						// assignmnet
-	| expression (Comma expression)+									// expr1 , expr2 , expr3 , ...
+	LParen expression RParen											# parenExpr
+	| expression (Inc | Dec)											# sufIncDecExpr
+	| funcCall															# funcCallExpr
+	| expression (LBracket expression RBracket)							# subscriptExpr
+	| expression Dot (Identifier | funcCall)							# memberExpr
+	| expression Dot LParen (Identifier | funcCall) RParen				# memberParenExpr
+	| <assoc = right>(Inc | Dec) expression								# preIncDecExpr
+	| <assoc = right> (Add | Sub) expression							# preAddSubExpr
+	| <assoc = right> LogicNot expression								# logicalNotExpr
+	| <assoc = right> BitNot expression									# bitNotExpr
+	| expression (Mul | Div | Mod) expression							# mulDivModExpr
+	| expression (Add | Sub) expression									# addSubExpr
+	| expression (ShiftLeft | ShiftRight) expression					# shiftExpr
+	| expression (Less | LessEqual | Greater | GreaterEqual) expression	# compareExpr
+	| expression (Equal | NotEqual) expression							# equalAndNeqExpr
+	| expression BitAnd expression										# bitAndExpr
+	| expression BitXor expression										# bitXorExpr
+	| expression BitOr expression										# bitOrExpr
+	| expression LogicAnd expression									# logicalAndExpr
+	| expression LogicOr expression										# logicalOrExpr
+	| <assoc = right>expression Assign expression						# assignExpr
+	| expression (Comma expression)+									# commaExpr
 	// -----------------------------------
 	// No conflicts with the previous rules
-	| creatorExpression	// special case : create new variables
-	| lambdaExpression	// [&] (args) -> type { body }();
-	| This				// self-pointer expression
+	| creatorExpression	# creatorExpr
+	| lambdaExpression	# lambdaExpr
+	| This				# thisExpr
 	// -----------------------------------
-	| literalExpression	// literal
-	| Identifier;		// just a single variable?
+	| literalExpression	# literalExpr
+	| Identifier		# identifierExpr;
 
 literalExpression: (IntLiteral | StringLiteral | True | False | Null);
 
@@ -83,8 +83,8 @@ literalExpression: (IntLiteral | StringLiteral | True | False | Null);
 // A [][]a = new A[10][];
 
 creatorExpression:
-	New typeNameUnit (LBracket expression RBracket)+ (LBracket RBracket)*
-	| New typeNameUnit (LParen RParen)?;
+	New typeNameUnit (LBracket expression RBracket)+ (LBracket RBracket)*	# arrayCreator
+	| New typeNameUnit (LParen RParen)?										# singleCreator;
 /*
 creatorExpression:
 	New typeNameUnit (LBracket expression RBracket)+ (LParen RParen)?

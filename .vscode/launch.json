@@ -13,8 +13,8 @@
             "type": "antlr-debug",
             "request": "launch",
             "input": "testcases/sema/test.mx",
-            "grammar": "src/grammar/MxStarParser.g4",
-            "actionFile": "src/grammar/NoneUse.js",
+            "grammar": "src/Parser/MxStarParser.g4",
+            "actionFile": "src/Parser/NoneUse.js",
             "startRule": "program",
             "printParseTree": true,
             "visualParseTree": true
