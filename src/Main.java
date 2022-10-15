@@ -32,4 +32,7 @@ public class Main {
 
         ParseTree treeRoot = parser.program();
     }
+
+    void test(MxStarParser.ExpressionContext a) {
+    }
 }

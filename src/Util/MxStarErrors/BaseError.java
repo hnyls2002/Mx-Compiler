@@ -1,12 +1,12 @@
 package Util.MxStarErrors;
 
-import Util.position;
+import Util.Position;
 
 public abstract class BaseError extends RuntimeException {
-    private position pos;
+    private Position pos;
     private String message;
 
-    public BaseError(String msg, position pos) {
+    public BaseError(String msg, Position pos) {
         this.message = msg;
         this.pos = pos;
     }

@@ -15,6 +15,6 @@ public class MxStarErrorListener extends BaseErrorListener {
             int charPositionInLine,
             String msg,
             RecognitionException e) {
-        throw new SyntaxError(msg, new position(line, charPositionInLine));
+        throw new SyntaxError(msg, new Position(line, charPositionInLine));
     }
 }

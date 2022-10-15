@@ -1,9 +1,9 @@
 package Util.MxStarErrors;
 
-import Util.position;
+import Util.Position;
 
 public class SemanticError extends BaseError {
-    public SemanticError(String msg, position pos) {
+    public SemanticError(String msg, Position pos) {
         super("Semantic Error" + msg, pos);
     }
 

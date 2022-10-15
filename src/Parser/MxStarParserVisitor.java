@@ -19,19 +19,18 @@ public interface MxStarParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitProgram(MxStarParser.ProgramContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code suiteWithBrace}
-	 * labeled alternative in {@link MxStarParser#suite}.
+	 * Visit a parse tree produced by {@link MxStarParser#suite}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSuiteWithBrace(MxStarParser.SuiteWithBraceContext ctx);
+	T visitSuite(MxStarParser.SuiteContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code suiteWithoutBrace}
-	 * labeled alternative in {@link MxStarParser#suite}.
+	 * Visit a parse tree produced by the {@code suitStmt}
+	 * labeled alternative in {@link MxStarParser#statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSuiteWithoutBrace(MxStarParser.SuiteWithoutBraceContext ctx);
+	T visitSuitStmt(MxStarParser.SuitStmtContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code exprStmt}
 	 * labeled alternative in {@link MxStarParser#statement}.
@@ -109,48 +108,6 @@ public interface MxStarParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitEmptyStmt(MxStarParser.EmptyStmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MxStarParser#ifStatement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIfStatement(MxStarParser.IfStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MxStarParser#whileStatement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitWhileStatement(MxStarParser.WhileStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MxStarParser#forStatement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitForStatement(MxStarParser.ForStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MxStarParser#returnStatement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitReturnStatement(MxStarParser.ReturnStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MxStarParser#breakStatement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBreakStatement(MxStarParser.BreakStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MxStarParser#continueStatement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitContinueStatement(MxStarParser.ContinueStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link MxStarParser#emptyStatement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitEmptyStatement(MxStarParser.EmptyStatementContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code thisExpr}
 	 * labeled alternative in {@link MxStarParser#expression}.

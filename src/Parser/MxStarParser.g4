@@ -7,57 +7,59 @@ options {
 	tokenVocab = MxStarLexer;
 }
 
-program: (funcDeclarStatement | classDeclarStatement | varDeclarStatement)* EOF;
+program: (
+		funcDeclarStatement
+		| classDeclarStatement
+		| varDeclarStatement
+	)* EOF;
 
-// REGULATION : suite contains the statements
-suite: LBrace (statement | suite)* RBrace # suiteWithBrace | statement # suiteWithoutBrace;
+// REGULATION 
+// suite must have {}
+// statements contain suites
+// which means suite is a type of statement
+suite: LBrace statement* RBrace;
 
 statement: // for side-effects
-	expression Semicolon	# exprStmt
+	suite					# suitStmt
+	| expression Semicolon	# exprStmt
 	| varDeclarStatement	# varDeclStmt
 	| funcDeclarStatement	# funcDeclStmt
 	| classDeclarStatement	# classDeclStmt
-	| ifStatement			# ifStmt
-	| whileStatement		# whileStmt
-	| forStatement			# forStmt
-	| returnStatement		# returnStmt
-	| breakStatement		# breakStmt
-	| continueStatement		# continueStmt
-	| emptyStatement		# emptyStmt;
-
-ifStatement: If LParen expression RParen suite (Else suite)?;
-whileStatement: While LParen expression RParen suite;
-forStatement:
-	For LParen (expression | varDeclar)? Semicolon expression? Semicolon expression? RParen suite;
-returnStatement: Return expression? Semicolon;
-breakStatement: Break Semicolon;
-continueStatement: Continue Semicolon;
-emptyStatement: Semicolon;
+	| If LParen expression RParen thenStmt = statement (
+		Else elseStmt = statement
+	)?											# ifStmt
+	| While LParen expression RParen statement	# whileStmt
+	| For LParen (initExpr = expression | initVar = varDeclar)? Semicolon conditionExpr = expression
+		? Semicolon increExpr = expression? RParen statement	# forStmt
+	| Return expression? Semicolon								# returnStmt
+	| Break Semicolon											# breakStmt
+	| Continue Semicolon										# continueStmt
+	| Semicolon													# emptyStmt;
 
 // for create a value (with some possible side-effects)
 expression:
-	LParen expression RParen											# parenExpr
-	| expression (Inc | Dec)											# sufIncDecExpr
-	| funcCall															# funcCallExpr
-	| expression (LBracket expression RBracket)							# subscriptExpr
-	| expression Dot (Identifier | funcCall)							# memberExpr
-	| expression Dot LParen (Identifier | funcCall) RParen				# memberParenExpr
-	| <assoc = right>(Inc | Dec) expression								# preIncDecExpr
-	| <assoc = right> (Add | Sub) expression							# preAddSubExpr
-	| <assoc = right> LogicNot expression								# logicalNotExpr
-	| <assoc = right> BitNot expression									# bitNotExpr
-	| expression (Mul | Div | Mod) expression							# mulDivModExpr
-	| expression (Add | Sub) expression									# addSubExpr
-	| expression (ShiftLeft | ShiftRight) expression					# shiftExpr
-	| expression (Less | LessEqual | Greater | GreaterEqual) expression	# compareExpr
-	| expression (Equal | NotEqual) expression							# equalAndNeqExpr
-	| expression BitAnd expression										# bitAndExpr
-	| expression BitXor expression										# bitXorExpr
-	| expression BitOr expression										# bitOrExpr
-	| expression LogicAnd expression									# logicalAndExpr
-	| expression LogicOr expression										# logicalOrExpr
-	| <assoc = right>expression Assign expression						# assignExpr
-	| expression (Comma expression)+									# commaExpr
+	LParen expression RParen													# parenExpr
+	| expression op = (Inc | Dec)												# sufIncDecExpr
+	| funcCall																	# funcCallExpr
+	| expression (LBracket expression RBracket)									# subscriptExpr
+	| expression Dot (Identifier | funcCall)									# memberExpr
+	| expression Dot LParen (Identifier | funcCall) RParen						# memberParenExpr
+	| <assoc = right> op = (Inc | Dec) expression								# preIncDecExpr
+	| <assoc = right> op = (Add | Sub) expression								# preAddSubExpr
+	| <assoc = right> LogicNot expression										# logicalNotExpr
+	| <assoc = right> BitNot expression											# bitNotExpr
+	| expression op = (Mul | Div | Mod) expression								# mulDivModExpr
+	| expression op = (Add | Sub) expression									# addSubExpr
+	| expression op = (ShiftLeft | ShiftRight) expression						# shiftExpr
+	| expression op = (Less | LessEqual | Greater | GreaterEqual) expression	# compareExpr
+	| expression op = (Equal | NotEqual) expression								# equalAndNeqExpr
+	| expression BitAnd expression												# bitAndExpr
+	| expression BitXor expression												# bitXorExpr
+	| expression BitOr expression												# bitOrExpr
+	| expression LogicAnd expression											# logicalAndExpr
+	| expression LogicOr expression												# logicalOrExpr
+	| <assoc = right>expression Assign expression								# assignExpr
+	| expression (Comma expression)+											# commaExpr
 	// -----------------------------------
 	// No conflicts with the previous rules
 	| creatorExpression	# creatorExpr
@@ -67,7 +69,13 @@ expression:
 	| literalExpression	# literalExpr
 	| Identifier		# identifierExpr;
 
-literalExpression: (IntLiteral | StringLiteral | True | False | Null);
+literalExpression: (
+		IntLiteral
+		| StringLiteral
+		| True
+		| False
+		| Null
+	);
 
 // ------builtin-types------
 // int a; undefined value
@@ -83,8 +91,10 @@ literalExpression: (IntLiteral | StringLiteral | True | False | Null);
 // A [][]a = new A[10][];
 
 creatorExpression:
-	New typeNameUnit (LBracket expression RBracket)+ (LBracket RBracket)*	# arrayCreator
-	| New typeNameUnit (LParen RParen)?										# singleCreator;
+	New typeNameUnit (LBracket expression RBracket)+ (
+		LBracket RBracket
+	)*									# arrayCreator
+	| New typeNameUnit (LParen RParen)?	# singleCreator;
 /*
 creatorExpression:
 	New typeNameUnit (LBracket expression RBracket)+ (LParen RParen)?
@@ -93,7 +103,7 @@ creatorExpression:
 	*/
 
 lambdaExpression:
-	LambdaStart LParen parameterList RParen RightArrow suite LParen argumentList RParen;
+	LambdaStart LParen parameterList RParen RightArrow statement LParen argumentList RParen;
 
 // Variable and array declaration
 varDeclarStatement: varDeclar Semicolon;
@@ -103,7 +113,8 @@ typeName: typeNameUnit (LBracket RBracket)*;
 typeNameUnit: IntType | BoolType | StringType | Identifier;
 
 // Function declaration:
-funcDeclarStatement: returnType Identifier LParen parameterList RParen suite;
+funcDeclarStatement:
+	returnType Identifier LParen parameterList RParen statement;
 parameterList: parameter (',' parameter)* |;
 parameter: typeName Identifier;
 returnType: typeName | Void;
@@ -115,5 +126,9 @@ argumentList: expression (Comma expression)* |;
 // Class Declaration
 classDeclarStatement: classDeclar Semicolon;
 classDeclar:
-	Class Identifier LBrace (varDeclarStatement | selfConstructor | funcDeclarStatement)* RBrace;
-selfConstructor: Identifier LParen RParen suite;
+	Class Identifier LBrace (
+		varDeclarStatement
+		| selfConstructor
+		| funcDeclarStatement
+	)* RBrace;
+selfConstructor: Identifier LParen RParen statement;
