@@ -1,0 +1,78 @@
+package AST;
+
+import AST.Expr.AssignExprNode;
+import AST.Expr.BinaryOpExprNode;
+import AST.Expr.CommaExprNode;
+import AST.Expr.CreatorExprNode;
+import AST.Expr.FuncCallExprNode;
+import AST.Expr.LambdaExprNode;
+import AST.Expr.LiteralExprNode;
+import AST.Expr.MemberExprNode;
+import AST.Expr.SubscExprNode;
+import AST.Expr.ThisExprNode;
+import AST.Expr.UnaryOpExprNode;
+import AST.Expr.VarExprNode;
+import AST.Stmt.BreakStmtNode;
+import AST.Stmt.ClassDeclStmtNode;
+import AST.Stmt.ContinueStmtNode;
+import AST.Stmt.ExprStmtNode;
+import AST.Stmt.ForStmtNode;
+import AST.Stmt.FuncDeclrStmtNode;
+import AST.Stmt.IfStmtNode;
+import AST.Stmt.ReturnStmtNode;
+import AST.Stmt.SelfConstructNode;
+import AST.Stmt.VarDeclStmtNode;
+import AST.Stmt.WhileStmtNode;
+
+public interface ASTVisitor {
+    // For every type of derived AST nodes, define a visit interface.
+    void visit(ProgramNode it);
+
+    void visit(ClassDeclStmtNode it);
+
+    void visit(VarDeclStmtNode it);
+
+    void visit(FuncDeclrStmtNode it);
+
+    void visit(TypeNode it);
+
+    void visit(CreatorExprNode it);
+
+    void visit(BinaryOpExprNode it);
+
+    void visit(UnaryOpExprNode it);
+
+    void visit(AssignExprNode it);
+
+    void visit(CommaExprNode it);
+
+    void visit(SubscExprNode it);
+
+    void visit(FuncCallExprNode it);
+
+    void visit(SelfConstructNode it);
+
+    void visit(ExprStmtNode it);
+
+    void visit(IfStmtNode it);
+
+    void visit(WhileStmtNode it);
+
+    void visit(ForStmtNode it);
+
+    void visit(ReturnStmtNode it);
+
+    void visit(ContinueStmtNode it);
+
+    void visit(BreakStmtNode it);
+
+    void visit(MemberExprNode it);
+
+    void visit(LambdaExprNode it);
+
+    void visit(ThisExprNode it);
+
+    void visit(LiteralExprNode it);
+
+    void visit(VarExprNode it);
+}
