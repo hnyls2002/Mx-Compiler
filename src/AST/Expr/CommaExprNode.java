@@ -13,10 +13,6 @@ public class CommaExprNode extends ExprNode {
         super(pos);
     }
 
-    public void addExpr(ExprNode x) {
-        exprList.add(x);
-    }
-
     public ExprNode last() {
         return exprList.get(exprList.size() - 1);
     }

@@ -1,7 +1,5 @@
 package AST.Stmt;
 
-import java.util.ArrayList;
-
 import AST.ASTNode;
 import AST.ASTVisitor;
 import Util.Position;
@@ -9,7 +7,7 @@ import Util.Position;
 public class SelfConstructNode extends ASTNode {
 
     public String ClassNameString;
-    public ArrayList<StmtNode> stmtList = new ArrayList<>();
+    public SuiteStmtNode body;
 
     public SelfConstructNode(Position pos) {
         super(pos);

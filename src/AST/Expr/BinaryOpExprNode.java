@@ -8,7 +8,7 @@ public class BinaryOpExprNode extends ExprNode {
     public ExprNode lhs, rhs;
 
     public enum binaryOp {
-        ADD, SUB, MUL, DIV, MUl, SHIFT_LEFT, SHIFT_RIGHT, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, EQUAL, NOT_EQUAL,
+        ADD, SUB, MUL, DIV, MOD, SHIFT_LEFT, SHIFT_RIGHT, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, EQUAL, NOT_EQUAL,
         BIT_AND, BIT_XOR, BIT_OR, LOGIC_AND, LOGIC_OR
     }
 

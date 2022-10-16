@@ -1,16 +1,16 @@
-package AST.Stmt;
+package AST.Util;
 
+import AST.ASTNode;
 import AST.ASTVisitor;
 import AST.Expr.ExprNode;
 import Util.Position;
 
-public class WhileStmtNode extends StmtNode {
+public class VarSingleDecNode extends ASTNode {
 
-    public ExprNode expr;
+    public String id = null;
+    public ExprNode expr = null;
 
-    public StmtNode body;
-
-    public WhileStmtNode(Position pos) {
+    public VarSingleDecNode(Position pos) {
         super(pos);
     }
 

@@ -1,9 +1,14 @@
 package AST.Stmt;
 
 import AST.ASTVisitor;
+import AST.Expr.ExprNode;
 import Util.Position;
 
 public class IfStmtNode extends StmtNode {
+
+    public ExprNode expr;
+
+    public StmtNode thenStmt, elseStmt;
 
     public IfStmtNode(Position pos) {
         super(pos);

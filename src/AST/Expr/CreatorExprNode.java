@@ -9,7 +9,9 @@ public class CreatorExprNode extends ExprNode {
 
     public int dimen = 0, dimenSet = 0;
 
-    public ArrayList<Integer> dimenSize = new ArrayList<>();
+    public ArrayList<ExprNode> dimenSize = new ArrayList<>();
+
+    public String typeNameString;
 
     public CreatorExprNode(Position pos) {
         super(pos);

@@ -5,6 +5,8 @@ import Util.Position;
 
 public class AssignExprNode extends ExprNode {
 
+    public ExprNode lvalue, rvalue;
+
     public AssignExprNode(Position pos) {
         super(pos);
     }

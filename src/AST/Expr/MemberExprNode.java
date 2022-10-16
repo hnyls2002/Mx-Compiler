@@ -5,6 +5,10 @@ import Util.Position;
 
 public class MemberExprNode extends ExprNode {
 
+    public ExprNode expr;
+    public String idString;
+    public FuncCallExprNode funcCall;
+
     public MemberExprNode(Position pos) {
         super(pos);
     }
@@ -12,7 +16,6 @@ public class MemberExprNode extends ExprNode {
     @Override
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);
-
     }
 
 }

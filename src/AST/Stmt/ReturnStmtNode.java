@@ -1,9 +1,12 @@
 package AST.Stmt;
 
 import AST.ASTVisitor;
+import AST.Expr.ExprNode;
 import Util.Position;
 
 public class ReturnStmtNode extends StmtNode {
+
+    public ExprNode expr;
 
     public ReturnStmtNode(Position pos) {
         super(pos);

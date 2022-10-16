@@ -3,11 +3,11 @@ package AST.Expr;
 import AST.ASTVisitor;
 import Util.Position;
 
-public class SubscExprNode extends ExprNode {
+public class IdentiExprNode extends ExprNode {
 
-    public ExprNode arr, sub;
+    public String idString;
 
-    public SubscExprNode(Position pos) {
+    public IdentiExprNode(Position pos) {
         super(pos);
     }
 
@@ -15,4 +15,5 @@ public class SubscExprNode extends ExprNode {
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
+
 }

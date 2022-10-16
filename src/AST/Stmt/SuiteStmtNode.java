@@ -1,16 +1,15 @@
 package AST.Stmt;
 
+import java.util.ArrayList;
+
 import AST.ASTVisitor;
-import AST.Expr.ExprNode;
 import Util.Position;
 
-public class WhileStmtNode extends StmtNode {
+public class SuiteStmtNode extends StmtNode {
 
-    public ExprNode expr;
+    public ArrayList<StmtNode> StmtList = new ArrayList<>();
 
-    public StmtNode body;
-
-    public WhileStmtNode(Position pos) {
+    public SuiteStmtNode(Position pos) {
         super(pos);
     }
 
