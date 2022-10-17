@@ -28,13 +28,11 @@ import AST.Stmt.FuncDeclrStmtNode;
 import AST.Stmt.IfStmtNode;
 import AST.Stmt.ReturnStmtNode;
 import AST.Stmt.SelfConstructNode;
+import AST.Stmt.SingleVarDeclStmtNode;
 import AST.Stmt.StmtNode;
 import AST.Stmt.SuiteStmtNode;
 import AST.Stmt.VarDeclStmtNode;
 import AST.Stmt.WhileStmtNode;
-import AST.Util.ParaNode;
-import AST.Util.TypeNode;
-import AST.Util.VarSingleDecNode;
 import Parser.MxStarParser;
 import Parser.MxStarParserBaseVisitor;
 import Parser.MxStarParser.BinaryExprContext;
@@ -42,6 +40,8 @@ import Parser.MxStarParser.ExprStmtContext;
 import Parser.MxStarParser.UnaryPrefixExprContext;
 import Parser.MxStarParser.UnarySuffixExprContext;
 import Util.Position;
+import Util.TypeIdPair;
+import Util.TypeName;
 import Util.MxStarErrors.SyntaxError;
 
 // This definition is used to check whether there are some methods missed
@@ -273,7 +273,7 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
         LambdaExprNode cur = new LambdaExprNode(new Position(ctx));
         var paraList = ctx.parameterList();
         for (int i = 0; i < paraList.parameter().size(); ++i)
-            cur.paraList.add((ParaNode) visit(paraList.parameter(i)));
+            cur.paraList.add(new TypeIdPair(paraList.parameter(i)));
 
         var argList = ctx.argumentList();
         for (int i = 0; i < argList.expression().size(); ++i)
@@ -287,24 +287,20 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitVarDeclar(MxStarParser.VarDeclarContext ctx) {
         VarDeclStmtNode cur = new VarDeclStmtNode(new Position(ctx));
-        cur.typeName = (TypeNode) visit(ctx.typeName());
-        for (int i = 0; i < ctx.varSingleDeclar().size(); ++i)
-            cur.varList.add((VarSingleDecNode) visit(ctx.varSingleDeclar(i)));
+        cur.typeName = new TypeName(ctx.typeName());
+        for (int i = 0; i < ctx.varSingleDeclar().size(); ++i) {
+            var sub_ctx = ctx.varSingleDeclar(i);
+            var tmp = (SingleVarDeclStmtNode) visit(sub_ctx);
+            tmp.decl = new TypeIdPair(cur.typeName, sub_ctx.Identifier().toString(), new Position(sub_ctx));
+            cur.varList.add(tmp);
+        }
         return cur;
     }
 
     @Override
     public ASTNode visitVarSingleDeclar(MxStarParser.VarSingleDeclarContext ctx) {
-        VarSingleDecNode cur = new VarSingleDecNode(new Position(ctx));
-        cur.id = ctx.Identifier().toString();
-        if (!ctx.expression().isEmpty())
-            cur.expr = (ExprNode) visit(ctx.expression());
-        return cur;
-    }
-
-    @Override
-    public ASTNode visitTypeName(MxStarParser.TypeNameContext ctx) {
-        TypeNode cur = new TypeNode(new Position(ctx), ctx);
+        SingleVarDeclStmtNode cur = new SingleVarDeclStmtNode(new Position(ctx));
+        cur.expr = ctx.expression().isEmpty() ? null : (ExprNode) visit(ctx.expression());
         return cur;
     }
 
@@ -317,26 +313,14 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
     public ASTNode visitFuncDeclar(MxStarParser.FuncDeclarContext ctx) {
         FuncDeclrStmtNode cur = new FuncDeclrStmtNode(new Position(ctx), ctx.Identifier().toString());
 
-        cur.retType = (TypeNode) visit(ctx.returnType());
+        cur.retType = new TypeName(ctx.returnType());
 
         var parametersContext = ctx.parameterList();
         for (int i = 0; i < parametersContext.parameter().size(); ++i)
-            cur.paraList.add((ParaNode) visit(parametersContext.parameter(i)));
+            cur.paraList.add(new TypeIdPair(parametersContext.parameter(i)));
 
         cur.body = (SuiteStmtNode) visit(ctx.suite());
 
-        return cur;
-    }
-
-    @Override
-    public ASTNode visitParameter(MxStarParser.ParameterContext ctx) {
-        ParaNode cur = new ParaNode(new Position(ctx), (TypeNode) visit(ctx.typeName()), ctx.Identifier().toString());
-        return cur;
-    }
-
-    @Override
-    public ASTNode visitReturnType(MxStarParser.ReturnTypeContext ctx) {
-        TypeNode cur = new TypeNode(new Position(ctx), ctx);
         return cur;
     }
 

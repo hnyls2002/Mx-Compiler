@@ -4,17 +4,17 @@ import java.util.ArrayList;
 
 import AST.ASTNode;
 import AST.ASTVisitor;
-import AST.Util.ParaNode;
-import AST.Util.TypeNode;
 import Util.Position;
+import Util.TypeIdPair;
+import Util.TypeName;
 
 public class FuncDeclrStmtNode extends ASTNode {
 
     public String funcNameString;
 
-    public TypeNode retType;
+    public TypeName retType;
 
-    public ArrayList<ParaNode> paraList = new ArrayList<>();
+    public ArrayList<TypeIdPair> paraList = new ArrayList<>();
 
     public SuiteStmtNode body;
 

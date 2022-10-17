@@ -61,9 +61,12 @@
   - Some fields of the context I don't know...
 - **Build the `AST`**.
 
-### Build The `AST`
+### **Build The `AST`**
 - Interface `ASTVisitor` for `AST` visitor pattern.
 - Abstruce class `ASTNode` for `AST` base and derived classes.
+- AST nodes design
+  - `Expr` : all expressions
+  - `Stmt` : all statements
 
 ### `ASTVisitor`
 - It's a interface to traverse the `AST`, generate the `IR` and so on.
@@ -72,11 +75,6 @@
 
 - Traverse the `AST` and check the semantic. Require a class which is extended from `ASTVisitor` and implement the `visit` method for every type of node.
 
-- **Type Handling**
-  - `BaseType` Class.
-    - `BuiltinType` Class for `int`, `bool`, `string` and `void`.
-    - `ClassType` Class for `class` type.
-    - `ArrayType` Class for `[]` type.
-  - Since a `Class` type  should be defined in `program` or in `SomeClass`, so we create an `ClassType` instance in its being-defined context.
-  - When some statements need to use a `class` type, they use the `ClassType`'s reference, so that they can visit the `ClassType`'s fields and methods.
-- **Scope Handling**
+- **Types and Scopes Handling**
+  - Recording the `typename` , `varname` , `methodname` and dimentions of multi-dimentional array. Noticing that one class cannot have an inner class, and can only be defined globally.  
+  - `BaseType` class for recording the above information.

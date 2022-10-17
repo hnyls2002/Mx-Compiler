@@ -23,12 +23,10 @@ import AST.Stmt.FuncDeclrStmtNode;
 import AST.Stmt.IfStmtNode;
 import AST.Stmt.ReturnStmtNode;
 import AST.Stmt.SelfConstructNode;
+import AST.Stmt.SingleVarDeclStmtNode;
 import AST.Stmt.SuiteStmtNode;
 import AST.Stmt.VarDeclStmtNode;
 import AST.Stmt.WhileStmtNode;
-import AST.Util.ParaNode;
-import AST.Util.TypeNode;
-import AST.Util.VarSingleDecNode;
 
 public interface ASTVisitor {
     // For every type of derived AST nodes, define a visit interface.
@@ -39,8 +37,6 @@ public interface ASTVisitor {
     void visit(VarDeclStmtNode it);
 
     void visit(FuncDeclrStmtNode it);
-
-    void visit(TypeNode it);
 
     void visit(CreatorExprNode it);
 
@@ -82,13 +78,11 @@ public interface ASTVisitor {
 
     void visit(VarExprNode it);
 
-    void visit(ParaNode it);
-
     void visit(SuiteStmtNode it);
-
-    void visit(VarSingleDecNode it);
 
     void visit(EmptyStmtNode it);
 
     void visit(IdentiExprNode it);
+
+    void visit(SingleVarDeclStmtNode it);
 }

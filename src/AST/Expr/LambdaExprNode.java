@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 import AST.ASTVisitor;
 import AST.Stmt.SuiteStmtNode;
-import AST.Util.ParaNode;
 import Util.Position;
+import Util.TypeIdPair;
 
 public class LambdaExprNode extends ExprNode {
 
-    public ArrayList<ParaNode> paraList = new ArrayList<>();
+    public ArrayList<TypeIdPair> paraList = new ArrayList<>();
     public SuiteStmtNode body;
     public ArrayList<ExprNode> argList = new ArrayList<>();
 
