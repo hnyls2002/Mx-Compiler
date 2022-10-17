@@ -21,7 +21,7 @@ public final class TypeIdPair {
 
     public TypeIdPair(ParameterContext ctx) {
         typeName = new TypeName(ctx.typeName());
-        Id = ctx.Identifier().toString();
+        Id = ctx.Identifier().getText();
         pos = new Position(ctx);
     }
 

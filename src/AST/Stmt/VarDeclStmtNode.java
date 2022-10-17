@@ -2,12 +2,11 @@ package AST.Stmt;
 
 import java.util.ArrayList;
 
-import AST.ASTNode;
 import AST.ASTVisitor;
 import Util.Position;
 import Util.TypeName;
 
-public class VarDeclStmtNode extends ASTNode {
+public class VarDeclStmtNode extends StmtNode {
 
     public TypeName typeName;
     public ArrayList<SingleVarDeclStmtNode> varList = new ArrayList<>();

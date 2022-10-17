@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public class BuiltinType extends BaseType {
 
-    public HashMap<String, FuncInfo> funMap;
+    public HashMap<String, FuncInfo> funMap = new HashMap<>();
 
     public BuiltinType(String typeNameString) {
         this.typeNameString = typeNameString;

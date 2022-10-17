@@ -41,7 +41,7 @@ public class Main {
             parser.addErrorListener(new MxStarErrorListener());
 
             ParseTree treeRoot = parser.program();
-            ASTBuilder astBuilder = new ASTBuilder();
+            ASTBuilder astBuilder = new ASTBuilder(true);
             ProgramNode ast = (ProgramNode) astBuilder.visit(treeRoot);
 
             GlobalScope gScope = new GlobalScope();

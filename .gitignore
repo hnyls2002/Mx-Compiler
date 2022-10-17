@@ -3,3 +3,4 @@ antlr4-runtime/
 *.class
 testcases/
 bin/
+bugs.txt

@@ -22,14 +22,19 @@ public final class TypeName {
     }
 
     public TypeName(TypeNameContext ctx) {
-        typeNameString = ctx.typeNameUnit().toString();
-        dimen = ctx.LBracket().size() + 1;
+        typeNameString = ctx.typeNameUnit().getText();
+        dimen = ctx.LBracket().size();
         pos = new Position(ctx);
     }
 
     public TypeName(ReturnTypeContext ctx) {
-        typeNameString = ctx.typeName().isEmpty() ? "void" : ctx.typeName().toString();
-        dimen = ctx.typeName().LBracket().size() + 1;
+        if (ctx.typeName() == null) {
+            typeNameString = "void";
+            dimen = 0;
+        } else {
+            typeNameString = ctx.typeName().toString();
+            dimen = ctx.typeName().LBracket() == null ? 0 : ctx.typeName().LBracket().size();
+        }
         pos = new Position(ctx);
     }
 

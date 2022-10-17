@@ -1,5 +1,9 @@
 package Frontend;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+
 import AST.ASTNode;
 import AST.ProgramNode;
 import AST.Expr.AssignExprNode;
@@ -50,8 +54,25 @@ import Util.MxStarErrors.SyntaxError;
 //        implements Parser.MxStarParserVisitor<ASTNode> {
 
 public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
+    public boolean isDebugging;
+
+    public ASTBuilder(boolean flag) throws FileNotFoundException {
+        isDebugging = flag;
+        if (flag) {
+            // for debug
+            File bugs = new File("bugs.txt");
+            PrintStream ps = new PrintStream(bugs);
+            System.setErr(ps);
+        }
+
+    }
+
     @Override
     public ASTNode visitProgram(MxStarParser.ProgramContext ctx) {
+        if (isDebugging) {
+            System.err.println("Program-Start");
+        }
+
         ProgramNode cur = new ProgramNode(new Position(ctx));
         for (int i = 0; i < ctx.funcDeclar().size(); ++i)
             cur.funcList.add((FuncDeclrStmtNode) visit(ctx.funcDeclar(i)));
@@ -62,11 +83,20 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
         for (int i = 0; i < ctx.classDeclar().size(); ++i)
             cur.classList.add((ClassDeclStmtNode) visit(ctx.classDeclar(i)));
 
+        if (isDebugging) {
+            System.err.println("Program-End");
+        }
+
         return cur;
+
     }
 
     @Override
     public ASTNode visitSuite(MxStarParser.SuiteContext ctx) {
+        if (isDebugging) {
+            System.err.println("A suite");
+        }
+
         SuiteStmtNode cur = new SuiteStmtNode(new Position(ctx));
         for (int i = 0; i < ctx.statement().size(); ++i)
             cur.StmtList.add((StmtNode) visit(ctx.statement(i)));
@@ -95,16 +125,22 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitIfStmt(MxStarParser.IfStmtContext ctx) {
+        if (isDebugging) {
+            System.err.println("If");
+        }
         IfStmtNode cur = new IfStmtNode(new Position(ctx));
         cur.expr = (ExprNode) visit(ctx.expression());
         cur.thenStmt = (StmtNode) visit(ctx.thenStmt);
-        if (!ctx.elseStmt.isEmpty())
+        if (ctx.elseStmt != null)
             cur.elseStmt = (StmtNode) visit(ctx.elseStmt);
         return cur;
     }
 
     @Override
     public ASTNode visitWhileStmt(MxStarParser.WhileStmtContext ctx) {
+        if (isDebugging) {
+            System.err.println("While");
+        }
         WhileStmtNode cur = new WhileStmtNode(new Position(ctx));
         cur.expr = (ExprNode) visit(ctx.expression());
         cur.body = (StmtNode) visit(ctx.statement());
@@ -113,14 +149,17 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitForStmt(MxStarParser.ForStmtContext ctx) {
+        if (isDebugging) {
+            System.err.println("For");
+        }
         ForStmtNode cur = new ForStmtNode(new Position(ctx));
-        if (!ctx.initVar.isEmpty())
+        if (ctx.initVar != null)
             cur.varDecl = (VarDeclStmtNode) visit(ctx.initVar);
-        if (!ctx.initExpr.isEmpty())
+        if (ctx.initExpr != null)
             cur.initExpr = (ExprNode) visit(ctx.initExpr);
-        if (!ctx.conditionExpr.isEmpty())
+        if (ctx.conditionExpr != null)
             cur.condExpr = (ExprNode) visit(ctx.conditionExpr);
-        if (!ctx.increExpr.isEmpty())
+        if (ctx.increExpr != null)
             cur.incExpr = (ExprNode) visit(ctx.increExpr);
         cur.body = (StmtNode) visit(ctx.statement());
         return cur;
@@ -128,20 +167,29 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitReturnStmt(MxStarParser.ReturnStmtContext ctx) {
+        if (isDebugging) {
+            System.err.println("Return");
+        }
         ReturnStmtNode cur = new ReturnStmtNode(new Position(ctx));
-        if (!ctx.expression().isEmpty())
+        if (ctx.expression() != null)
             cur.expr = (ExprNode) visit(ctx.expression());
         return cur;
     }
 
     @Override
     public ASTNode visitBreakStmt(MxStarParser.BreakStmtContext ctx) {
+        if (isDebugging) {
+            System.err.println("Break");
+        }
         BreakStmtNode cur = new BreakStmtNode(new Position(ctx));
         return cur;
     }
 
     @Override
     public ASTNode visitContinueStmt(MxStarParser.ContinueStmtContext ctx) {
+        if (isDebugging) {
+            System.err.println("Continue");
+        }
         ContinueStmtNode cur = new ContinueStmtNode(new Position(ctx));
         return cur;
     }
@@ -154,12 +202,18 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitThisExpr(MxStarParser.ThisExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("This");
+        }
         ThisExprNode cur = new ThisExprNode(new Position(ctx));
         return cur;
     }
 
     @Override
     public ASTNode visitSubscriptExpr(MxStarParser.SubscriptExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Subscript");
+        }
         SubscExprNode cur = new SubscExprNode(new Position(ctx));
         cur.arr = (ExprNode) visit(ctx.expression(0));
         cur.sub = (ExprNode) visit(ctx.expression(1));
@@ -178,12 +232,15 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitMemberParenExpr(MxStarParser.MemberParenExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Member Dot");
+        }
         MemberExprNode cur = new MemberExprNode(new Position(ctx));
         cur.expr = (ExprNode) visit(ctx.expression());
-        if (!ctx.funcCall().isEmpty())
+        if (ctx.funcCall() != null)
             cur.funcCall = (FuncCallExprNode) visit(ctx.funcCall());
         else
-            cur.idString = ctx.Identifier().toString();
+            cur.idString = ctx.Identifier().getText();
         return cur;
     }
 
@@ -199,6 +256,9 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitAssignExpr(MxStarParser.AssignExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Assign");
+        }
         AssignExprNode cur = new AssignExprNode(new Position(ctx));
         cur.lvalue = (ExprNode) visit(ctx.expression(0));
         cur.rvalue = (ExprNode) visit(ctx.expression(1));
@@ -207,17 +267,23 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitMemberExpr(MxStarParser.MemberExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Member Dot");
+        }
         MemberExprNode cur = new MemberExprNode(new Position(ctx));
         cur.expr = (ExprNode) visit(ctx.expression());
-        if (!ctx.funcCall().isEmpty())
+        if (ctx.funcCall() != null)
             cur.funcCall = (FuncCallExprNode) visit(ctx.funcCall());
         else
-            cur.idString = ctx.Identifier().toString();
+            cur.idString = ctx.Identifier().getText();
         return cur;
     }
 
     @Override
     public ASTNode visitCommaExpr(MxStarParser.CommaExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Comma Expr");
+        }
         CommaExprNode cur = new CommaExprNode(new Position(ctx));
         for (int i = 0; i < ctx.expression().size(); ++i)
             cur.exprList.add((ExprNode) visit(ctx.expression(i)));
@@ -226,23 +292,29 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitIdentifierExpr(MxStarParser.IdentifierExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("id : " + ctx.Identifier().getText());
+        }
         IdentiExprNode cur = new IdentiExprNode(new Position(ctx));
-        cur.idString = ctx.Identifier().toString();
+        cur.idString = ctx.Identifier().getText();
         return cur;
     }
 
     @Override
     public ASTNode visitLiteralExpression(MxStarParser.LiteralExpressionContext ctx) {
+        if (isDebugging) {
+            System.err.println("literal : " + ctx.getText());
+        }
         LiteralExprNode cur = new LiteralExprNode(new Position(ctx));
-        if (ctx.IntLiteral().toString() != null)
+        if (ctx.IntLiteral() != null)
             cur.lit = literalType.INT;
-        else if (ctx.StringLiteral().toString() != null)
+        else if (ctx.StringLiteral() != null)
             cur.lit = literalType.STRING;
-        else if (ctx.toString().equals("true"))
+        else if (ctx.getText().equals("true"))
             cur.lit = literalType.TRUE;
-        else if (ctx.toString().equals("false"))
+        else if (ctx.getText().equals("false"))
             cur.lit = literalType.FALSE;
-        else if (ctx.toString().equals("null"))
+        else if (ctx.getText().equals("null"))
             cur.lit = literalType.NULL;
         else
             throw new SyntaxError("Errors happened in literal value parsing", new Position(ctx));
@@ -252,10 +324,13 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitArrayCreator(MxStarParser.ArrayCreatorContext ctx) {
+        if (isDebugging) {
+            System.err.println("Array Create : ");
+        }
         CreatorExprNode cur = new CreatorExprNode(new Position(ctx));
-        cur.typeNameString = ctx.typeNameUnit().toString();
-        cur.dimen = ctx.LBracket().size() + 1;
-        cur.dimenSet = ctx.expression().size() + 1;
+        cur.typeNameString = ctx.typeNameUnit().getText();
+        cur.dimen = ctx.LBracket().size();
+        cur.dimenSet = ctx.expression().size();
         for (int i = 0; i < ctx.expression().size(); ++i)
             cur.dimenSize.add((ExprNode) visit(ctx.expression(i)));
         return cur;
@@ -263,13 +338,19 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitSingleCreator(MxStarParser.SingleCreatorContext ctx) {
+        if (isDebugging) {
+            System.err.println("Single Create");
+        }
         CreatorExprNode cur = new CreatorExprNode(new Position(ctx));
-        cur.typeNameString = ctx.typeNameUnit().toString();
+        cur.typeNameString = ctx.typeNameUnit().getText();
         return cur;
     }
 
     @Override
     public ASTNode visitLambdaExpression(MxStarParser.LambdaExpressionContext ctx) {
+        if (isDebugging) {
+            System.err.println("Lambda");
+        }
         LambdaExprNode cur = new LambdaExprNode(new Position(ctx));
         var paraList = ctx.parameterList();
         for (int i = 0; i < paraList.parameter().size(); ++i)
@@ -286,12 +367,20 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitVarDeclar(MxStarParser.VarDeclarContext ctx) {
+        if (isDebugging) {
+            System.err.println("Var Declar");
+        }
         VarDeclStmtNode cur = new VarDeclStmtNode(new Position(ctx));
         cur.typeName = new TypeName(ctx.typeName());
         for (int i = 0; i < ctx.varSingleDeclar().size(); ++i) {
             var sub_ctx = ctx.varSingleDeclar(i);
+            var pair = new TypeIdPair(cur.typeName, sub_ctx.Identifier().getText(), new Position(sub_ctx));
+            if (isDebugging) {
+                System.err.println("typename : " + pair.typeName.toString() + " ,var Name : " + pair.Id + " , dime : "
+                        + pair.typeName.getDimen());
+            }
             var tmp = (SingleVarDeclStmtNode) visit(sub_ctx);
-            tmp.decl = new TypeIdPair(cur.typeName, sub_ctx.Identifier().toString(), new Position(sub_ctx));
+            tmp.decl = pair;
             cur.varList.add(tmp);
         }
         return cur;
@@ -300,7 +389,7 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitVarSingleDeclar(MxStarParser.VarSingleDeclarContext ctx) {
         SingleVarDeclStmtNode cur = new SingleVarDeclStmtNode(new Position(ctx));
-        cur.expr = ctx.expression().isEmpty() ? null : (ExprNode) visit(ctx.expression());
+        cur.expr = ctx.expression() == null ? null : (ExprNode) visit(ctx.expression());
         return cur;
     }
 
@@ -311,7 +400,10 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitFuncDeclar(MxStarParser.FuncDeclarContext ctx) {
-        FuncDeclrStmtNode cur = new FuncDeclrStmtNode(new Position(ctx), ctx.Identifier().toString());
+        if (isDebugging) {
+            System.err.println("Func-Declar ");
+        }
+        FuncDeclrStmtNode cur = new FuncDeclrStmtNode(new Position(ctx), ctx.Identifier().getText());
 
         cur.retType = new TypeName(ctx.returnType());
 
@@ -326,8 +418,11 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitFuncCall(MxStarParser.FuncCallContext ctx) {
+        if (isDebugging) {
+            System.err.println("Func Call");
+        }
         FuncCallExprNode cur = new FuncCallExprNode(new Position(ctx));
-        cur.FuncNameString = ctx.Identifier().toString();
+        cur.FuncNameString = ctx.Identifier().getText();
         var argList = ctx.argumentList();
         for (int i = 0; i < argList.expression().size(); ++i)
             cur.argList.add((ExprNode) visit(argList.expression(i)));
@@ -336,8 +431,11 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitClassDeclar(MxStarParser.ClassDeclarContext ctx) {
+        if (isDebugging) {
+            System.err.println("Class Declar");
+        }
         ClassDeclStmtNode cur = new ClassDeclStmtNode(new Position(ctx));
-        cur.classNameString = ctx.Identifier().toString();
+        cur.classNameString = ctx.Identifier().getText();
         for (int i = 0; i < ctx.varDeclar().size(); ++i)
             cur.varDeclList.add((VarDeclStmtNode) visit(ctx.varDeclar(i)));
 
@@ -347,21 +445,29 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
         if (ctx.selfConstructor().size() > 1)
             throw new SyntaxError("Multiple Constructors For One Class", new Position(ctx));
 
-        if (!ctx.selfConstructor().isEmpty())
+        if (!ctx.selfConstructor().isEmpty()) {
             cur.constructor = (SelfConstructNode) visit(ctx.selfConstructor(0));
+        }
+
         return cur;
     }
 
     @Override
     public ASTNode visitSelfConstructor(MxStarParser.SelfConstructorContext ctx) {
+        if (isDebugging) {
+            System.err.println("Self Constructor");
+        }
         SelfConstructNode cur = new SelfConstructNode(new Position(ctx));
-        cur.ClassNameString = ctx.Identifier().toString();
+        cur.ClassNameString = ctx.Identifier().getText();
         cur.body = (SuiteStmtNode) visit(ctx.suite());
         return cur;
     }
 
     @Override
     public ASTNode visitExprStmt(ExprStmtContext ctx) {
+        if (isDebugging) {
+            System.err.println("Expr-Statement");
+        }
         ExprStmtNode cur = new ExprStmtNode(new Position(ctx));
         cur.expr = (ExprNode) visit(ctx.expression());
         return cur;
@@ -369,6 +475,9 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitUnaryPrefixExpr(UnaryPrefixExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Prefix Op");
+        }
         UnaryOpExprNode cur = new UnaryOpExprNode(new Position(ctx));
         cur.expr = (ExprNode) visit(ctx.expression());
         cur.opCode = switch (ctx.op.getType()) {
@@ -386,6 +495,9 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitUnarySuffixExpr(UnarySuffixExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("suffix Op");
+        }
         UnaryOpExprNode cur = new UnaryOpExprNode(new Position(ctx));
         cur.expr = (ExprNode) visit(ctx.expression());
         cur.opCode = switch (ctx.op.getType()) {
@@ -399,6 +511,9 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitBinaryExpr(BinaryExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Binary Op");
+        }
         BinaryOpExprNode cur = new BinaryOpExprNode(new Position(ctx));
         cur.lhs = (ExprNode) visit(ctx.expression(0));
         cur.rhs = (ExprNode) visit(ctx.expression(1));
