@@ -1,9 +1,13 @@
 package Util.Types;
 
+import java.util.HashMap;
+
 public class BuiltinType extends BaseType {
 
-    public BuiltinType(String typeName) {
-        this.typeName = typeName;
+    public HashMap<String, FuncInfo> funMap;
+
+    public BuiltinType(String typeNameString) {
+        this.typeNameString = typeNameString;
     }
 
     @Override

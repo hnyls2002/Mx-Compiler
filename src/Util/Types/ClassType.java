@@ -2,11 +2,17 @@ package Util.Types;
 
 import java.util.HashMap;
 
-public class ClassType extends BaseType {
-    public HashMap<String, BaseType> varMap = new HashMap<>();
+import Util.Position;
+import Util.TypeIdPair;
 
-    public ClassType(String className) {
-        this.typeName = className;
+public class ClassType extends BaseType {
+    public HashMap<String, TypeIdPair> varMap = new HashMap<>();
+    public HashMap<String, FuncInfo> funMap = new HashMap<>();
+    public Position pos;
+
+    public ClassType(String classNameString, Position pos) {
+        this.typeNameString = classNameString;
+        this.pos = pos;
     }
 
     @Override

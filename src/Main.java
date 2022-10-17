@@ -4,6 +4,12 @@ import java.io.InputStream;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+
+import AST.ProgramNode;
+import Frontend.ASTBuilder;
+import Frontend.ProgInit;
+import Frontend.SemanticChecker;
+
 import org.antlr.v4.runtime.CharStreams;
 
 import Parser.MxStarLexer;
@@ -13,6 +19,7 @@ import TestPackage.TestPackage1.Test1;
 import Util.MxStarErrorListener;
 import Util.MxStarErrors.BaseError;
 import Util.MxStarErrors.SemanticError;
+import Util.Scopes.GlobalScope;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -34,6 +41,17 @@ public class Main {
             parser.addErrorListener(new MxStarErrorListener());
 
             ParseTree treeRoot = parser.program();
+            ASTBuilder astBuilder = new ASTBuilder();
+            ProgramNode ast = (ProgramNode) astBuilder.visit(treeRoot);
+
+            GlobalScope gScope = new GlobalScope();
+            ProgInit progInit = new ProgInit(gScope);
+            progInit.visit(ast);
+
+            SemanticChecker semanticChecker = new SemanticChecker(gScope);
+
+            semanticChecker.visit(ast);
+
         } catch (BaseError e) {
             System.err.println(e.toString());
             throw new RuntimeException();

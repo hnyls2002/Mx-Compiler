@@ -13,17 +13,16 @@ public final class TypeIdPair {
         this.pos = pos;
     }
 
+    public TypeIdPair(TypeName ty, String id) {
+        this.typeName = ty;
+        this.Id = id;
+        this.pos = null;
+    }
+
     public TypeIdPair(ParameterContext ctx) {
         typeName = new TypeName(ctx.typeName());
         Id = ctx.Identifier().toString();
         pos = new Position(ctx);
     }
 
-    public String getIdString() {
-        return Id;
-    }
-
-    public String getTypeNameString() {
-        return typeName.toString();
-    }
 }

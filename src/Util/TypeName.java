@@ -15,6 +15,12 @@ public final class TypeName {
         this.pos = pos;
     }
 
+    public TypeName(String typeNameString, int dimen) {
+        this.typeNameString = typeNameString;
+        this.dimen = dimen;
+        this.pos = null;
+    }
+
     public TypeName(TypeNameContext ctx) {
         typeNameString = ctx.typeNameUnit().toString();
         dimen = ctx.LBracket().size() + 1;
