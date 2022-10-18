@@ -1,7 +1,5 @@
 package Frontend;
 
-import java.util.HashMap;
-
 import AST.ASTVisitor;
 import AST.ProgramNode;
 import AST.Expr.AssignExprNode;
@@ -42,7 +40,7 @@ import Util.Types.FuncInfo;
 public class ProgInit implements ASTVisitor {
     private GlobalScope gScope;
     private boolean inClass = false;
-    private HashMap<String, FuncInfo> funcCollector = null;
+    private ClassType curClass = null;
 
     private void builtinTypeInit() {
         BuiltinType intType = new BuiltinType("int");
@@ -111,8 +109,13 @@ public class ProgInit implements ASTVisitor {
 
     @Override
     public void visit(ProgramNode it) {
-        it.classList.forEach(v -> visit(v));
-        it.funcList.forEach(v -> visit(v));
+        it.blocks.forEach(
+                v -> {
+                    if (v instanceof FuncDeclrStmtNode nv)
+                        visit(nv);
+                    else if (v instanceof ClassDeclStmtNode nv)
+                        visit(nv);
+                });
     }
 
     @Override
@@ -135,10 +138,10 @@ public class ProgInit implements ASTVisitor {
                 classType.putDef(decl.decl);
 
         inClass = true;
-        funcCollector = classType.funMap;
+        curClass = classType;
         it.funcDeclList.forEach(v -> visit(v));
         inClass = false;
-        funcCollector = null;
+        curClass = null;
 
         gScope.putType(classType);
     }
@@ -149,11 +152,9 @@ public class ProgInit implements ASTVisitor {
         for (var para : it.paraList)
             funcInfo.paraList.add(para);
 
-        if (inClass) {
-            if (funcCollector.containsKey(funcInfo.funcName))
-                throw new SemanticError("Redefinition of function " + funcInfo.funcName + " in class", funcInfo.pos);
-            funcCollector.put(it.funcNameString, funcInfo);
-        } else
+        if (inClass)
+            curClass.putFunc(funcInfo);
+        else
             gScope.putFunc(funcInfo);
     }
 

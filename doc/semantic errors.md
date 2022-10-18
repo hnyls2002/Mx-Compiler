@@ -1,5 +1,5 @@
 ### `Main` function
-- [ ] only have one `main` function.
+- [x] have and only have one `main` function with return type `int`.
 - [ ] no parameters.
 - [ ] `return` statement can be ignored.
 - [ ] if has `return`, can only return `int`.
@@ -22,9 +22,9 @@
 - [ ] check the scope's var.
 
 ### `Class Declaration`
-- [ ] name can't be `builtin` types.
-- [ ] `constructor` : no `return` statement, no `parameters`.
-- [ ] `constructor` : same name.
+- [x] name can't be `builtin` types.
+- [x] `constructor` : no `return` statement, no `parameters`.
+- [x] `constructor` : same name.
 - [ ] other `function` name can't be the same as `constructor`.
 
 ### Definition Errors

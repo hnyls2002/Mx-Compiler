@@ -40,9 +40,12 @@ import AST.Stmt.WhileStmtNode;
 import Parser.MxStarParser;
 import Parser.MxStarParserBaseVisitor;
 import Parser.MxStarParser.BinaryExprContext;
+import Parser.MxStarParser.ClassDeclarContext;
 import Parser.MxStarParser.ExprStmtContext;
+import Parser.MxStarParser.FuncDeclarContext;
 import Parser.MxStarParser.UnaryPrefixExprContext;
 import Parser.MxStarParser.UnarySuffixExprContext;
+import Parser.MxStarParser.VarDeclarContext;
 import Util.Position;
 import Util.TypeIdPair;
 import Util.TypeName;
@@ -74,14 +77,17 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
         }
 
         ProgramNode cur = new ProgramNode(new Position(ctx));
-        for (int i = 0; i < ctx.funcDeclar().size(); ++i)
-            cur.funcList.add((FuncDeclrStmtNode) visit(ctx.funcDeclar(i)));
 
-        for (int i = 0; i < ctx.varDeclar().size(); ++i)
-            cur.globalVarList.add((VarDeclStmtNode) visit(ctx.varDeclar(i)));
+        for (int i = 0; i < ctx.children.size(); ++i) {
+            var ch = ctx.children.get(i);
 
-        for (int i = 0; i < ctx.classDeclar().size(); ++i)
-            cur.classList.add((ClassDeclStmtNode) visit(ctx.classDeclar(i)));
+            if (ch instanceof FuncDeclarContext)
+                cur.blocks.add(visit(ch));
+            else if (ch instanceof VarDeclarContext)
+                cur.blocks.add(visit(ch));
+            else if (ch instanceof ClassDeclarContext)
+                cur.blocks.add(visit(ch));
+        }
 
         if (isDebugging) {
             System.err.println("Program-End");

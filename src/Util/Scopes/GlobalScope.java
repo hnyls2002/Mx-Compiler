@@ -37,12 +37,18 @@ public class GlobalScope extends Scope {
     public void putType(BaseType t) {
         if (typeMap.containsKey(t.typeNameString))
             throw new SemanticError("Redefinition of class " + t.typeNameString, t.pos);
+        if (funMap.containsKey(t.typeNameString))
+            throw new SemanticError("Invalid name for class " + t.typeNameString + " , as it's already a function name",
+                    t.pos);
         typeMap.put(t.typeNameString, t);
     }
 
     public void putFunc(FuncInfo f) {
         if (funMap.containsKey(f.funcName))
             throw new SemanticError("Redefinition of function " + f.funcName, f.pos);
+        if (typeMap.containsKey(f.funcName))
+            throw new SemanticError("Invalid name for function " + f.funcName + " , as it's already a class name",
+                    f.pos);
         funMap.put(f.funcName, f);
     }
 

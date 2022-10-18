@@ -18,7 +18,6 @@ import TestPackage.Test;
 import TestPackage.TestPackage1.Test1;
 import Util.MxStarErrorListener;
 import Util.MxStarErrors.BaseError;
-import Util.MxStarErrors.SemanticError;
 import Util.Scopes.GlobalScope;
 
 public class Main {
@@ -58,10 +57,5 @@ public class Main {
             System.err.println(e.toString());
             throw new RuntimeException();
         }
-    }
-
-    void test(MxStarParser.ExpressionContext a) {
-        SemanticError v1 = new SemanticError(null, null);
-        SemanticError v2 = v1;
     }
 }

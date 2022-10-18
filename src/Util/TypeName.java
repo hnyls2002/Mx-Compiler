@@ -5,8 +5,8 @@ import Parser.MxStarParser.TypeNameContext;
 
 public final class TypeName {
 
-    private String typeNameString;
-    private int dimen = 0;
+    public String typeNameString;
+    public int dimen = 0;
     public Position pos;
 
     public TypeName(String typeNameString, int dimen, Position pos) {
@@ -32,7 +32,7 @@ public final class TypeName {
             typeNameString = "void";
             dimen = 0;
         } else {
-            typeNameString = ctx.typeName().toString();
+            typeNameString = ctx.typeName().typeNameUnit().getText();
             dimen = ctx.typeName().LBracket() == null ? 0 : ctx.typeName().LBracket().size();
         }
         pos = new Position(ctx);

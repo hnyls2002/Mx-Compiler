@@ -29,11 +29,15 @@ import AST.Stmt.SingleVarDeclStmtNode;
 import AST.Stmt.SuiteStmtNode;
 import AST.Stmt.VarDeclStmtNode;
 import AST.Stmt.WhileStmtNode;
+import Util.MxStarErrors.SemanticError;
 import Util.Scopes.GlobalScope;
+import Util.Scopes.Scope;
 
 public class SemanticChecker implements ASTVisitor {
 
     public GlobalScope gScope = null;
+
+    public Scope curScope = null;
 
     public SemanticChecker(GlobalScope gScope) {
         this.gScope = gScope;
@@ -41,14 +45,35 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(ProgramNode it) {
-        // TODO Auto-generated method stub
+        curScope = gScope;
+
+        // check the main function
+        var mainFun = gScope.getFuncInfo("main", null);
+        System.err.println(mainFun.retType.toString());
+        if (!mainFun.retType.typeNameString.equals("int"))
+            throw new SemanticError("main function can only be int type", mainFun.pos);
+        if (mainFun.retType.dimen != 0)
+            throw new SemanticError("main function cannot return an array", mainFun.pos);
+
+        it.blocks.forEach(v -> {
+            if (v instanceof ClassDeclStmtNode nv)
+                visit(nv);
+            else if (v instanceof FuncDeclrStmtNode nv)
+                visit(nv);
+            else if (v instanceof VarDeclStmtNode nv)
+                visit(nv);
+
+        });
 
     }
 
     @Override
     public void visit(ClassDeclStmtNode it) {
-        // TODO Auto-generated method stub
-
+        if (it.constructor != null) {
+            for (var stmt : it.constructor.body.StmtList)
+                if (stmt instanceof ReturnStmtNode)
+                    throw new SemanticError("Cannot have return statement in a constructor ", stmt.pos);
+        }
     }
 
     @Override

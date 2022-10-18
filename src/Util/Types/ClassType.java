@@ -42,7 +42,7 @@ public class ClassType extends BaseType {
         return ret;
     }
 
-    // put def of vars in global definition
+    // put def of vars in global class definition
     public void putDef(TypeIdPair p) {
         if (varMap.containsKey(p.Id))
             throw new SemanticError("Redefinition of " + p.Id + " in class " + typeNameString, p.pos);
@@ -51,6 +51,10 @@ public class ClassType extends BaseType {
 
     // put funcs in global definition
     public void putFunc(FuncInfo f) {
+        if (f.funcName.equals(typeNameString))
+            throw new SemanticError("Cannot have function name the same as class name : " + f.funcName + " ",
+                    f.pos);
+
         if (funMap.containsKey(f.funcName))
             throw new SemanticError("Redefinition of " + f.funcName + " in class " + typeNameString, f.pos);
         funMap.put(f.funcName, f);
