@@ -48,6 +48,8 @@ public class Main {
             ProgInit progInit = new ProgInit(gScope);
             progInit.visit(ast);
 
+            gScope.showShowWay();
+
             SemanticChecker semanticChecker = new SemanticChecker(gScope);
 
             semanticChecker.visit(ast);

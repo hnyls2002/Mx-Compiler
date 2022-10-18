@@ -24,4 +24,20 @@ public class GlobalScope extends Scope {
         return funMap.get(s);
     }
 
+    public void putType(BaseType t) {
+        typeMap.put(t.typeNameString, t);
+    }
+
+    public void putFunc(FuncInfo f) {
+        funMap.put(f.funcName, f);
+    }
+
+    public void showShowWay() {
+        System.err.println("----------------------");
+        typeMap.forEach(
+                (name, type) -> {
+                    System.err.print(type.toString());
+                    System.err.println("----------------------");
+                });
+    }
 }

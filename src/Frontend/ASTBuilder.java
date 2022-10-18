@@ -293,7 +293,7 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitIdentifierExpr(MxStarParser.IdentifierExprContext ctx) {
         if (isDebugging) {
-            System.err.println("id : " + ctx.Identifier().getText());
+            System.err.println("id_expr : " + ctx.Identifier().getText());
         }
         IdentiExprNode cur = new IdentiExprNode(new Position(ctx));
         cur.idString = ctx.Identifier().getText();
@@ -466,7 +466,7 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitExprStmt(ExprStmtContext ctx) {
         if (isDebugging) {
-            System.err.println("Expr-Statement");
+            System.err.println("an expression-statement:");
         }
         ExprStmtNode cur = new ExprStmtNode(new Position(ctx));
         cur.expr = (ExprNode) visit(ctx.expression());

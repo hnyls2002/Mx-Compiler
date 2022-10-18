@@ -25,4 +25,9 @@ public final class TypeIdPair {
         pos = new Position(ctx);
     }
 
+    @Override
+    public String toString() {
+        return "(" + typeName.toString() + "," + Id + ")";
+    }
+
 }

@@ -19,4 +19,10 @@ public class BuiltinType extends BaseType {
     public boolean isClass() {
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "BUILTIN TYPE : " + typeNameString + "\n";
+    }
+
 }

@@ -64,11 +64,11 @@ public class ProgInit implements ASTVisitor {
         ord.paraList.add(new TypeIdPair(gScope.intName, "pos"));
         stringType.funMap.put("ord", ord);
 
-        gScope.typeMap.put("int", intType);
-        gScope.typeMap.put("string", stringType);
-        gScope.typeMap.put("bool", boolType);
-        gScope.typeMap.put("null", nullType);
-        gScope.typeMap.put("void", voidType);
+        gScope.putType(intType);
+        gScope.putType(stringType);
+        gScope.putType(boolType);
+        gScope.putType(nullType);
+        gScope.putType(voidType);
 
     }
 
@@ -92,13 +92,13 @@ public class ProgInit implements ASTVisitor {
         FuncInfo _toString = new FuncInfo(gScope.stringName, "toString");
         _toString.paraList.add(new TypeIdPair(gScope.intName, "i"));
 
-        gScope.funMap.put("print", _print);
-        gScope.funMap.put("println", _println);
-        gScope.funMap.put("printInt", _printInt);
-        gScope.funMap.put("printlnInt", _printlnInt);
-        gScope.funMap.put("getString", _getString);
-        gScope.funMap.put("getInt", _getInt);
-        gScope.funMap.put("toString", _toString);
+        gScope.putFunc(_print);
+        gScope.putFunc(_println);
+        gScope.putFunc(_printInt);
+        gScope.putFunc(_printlnInt);
+        gScope.putFunc(_getString);
+        gScope.putFunc(_getInt);
+        gScope.putFunc(_toString);
     }
 
     public ProgInit(GlobalScope gScope) {
@@ -117,6 +117,11 @@ public class ProgInit implements ASTVisitor {
     public void visit(ClassDeclStmtNode it) {
         ClassType classType = new ClassType(it.classNameString, it.pos);
 
+        if (it.constructor != null)
+            classType.haveConst = true;
+        else
+            classType.haveConst = false;
+
         for (var declList : it.varDeclList) {
             for (var decl : declList.varList) {
                 classType.varMap.put(decl.decl.Id, decl.decl);
@@ -128,6 +133,8 @@ public class ProgInit implements ASTVisitor {
         it.funcDeclList.forEach(v -> visit(v));
         inClass = false;
         funcCollector = null;
+
+        gScope.putType(classType);
     }
 
     @Override

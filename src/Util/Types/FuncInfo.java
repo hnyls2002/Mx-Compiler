@@ -15,4 +15,15 @@ public class FuncInfo {
         this.funcName = funcName;
     }
 
+    @Override
+    public String toString() {
+        String ret = "";
+        ret += "FUNCTION : " + funcName + "\n";
+        ret += "parameter list : ";
+        for (int i = 0; i < paraList.size(); ++i)
+            ret += paraList.get(i).toString() + (i == paraList.size() - 1 ? "\n" : ",");
+        ret += "FUNCTION END\n";
+        return ret;
+    }
+
 }
