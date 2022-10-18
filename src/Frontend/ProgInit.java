@@ -31,7 +31,9 @@ import AST.Stmt.SingleVarDeclStmtNode;
 import AST.Stmt.SuiteStmtNode;
 import AST.Stmt.VarDeclStmtNode;
 import AST.Stmt.WhileStmtNode;
+import Util.Position;
 import Util.TypeIdPair;
+import Util.MxStarErrors.SemanticError;
 import Util.Scopes.GlobalScope;
 import Util.Types.BuiltinType;
 import Util.Types.ClassType;
@@ -49,18 +51,18 @@ public class ProgInit implements ASTVisitor {
         BuiltinType nullType = new BuiltinType("null");
         BuiltinType voidType = new BuiltinType("void");
 
-        FuncInfo length = new FuncInfo(gScope.intName, "length");
+        FuncInfo length = new FuncInfo(gScope.intName, "length", new Position(0, 0));
         stringType.funMap.put("length", length);
 
-        FuncInfo substring = new FuncInfo(gScope.stringName, "substring");
+        FuncInfo substring = new FuncInfo(gScope.stringName, "substring", new Position(0, 0));
         substring.paraList.add(new TypeIdPair(gScope.intName, "left"));
         substring.paraList.add(new TypeIdPair(gScope.intName, "right"));
         stringType.funMap.put("substring", substring);
 
-        FuncInfo parseInt = new FuncInfo(gScope.intName, "parseInt");
+        FuncInfo parseInt = new FuncInfo(gScope.intName, "parseInt", new Position(0, 0));
         stringType.funMap.put("parseInt", parseInt);
 
-        FuncInfo ord = new FuncInfo(gScope.intName, "ord");
+        FuncInfo ord = new FuncInfo(gScope.intName, "ord", new Position(0, 0));
         ord.paraList.add(new TypeIdPair(gScope.intName, "pos"));
         stringType.funMap.put("ord", ord);
 
@@ -73,23 +75,23 @@ public class ProgInit implements ASTVisitor {
     }
 
     public void builtinFuncInit() {
-        FuncInfo _print = new FuncInfo(gScope.voidName, "print");
+        FuncInfo _print = new FuncInfo(gScope.voidName, "print", new Position(0, 0));
         _print.paraList.add(new TypeIdPair(gScope.stringName, "str"));
 
-        FuncInfo _println = new FuncInfo(gScope.voidName, "println");
+        FuncInfo _println = new FuncInfo(gScope.voidName, "println", new Position(0, 0));
         _println.paraList.add(new TypeIdPair(gScope.stringName, "str"));
 
-        FuncInfo _printInt = new FuncInfo(gScope.voidName, "printInt");
+        FuncInfo _printInt = new FuncInfo(gScope.voidName, "printInt", new Position(0, 0));
         _printInt.paraList.add(new TypeIdPair(gScope.intName, "n"));
 
-        FuncInfo _printlnInt = new FuncInfo(gScope.voidName, "printlnInt");
+        FuncInfo _printlnInt = new FuncInfo(gScope.voidName, "printlnInt", new Position(0, 0));
         _printlnInt.paraList.add(new TypeIdPair(gScope.intName, "n"));
 
-        FuncInfo _getString = new FuncInfo(gScope.stringName, "getString");
+        FuncInfo _getString = new FuncInfo(gScope.stringName, "getString", new Position(0, 0));
 
-        FuncInfo _getInt = new FuncInfo(gScope.intName, "getInt");
+        FuncInfo _getInt = new FuncInfo(gScope.intName, "getInt", new Position(0, 0));
 
-        FuncInfo _toString = new FuncInfo(gScope.stringName, "toString");
+        FuncInfo _toString = new FuncInfo(gScope.stringName, "toString", new Position(0, 0));
         _toString.paraList.add(new TypeIdPair(gScope.intName, "i"));
 
         gScope.putFunc(_print);
@@ -117,16 +119,20 @@ public class ProgInit implements ASTVisitor {
     public void visit(ClassDeclStmtNode it) {
         ClassType classType = new ClassType(it.classNameString, it.pos);
 
-        if (it.constructor != null)
+        if (it.constructor != null) {
+            if (!it.constructor.consNameString.equals(it.classNameString)) {
+                throw new SemanticError(
+                        "Constructor must have the same name with class name : " + it.classNameString + " ",
+                        it.constructor.pos);
+            }
             classType.haveConst = true;
-        else
+        } else
             classType.haveConst = false;
 
-        for (var declList : it.varDeclList) {
-            for (var decl : declList.varList) {
-                classType.varMap.put(decl.decl.Id, decl.decl);
-            }
-        }
+        // adding fields
+        for (var declList : it.varDeclList)
+            for (var decl : declList.varList)
+                classType.putDef(decl.decl);
 
         inClass = true;
         funcCollector = classType.funMap;
@@ -139,14 +145,16 @@ public class ProgInit implements ASTVisitor {
 
     @Override
     public void visit(FuncDeclrStmtNode it) {
-        FuncInfo funcInfo = new FuncInfo(it.retType, it.funcNameString);
+        FuncInfo funcInfo = new FuncInfo(it.retType, it.funcNameString, it.pos);
         for (var para : it.paraList)
             funcInfo.paraList.add(para);
 
-        if (inClass)
+        if (inClass) {
+            if (funcCollector.containsKey(funcInfo.funcName))
+                throw new SemanticError("Redefinition of function " + funcInfo.funcName + " in class", funcInfo.pos);
             funcCollector.put(it.funcNameString, funcInfo);
-        else
-            gScope.funMap.put(it.funcNameString, funcInfo);
+        } else
+            gScope.putFunc(funcInfo);
     }
 
     @Override

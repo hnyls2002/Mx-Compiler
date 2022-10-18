@@ -1,11 +1,18 @@
 package Util.Types;
 
+import Util.Position;
+
 public abstract class BaseType {
     public String typeNameString;
+    public Position pos;
 
     public abstract boolean isBuiltin();
 
     public abstract boolean isClass();
+
+    public BaseType(Position pos) {
+        this.pos = pos;
+    }
 
     public boolean isInt() {
         return typeNameString.equals("int");

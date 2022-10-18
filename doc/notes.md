@@ -76,5 +76,5 @@
 - Traverse the `AST` and check the semantic. Require a class which is extended from `ASTVisitor` and implement the `visit` method for every type of node.
 
 - **Types and Scopes Handling**
-  - Recording the `typename` , `varname` , `methodname` and dimentions of multi-dimentional array. Noticing that one class cannot have an inner class, and can only be defined globally.  
+  - Recording the `typename` , `varname` , `methodname` and demensions of multi-demensional array. Noticing that one class cannot have an inner class, and can only be defined globally.  
   - `BaseType` class for recording the above information.

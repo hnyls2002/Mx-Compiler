@@ -6,7 +6,7 @@ import Util.Position;
 
 public class SelfConstructNode extends ASTNode {
 
-    public String ClassNameString;
+    public String consNameString;
     public SuiteStmtNode body;
 
     public SelfConstructNode(Position pos) {

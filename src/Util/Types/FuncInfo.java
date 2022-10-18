@@ -2,6 +2,7 @@ package Util.Types;
 
 import java.util.ArrayList;
 
+import Util.Position;
 import Util.TypeIdPair;
 import Util.TypeName;
 
@@ -9,10 +10,12 @@ public class FuncInfo {
     public TypeName retType;
     public String funcName;
     public ArrayList<TypeIdPair> paraList = new ArrayList<>();
+    public Position pos;
 
-    public FuncInfo(TypeName ty, String funcName) {
+    public FuncInfo(TypeName ty, String funcName, Position pos) {
         retType = ty;
         this.funcName = funcName;
+        this.pos = pos;
     }
 
     @Override
@@ -22,6 +25,8 @@ public class FuncInfo {
         ret += "parameter list : ";
         for (int i = 0; i < paraList.size(); ++i)
             ret += paraList.get(i).toString() + (i == paraList.size() - 1 ? "\n" : ",");
+        if (paraList.isEmpty())
+            ret += "\n";
         ret += "FUNCTION END\n";
         return ret;
     }

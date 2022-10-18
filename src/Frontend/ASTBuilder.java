@@ -458,7 +458,7 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
             System.err.println("Self Constructor");
         }
         SelfConstructNode cur = new SelfConstructNode(new Position(ctx));
-        cur.ClassNameString = ctx.Identifier().getText();
+        cur.consNameString = ctx.Identifier().getText();
         cur.body = (SuiteStmtNode) visit(ctx.suite());
         return cur;
     }
