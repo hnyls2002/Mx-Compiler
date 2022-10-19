@@ -5,7 +5,7 @@
             "type": "java",
             "name": "Launch Main",
             "request": "launch",
-            "mainClass": "Main",
+            "mainClass": "Compiler",
             "projectName": "Mx-Compiler_5cbe46eb"
         },
         {
