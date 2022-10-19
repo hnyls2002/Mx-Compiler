@@ -20,17 +20,19 @@ import Util.MxStarErrorListener;
 import Util.MxStarErrors.BaseError;
 import Util.Scopes.GlobalScope;
 
-public class Main {
+public class Compiler {
     public static void main(String[] args) throws Exception {
         try {
             Test.showShowWay();
             Test1.showShowWay();
             System.out.println(" --------------------------------- ");
-            File testCode = new File("testcases/sema/test.mx");
+            // File testCode = new File("testcases/sema/test.mx");
 
-            //File testCode = new File("testcases/sema/basic-package/basic-32.mx");
+            // File testCode = new File("testcases/sema/basic-package/basic-32.mx");
 
-            InputStream testCodeStream = new FileInputStream(testCode);
+            // InputStream testCodeStream = new FileInputStream(testCode);
+
+            InputStream testCodeStream = System.in;
 
             // get lexer
             MxStarLexer lexer = new MxStarLexer(CharStreams.fromStream(testCodeStream));
@@ -43,7 +45,7 @@ public class Main {
             parser.addErrorListener(new MxStarErrorListener());
 
             ParseTree treeRoot = parser.program();
-            ASTBuilder astBuilder = new ASTBuilder(true);
+            ASTBuilder astBuilder = new ASTBuilder(false);
             ProgramNode ast = (ProgramNode) astBuilder.visit(treeRoot);
 
             GlobalScope gScope = new GlobalScope();
