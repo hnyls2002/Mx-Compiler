@@ -8,7 +8,6 @@ import Util.MxStarErrors.SemanticError;
 
 public class ClassType extends BaseType {
     public HashMap<String, TypeIdPair> varMap = new HashMap<>();
-    public HashMap<String, FuncInfo> funMap = new HashMap<>();
     public boolean haveConst = false;
     public Position pos;
 
@@ -66,9 +65,4 @@ public class ClassType extends BaseType {
         return varMap.get(s);
     }
 
-    public FuncInfo getFunc(String s, Position pos) {
-        if (!funMap.containsKey(s))
-            throw new SemanticError("Cannot find method " + s + " in class " + typeNameString + " ", pos);
-        return funMap.get(s);
-    }
 }

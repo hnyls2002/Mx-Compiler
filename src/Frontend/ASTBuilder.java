@@ -39,12 +39,22 @@ import AST.Stmt.VarDeclStmtNode;
 import AST.Stmt.WhileStmtNode;
 import Parser.MxStarParser;
 import Parser.MxStarParserBaseVisitor;
-import Parser.MxStarParser.BinaryExprContext;
+import Parser.MxStarParser.ArrayCreatorContext;
+import Parser.MxStarParser.Binary10ExprContext;
+import Parser.MxStarParser.Binary1ExprContext;
+import Parser.MxStarParser.Binary2ExprContext;
+import Parser.MxStarParser.Binary3ExprContext;
+import Parser.MxStarParser.Binary4ExprContext;
+import Parser.MxStarParser.Binary5ExprContext;
+import Parser.MxStarParser.Binary6ExprContext;
+import Parser.MxStarParser.Binary7ExprContext;
+import Parser.MxStarParser.Binary8ExprContext;
+import Parser.MxStarParser.Binary9ExprContext;
 import Parser.MxStarParser.ClassDeclarContext;
 import Parser.MxStarParser.ExprStmtContext;
 import Parser.MxStarParser.FuncDeclarContext;
-import Parser.MxStarParser.UnaryPrefixExprContext;
-import Parser.MxStarParser.UnarySuffixExprContext;
+import Parser.MxStarParser.Unary1ExprContext;
+import Parser.MxStarParser.Unary2ExprContext;
 import Parser.MxStarParser.VarDeclarContext;
 import Util.Position;
 import Util.TypeIdPair;
@@ -221,6 +231,11 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
             System.err.println("Subscript");
         }
         SubscExprNode cur = new SubscExprNode(new Position(ctx));
+
+        if (ctx.expression(0) instanceof ArrayCreatorContext) {
+            throw new SyntaxError("Creator can't be subscripted without a pair of parenthess", new Position(ctx));
+        }
+
         cur.arr = (ExprNode) visit(ctx.expression(0));
         cur.sub = (ExprNode) visit(ctx.expression(1));
         return cur;
@@ -245,8 +260,10 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
         cur.expr = (ExprNode) visit(ctx.expression());
         if (ctx.funcCall() != null)
             cur.funcCall = (FuncCallExprNode) visit(ctx.funcCall());
-        else
-            cur.idString = ctx.Identifier().getText();
+        else {
+            cur.idExpr = new IdentiExprNode(new Position(ctx.Identifier()));
+            cur.idExpr.idString = ctx.Identifier().getText();
+        }
         return cur;
     }
 
@@ -280,8 +297,10 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
         cur.expr = (ExprNode) visit(ctx.expression());
         if (ctx.funcCall() != null)
             cur.funcCall = (FuncCallExprNode) visit(ctx.funcCall());
-        else
-            cur.idString = ctx.Identifier().getText();
+        else {
+            cur.idExpr = new IdentiExprNode(new Position(ctx.Identifier()));
+            cur.idExpr.idString = ctx.Identifier().getText();
+        }
         return cur;
     }
 
@@ -336,7 +355,6 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
         CreatorExprNode cur = new CreatorExprNode(new Position(ctx));
         cur.typeNameString = ctx.typeNameUnit().getText();
         cur.dimen = ctx.LBracket().size();
-        cur.dimenSet = ctx.expression().size();
         for (int i = 0; i < ctx.expression().size(); ++i)
             cur.dimenSize.add((ExprNode) visit(ctx.expression(i)));
         return cur;
@@ -377,7 +395,7 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
             System.err.println("Var Declar");
         }
         VarDeclStmtNode cur = new VarDeclStmtNode(new Position(ctx));
-        cur.typeName = new TypeName(ctx.typeName());
+        cur.typeName = new TypeName(ctx.typeName(), true);
         for (int i = 0; i < ctx.varSingleDeclar().size(); ++i) {
             var sub_ctx = ctx.varSingleDeclar(i);
             var pair = new TypeIdPair(cur.typeName, sub_ctx.Identifier().getText(), new Position(sub_ctx));
@@ -411,7 +429,7 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
         }
         FuncDeclrStmtNode cur = new FuncDeclrStmtNode(new Position(ctx), ctx.Identifier().getText());
 
-        cur.retType = new TypeName(ctx.returnType());
+        cur.retType = new TypeName(ctx.returnType(), false);
 
         var parametersContext = ctx.parameterList();
         for (int i = 0; i < parametersContext.parameter().size(); ++i)
@@ -480,7 +498,40 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitUnaryPrefixExpr(UnaryPrefixExprContext ctx) {
+    public ASTNode visitBinary9Expr(Binary9ExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Binary Op && ");
+        }
+        BinaryOpExprNode cur = new BinaryOpExprNode(new Position(ctx));
+        cur.lhs = (ExprNode) visit(ctx.expression(0));
+        cur.rhs = (ExprNode) visit(ctx.expression(1));
+        cur.opcode = switch (ctx.op.getType()) {
+            case MxStarParser.LogicAnd -> binaryOp.LOGIC_AND;
+            default -> throw new SyntaxError("Errors happened in binary operator", new Position(ctx));
+        };
+        return cur;
+    }
+
+    @Override
+    public ASTNode visitBinary4Expr(Binary4ExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Binary Op < <= > >=");
+        }
+        BinaryOpExprNode cur = new BinaryOpExprNode(new Position(ctx));
+        cur.lhs = (ExprNode) visit(ctx.expression(0));
+        cur.rhs = (ExprNode) visit(ctx.expression(1));
+        cur.opcode = switch (ctx.op.getType()) {
+            case MxStarParser.Less -> binaryOp.LESS;
+            case MxStarParser.LessEqual -> binaryOp.LESS_EQUAL;
+            case MxStarParser.Greater -> binaryOp.GREATER;
+            case MxStarParser.GreaterEqual -> binaryOp.GREATER_EQUAL;
+            default -> throw new SyntaxError("Errors happened in binary operator", new Position(ctx));
+        };
+        return cur;
+    }
+
+    @Override
+    public ASTNode visitUnary2Expr(Unary2ExprContext ctx) {
         if (isDebugging) {
             System.err.println("Prefix Op");
         }
@@ -500,7 +551,55 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitUnarySuffixExpr(UnarySuffixExprContext ctx) {
+    public ASTNode visitBinary5Expr(Binary5ExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Binary Op == != ");
+        }
+        BinaryOpExprNode cur = new BinaryOpExprNode(new Position(ctx));
+        cur.lhs = (ExprNode) visit(ctx.expression(0));
+        cur.rhs = (ExprNode) visit(ctx.expression(1));
+        cur.opcode = switch (ctx.op.getType()) {
+            case MxStarParser.Equal -> binaryOp.EQUAL;
+            case MxStarParser.NotEqual -> binaryOp.NOT_EQUAL;
+            default -> throw new SyntaxError("Errors happened in binary operator", new Position(ctx));
+        };
+        return cur;
+    }
+
+    @Override
+    public ASTNode visitBinary1Expr(Binary1ExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Binary Op * / %");
+        }
+        BinaryOpExprNode cur = new BinaryOpExprNode(new Position(ctx));
+        cur.lhs = (ExprNode) visit(ctx.expression(0));
+        cur.rhs = (ExprNode) visit(ctx.expression(1));
+        cur.opcode = switch (ctx.op.getType()) {
+            case MxStarParser.Mul -> binaryOp.MUL;
+            case MxStarParser.Div -> binaryOp.DIV;
+            case MxStarParser.Mod -> binaryOp.MOD;
+            default -> throw new SyntaxError("Errors happened in binary operator", new Position(ctx));
+        };
+        return cur;
+    }
+
+    @Override
+    public ASTNode visitBinary7Expr(Binary7ExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Binary Op ^");
+        }
+        BinaryOpExprNode cur = new BinaryOpExprNode(new Position(ctx));
+        cur.lhs = (ExprNode) visit(ctx.expression(0));
+        cur.rhs = (ExprNode) visit(ctx.expression(1));
+        cur.opcode = switch (ctx.op.getType()) {
+            case MxStarParser.BitXor -> binaryOp.BIT_XOR;
+            default -> throw new SyntaxError("Errors happened in binary operator", new Position(ctx));
+        };
+        return cur;
+    }
+
+    @Override
+    public ASTNode visitUnary1Expr(Unary1ExprContext ctx) {
         if (isDebugging) {
             System.err.println("suffix Op");
         }
@@ -516,7 +615,22 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitBinaryExpr(BinaryExprContext ctx) {
+    public ASTNode visitBinary6Expr(Binary6ExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Binary Op &");
+        }
+        BinaryOpExprNode cur = new BinaryOpExprNode(new Position(ctx));
+        cur.lhs = (ExprNode) visit(ctx.expression(0));
+        cur.rhs = (ExprNode) visit(ctx.expression(1));
+        cur.opcode = switch (ctx.op.getType()) {
+            case MxStarParser.BitAnd -> binaryOp.BIT_AND;
+            default -> throw new SyntaxError("Errors happened in binary operator", new Position(ctx));
+        };
+        return cur;
+    }
+
+    @Override
+    public ASTNode visitBinary2Expr(Binary2ExprContext ctx) {
         if (isDebugging) {
             System.err.println("Binary Op");
         }
@@ -524,26 +638,57 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
         cur.lhs = (ExprNode) visit(ctx.expression(0));
         cur.rhs = (ExprNode) visit(ctx.expression(1));
         cur.opcode = switch (ctx.op.getType()) {
-            case MxStarParser.Mul -> binaryOp.MUL;
-            case MxStarParser.Div -> binaryOp.DIV;
-            case MxStarParser.Mod -> binaryOp.MOD;
             case MxStarParser.Add -> binaryOp.ADD;
             case MxStarParser.Sub -> binaryOp.SUB;
+            default -> throw new SyntaxError("Errors happened in binary operator", new Position(ctx));
+        };
+        return cur;
+    }
+
+    @Override
+    public ASTNode visitBinary8Expr(Binary8ExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Binary Op | ");
+        }
+        BinaryOpExprNode cur = new BinaryOpExprNode(new Position(ctx));
+        cur.lhs = (ExprNode) visit(ctx.expression(0));
+        cur.rhs = (ExprNode) visit(ctx.expression(1));
+        cur.opcode = switch (ctx.op.getType()) {
+            case MxStarParser.BitOr -> binaryOp.BIT_OR;
+            default -> throw new SyntaxError("Errors happened in binary operator", new Position(ctx));
+        };
+        return cur;
+    }
+
+    @Override
+    public ASTNode visitBinary3Expr(Binary3ExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Binary Op << >>");
+        }
+        BinaryOpExprNode cur = new BinaryOpExprNode(new Position(ctx));
+        cur.lhs = (ExprNode) visit(ctx.expression(0));
+        cur.rhs = (ExprNode) visit(ctx.expression(1));
+        cur.opcode = switch (ctx.op.getType()) {
             case MxStarParser.ShiftLeft -> binaryOp.SHIFT_LEFT;
             case MxStarParser.ShiftRight -> binaryOp.SHIFT_RIGHT;
-            case MxStarParser.Less -> binaryOp.LESS;
-            case MxStarParser.LessEqual -> binaryOp.LESS_EQUAL;
-            case MxStarParser.Greater -> binaryOp.GREATER;
-            case MxStarParser.GreaterEqual -> binaryOp.GREATER_EQUAL;
-            case MxStarParser.Equal -> binaryOp.EQUAL;
-            case MxStarParser.NotEqual -> binaryOp.NOT_EQUAL;
-            case MxStarParser.BitAnd -> binaryOp.BIT_AND;
-            case MxStarParser.BitXor -> binaryOp.BIT_XOR;
-            case MxStarParser.BitOr -> binaryOp.BIT_OR;
-            case MxStarParser.LogicAnd -> binaryOp.LOGIC_AND;
+            default -> throw new SyntaxError("Errors happened in binary operator", new Position(ctx));
+        };
+        return cur;
+    }
+
+    @Override
+    public ASTNode visitBinary10Expr(Binary10ExprContext ctx) {
+        if (isDebugging) {
+            System.err.println("Binary Op || ");
+        }
+        BinaryOpExprNode cur = new BinaryOpExprNode(new Position(ctx));
+        cur.lhs = (ExprNode) visit(ctx.expression(0));
+        cur.rhs = (ExprNode) visit(ctx.expression(1));
+        cur.opcode = switch (ctx.op.getType()) {
             case MxStarParser.LogicOr -> binaryOp.LOGIC_OR;
             default -> throw new SyntaxError("Errors happened in binary operator", new Position(ctx));
         };
         return cur;
     }
+
 }

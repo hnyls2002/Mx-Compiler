@@ -12,7 +12,6 @@ import AST.Expr.MemberExprNode;
 import AST.Expr.SubscExprNode;
 import AST.Expr.ThisExprNode;
 import AST.Expr.UnaryOpExprNode;
-import AST.Expr.VarExprNode;
 import AST.Stmt.BreakStmtNode;
 import AST.Stmt.ClassDeclStmtNode;
 import AST.Stmt.ContinueStmtNode;
@@ -75,8 +74,6 @@ public interface ASTVisitor {
     void visit(ThisExprNode it);
 
     void visit(LiteralExprNode it);
-
-    void visit(VarExprNode it);
 
     void visit(SuiteStmtNode it);
 

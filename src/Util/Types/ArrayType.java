@@ -1,26 +1,19 @@
 package Util.Types;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import Util.Position;
 import Util.Scopes.GlobalScope;
 
 public class ArrayType extends BaseType {
 
     public BaseType uniType;
-    public int dimen = 0, dimenset = 0;
-    public ArrayList<Integer> dimenSize = new ArrayList<>();
-    public HashMap<String, FuncInfo> funMap = new HashMap<>();
+    public int dimen = 0;
 
-    public ArrayType(GlobalScope gScope, Position pos) {
+    public ArrayType(GlobalScope gScope, BaseType uniType, int dimen, Position pos) {
         super(pos);
+        this.uniType = uniType;
+        this.dimen = dimen;
         FuncInfo size = new FuncInfo(gScope.intName, "size", new Position(0, 0));
         funMap.put("size", size);
-    }
-
-    public FuncInfo getFuncInfo(String s) {
-        return funMap.get(s);
     }
 
     @Override

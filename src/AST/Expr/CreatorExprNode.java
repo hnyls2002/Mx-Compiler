@@ -7,7 +7,7 @@ import Util.Position;
 
 public class CreatorExprNode extends ExprNode {
 
-    public int dimen = 0, dimenSet = 0;
+    public int dimen = 0;
 
     public ArrayList<ExprNode> dimenSize = new ArrayList<>();
 

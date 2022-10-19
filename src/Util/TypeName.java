@@ -8,26 +8,30 @@ public final class TypeName {
     public String typeNameString;
     public int dimen = 0;
     public Position pos;
+    public boolean isLeftValue = false;
 
-    public TypeName(String typeNameString, int dimen, Position pos) {
+    public TypeName(String typeNameString, int dimen, boolean islv, Position pos) {
         this.typeNameString = typeNameString;
         this.dimen = dimen;
+        this.isLeftValue = islv;
         this.pos = pos;
     }
 
-    public TypeName(String typeNameString, int dimen) {
+    public TypeName(String typeNameString, int dimen, boolean islv) {
         this.typeNameString = typeNameString;
         this.dimen = dimen;
+        this.isLeftValue = islv;
         this.pos = null;
     }
 
-    public TypeName(TypeNameContext ctx) {
+    public TypeName(TypeNameContext ctx, boolean islv) {
         typeNameString = ctx.typeNameUnit().getText();
         dimen = ctx.LBracket().size();
         pos = new Position(ctx);
+        this.isLeftValue = islv;
     }
 
-    public TypeName(ReturnTypeContext ctx) {
+    public TypeName(ReturnTypeContext ctx, boolean islv) {
         if (ctx.typeName() == null) {
             typeNameString = "void";
             dimen = 0;
@@ -36,6 +40,7 @@ public final class TypeName {
             dimen = ctx.typeName().LBracket() == null ? 0 : ctx.typeName().LBracket().size();
         }
         pos = new Position(ctx);
+        this.isLeftValue = islv;
     }
 
     public boolean isUnit() {
@@ -49,6 +54,18 @@ public final class TypeName {
     @Override
     public String toString() {
         return typeNameString;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof TypeName t) {
+            if (dimen != 0 && t.typeNameString == "null")
+                return true;
+            if (typeNameString == "null" && t.dimen != 0)
+                return true;
+            return typeNameString.equals(t.typeNameString) && dimen == t.dimen;
+        }
+        return false;
     }
 
 }

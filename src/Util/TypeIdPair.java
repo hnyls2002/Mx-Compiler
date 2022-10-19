@@ -20,7 +20,7 @@ public final class TypeIdPair {
     }
 
     public TypeIdPair(ParameterContext ctx) {
-        typeName = new TypeName(ctx.typeName());
+        typeName = new TypeName(ctx.typeName(), true);
         Id = ctx.Identifier().getText();
         pos = new Position(ctx);
     }

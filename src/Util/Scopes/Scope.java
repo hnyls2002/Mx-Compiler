@@ -5,8 +5,13 @@ import java.util.HashMap;
 import Util.Position;
 import Util.TypeIdPair;
 import Util.MxStarErrors.SemanticError;
+import Util.Types.BaseType;
+import Util.Types.FuncInfo;
 
 public class Scope {
+    public HashMap<String, BaseType> typeMap = new HashMap<>(); // suppose class can be in class
+    public HashMap<String, FuncInfo> funMap = new HashMap<>();
+    // when you enter a class, the inner function should be added into curScope !
     public HashMap<String, TypeIdPair> DefMap = new HashMap<>(); // the DefMap only stores the typename literally
     public Scope parent = null;
 
@@ -33,6 +38,25 @@ public class Scope {
                 return parent.getDef(s, pos);
         }
         return DefMap.get(s);
+    }
+
+    public void putFunc(FuncInfo f) {
+        if (funMap.containsKey(f.funcName))
+            throw new SemanticError("Redefinition of function " + f.funcName, f.pos);
+        if (typeMap.containsKey(f.funcName))
+            throw new SemanticError("Invalid name for function " + f.funcName + " , as it's already a class name",
+                    f.pos);
+        funMap.put(f.funcName, f);
+    }
+
+    public FuncInfo getFuncInfo(String s, Position pos) {
+        if (!funMap.containsKey(s)) {
+            if (parent == null)
+                throw new SemanticError("Cannot find function " + s + " ", pos);
+            else
+                return parent.getFuncInfo(s, pos);
+        }
+        return funMap.get(s);
     }
 
 }

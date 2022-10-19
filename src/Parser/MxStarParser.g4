@@ -39,7 +39,7 @@ statement: // for side-effects
 // for create a value (with some possible side-effects)
 expression:
 	LParen expression RParen								# parenExpr
-	| expression op = (Inc | Dec)							# unarySuffixExpr
+	| expression op = (Inc | Dec)							# unary1Expr
 	| funcCall												# funcCallExpr
 	| expression (LBracket expression RBracket)				# subscriptExpr
 	| expression Dot (Identifier | funcCall)				# memberExpr
@@ -51,29 +51,19 @@ expression:
 		| Sub
 		| LogicNot
 		| BitNot
-	) expression # unaryPrefixExpr
-	| expression op = (
-		Mul
-		| Div
-		| Mod
-		| Add
-		| Sub
-		| ShiftLeft
-		| ShiftRight
-		| Less
-		| LessEqual
-		| Greater
-		| GreaterEqual
-		| Equal
-		| NotEqual
-		| BitAnd
-		| BitXor
-		| BitOr
-		| LogicAnd
-		| LogicOr
-	) expression									# binaryExpr
-	| <assoc = right>expression Assign expression	# assignExpr
-	| expression (Comma expression)+				# commaExpr
+	) expression																# unary2Expr
+	| expression op = (Mul | Div | Mod) expression								# binary1Expr
+	| expression op = (Add | Sub) expression									# binary2Expr
+	| expression op = (ShiftLeft | ShiftRight) expression						# binary3Expr
+	| expression op = (Less | LessEqual | Greater | GreaterEqual) expression	# binary4Expr
+	| expression op = (Equal | NotEqual) expression								# binary5Expr
+	| expression op = BitAnd expression											# binary6Expr
+	| expression op = BitXor expression											# binary7Expr
+	| expression op = BitOr expression											# binary8Expr
+	| expression op = LogicAnd expression										# binary9Expr
+	| expression op = LogicOr expression										# binary10Expr
+	| <assoc = right>expression Assign expression								# assignExpr
+	| expression (Comma expression)+											# commaExpr
 	// -----------------------------------
 	// No conflicts with the previous rules
 	| New typeNameUnit (LBracket expression RBracket)+ (

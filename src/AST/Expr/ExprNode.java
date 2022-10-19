@@ -2,11 +2,11 @@ package AST.Expr;
 
 import AST.ASTNode;
 import Util.Position;
-import Util.Types.BaseType;
+import Util.TypeName;
 
 public abstract class ExprNode extends ASTNode {
 
-    public BaseType type = null;
+    public TypeName typeName = null;
 
     public ExprNode(Position pos) {
         super(pos);

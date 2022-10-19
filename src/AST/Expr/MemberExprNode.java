@@ -6,8 +6,8 @@ import Util.Position;
 public class MemberExprNode extends ExprNode {
 
     public ExprNode expr;
-    public String idString;
     public FuncCallExprNode funcCall;
+    public IdentiExprNode idExpr;
 
     public MemberExprNode(Position pos) {
         super(pos);

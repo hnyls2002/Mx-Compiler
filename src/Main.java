@@ -26,7 +26,10 @@ public class Main {
             Test.showShowWay();
             Test1.showShowWay();
             System.out.println(" --------------------------------- ");
-            File testCode = new File("testcases/sema/test.mx");
+            // File testCode = new File("testcases/sema/test.mx");
+
+            File testCode = new File("testcases/sema/basic-package/basic-19.mx");
+
             InputStream testCodeStream = new FileInputStream(testCode);
 
             // get lexer

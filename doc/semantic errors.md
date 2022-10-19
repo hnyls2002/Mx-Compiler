@@ -1,48 +1,48 @@
 ### `Main` function
 - [x] have and only have one `main` function with return type `int`.
-- [ ] no parameters.
-- [ ] `return` statement can be ignored.
-- [ ] if has `return`, can only return `int`.
-- [ ] `main` can't be used as class name or other functions' name.
+- [x] no parameters.
+- [x] `return` statement can be ignored.
+- [x] if has `return`, can only return `int`.
+- [x] `main` can't be used as class name or other functions' name.
 
 ### `Control Flow`
-- [ ] `break` and `continue` can only be used in `for` and `while` loop.
-- [ ] `if`'s `condition` can only be bool.
-- [ ] `for-loop` condition can only be bool.
+- [x] `break` and `continue` can only be used in `for` and `while` loop.
+- [x] `if`'s `condition` can only be bool.
+- [x] `for-loop` condition can only be bool.
 
 ### `Function Declaration`
-- [ ] `return type` match `declaration`.
-- [ ] `non-void` function must have `return` statement.
-- [ ] `this` usage : regarded as a `type`.
+- [x] `return type` match `declaration`.
+- [x] `non-void` function must have `return` statement.
+- [x] `this` usage : regarded as a `type`.
 
 ### `Lambda` function
-- [ ] `parameters` match `arguments`.
-- [ ] should have a `return` statement.
-- [ ] definition : right associative.
-- [ ] check the scope's var.
+- [x] `parameters` match `arguments`.
+- [x] should have a `return` statement.
+- [x] definition : right associative.
+- [x] check the scope's var.
 
 ### `Class Declaration`
 - [x] name can't be `builtin` types.
 - [x] `constructor` : no `return` statement, no `parameters`.
 - [x] `constructor` : same name.
-- [ ] other `function` name can't be the same as `constructor`.
+- [x] other `function` name can't be the same as `constructor`.
 
 ### Definition Errors
-- [ ] no `void` type for vars.
-- [ ] `var` can't support back reference.
-- [ ] `class`, `function` support back reference.
-- [ ] `undefined` being used.
-- [ ] `Duplicate` for `vars`,`function`,`class`, which means the three can't have the same name.
+- [x] no `void` type for vars.
+- [x] `var` can't support back reference.
+- [x] `class`, `function` support back reference.
+- [x] `undefined` being used.
+- [x] `Duplicate` for `vars`,`function`,`class`, which means the three can't have the same name.
 
 ### Var declaration
-- [ ] `variable` can't be `void`. 
-- [ ] `creator` can't be `void`.
+- [x] `variable` can't be `void`. 
+- [x] `creator` can't be `void`.
 
 ### Type Handling
-- [ ] every expression has a type.
-- [ ] any `conversion` is undefined behavior.
-- [ ] `assignment` match.
-- [ ] `field`,`arugments`,`method` match `definition`.
+- [x] every expression has a type.
+- [x] any `conversion` is undefined behavior.
+- [x] `assignment` match.
+- [x] `field`,`arugments`,`method` match `definition`.
 
 ### dimension Handling
 - [ ] `creator` has a type with dimension.
@@ -51,17 +51,17 @@
 - [ ] `subscript` expression.
 
 ### `Operator` expression
-- [ ] `ADD`,`SUB`,`...` can only be used on some specific types.
-- [ ] `logic` operator can only be used on `bool`.
+- [x] `ADD`,`SUB`,`...` can only be used on some specific types.
+- [x] `logic` operator can only be used on `bool`.
 
 
 ### Left Value
-- [ ] `literal value`,`function call` can't be left value.
-- [ ] `this` can't be assigned.
-- [ ] `a++` return a `right value`.
-- [ ] `a++`,`++a` : `a` need to be `left value`.
-- [ ] function call can't be `left value`.
+- [x] `literal value`,`function call` can't be left value.
+- [x] `this` can't be assigned.
+- [x] `a++` return a `right value`.
+- [x] `a++`,`++a` : `a` need to be `left value`.
+- [x] function call can't be `left value`.
 
 ### Others
-- [ ] `subscript` can only be `int`.
+- [x] `subscript` can only be `int`.
 - [ ] `null` can only be assigned to reference type.
