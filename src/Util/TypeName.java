@@ -66,9 +66,9 @@ public final class TypeName {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof TypeName t) {
-            if ((dimen != 0 || !isBuiltin()) && t.typeNameString == "null")
+            if ((dimen != 0 || !isBuiltin()) && t.typeNameString.equals("null"))
                 return true;
-            if (typeNameString == "null" && (t.dimen != 0 || !isBuiltin()))
+            if (typeNameString.equals("null") && (t.dimen != 0 || !t.isBuiltin()))
                 return true;
             return typeNameString.equals(t.typeNameString) && dimen == t.dimen;
         }

@@ -72,22 +72,22 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(ClassDeclStmtNode it) {
         curScope = new Scope(curScope);
 
-        if (it.constructor != null) {
-            for (var stmt : it.constructor.body.StmtList) {
-                if (stmt.retStmtType != null)
-                    throw new SemanticError("Cannot have return statement in a constructor ", stmt.pos);
-                if (stmt instanceof ReturnStmtNode)
-                    throw new SemanticError("Cannot have return statement in a constructor ", stmt.pos);
-            }
-        }
+        // check var declares and put it into scope
         it.varDeclList.forEach(v -> v.accept(this));
 
+        // put this into a field
         TypeName nowTypeName = new TypeName(it.classNameString, 0, false, it.pos);
-
         curScope.putDef(new TypeIdPair(nowTypeName, "this", it.pos), gScope);
 
+        // put func
         var typeClass = gScope.getType(it.classNameString, it.pos);
         typeClass.funMap.forEach((s, v) -> curScope.putFunc(v));
+
+        if (it.constructor != null) {
+            it.constructor.body.accept(this);
+            if (it.constructor.body.retStmtType != null && !it.constructor.body.retStmtType.equals(gScope.voidName))
+                throw new SemanticError("Cannot have non-void return statement in a constructor ", it.constructor.pos);
+        }
 
         it.funcDeclList.forEach(v -> {
             v.accept(this);
