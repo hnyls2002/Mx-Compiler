@@ -2,7 +2,6 @@ package AST;
 
 import AST.Expr.AssignExprNode;
 import AST.Expr.BinaryOpExprNode;
-import AST.Expr.CommaExprNode;
 import AST.Expr.CreatorExprNode;
 import AST.Expr.FuncCallExprNode;
 import AST.Expr.IdentiExprNode;
@@ -44,8 +43,6 @@ public interface ASTVisitor {
     void visit(UnaryOpExprNode it);
 
     void visit(AssignExprNode it);
-
-    void visit(CommaExprNode it);
 
     void visit(SubscExprNode it);
 

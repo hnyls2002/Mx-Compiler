@@ -4,7 +4,6 @@ import AST.ASTVisitor;
 import AST.ProgramNode;
 import AST.Expr.AssignExprNode;
 import AST.Expr.BinaryOpExprNode;
-import AST.Expr.CommaExprNode;
 import AST.Expr.CreatorExprNode;
 import AST.Expr.FuncCallExprNode;
 import AST.Expr.IdentiExprNode;
@@ -182,11 +181,6 @@ public class ProgInit implements ASTVisitor {
 
     @Override
     public void visit(AssignExprNode it) {
-
-    }
-
-    @Override
-    public void visit(CommaExprNode it) {
 
     }
 

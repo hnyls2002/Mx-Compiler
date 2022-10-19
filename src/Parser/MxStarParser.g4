@@ -63,7 +63,6 @@ expression:
 	| expression op = LogicAnd expression										# binary9Expr
 	| expression op = LogicOr expression										# binary10Expr
 	| <assoc = right>expression Assign expression								# assignExpr
-	| expression (Comma expression)+											# commaExpr
 	// -----------------------------------
 	// No conflicts with the previous rules
 	| New typeNameUnit (LBracket expression RBracket)+ (

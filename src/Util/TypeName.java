@@ -56,12 +56,19 @@ public final class TypeName {
         return typeNameString;
     }
 
+    public boolean isBuiltin() {
+        if (dimen != 0)
+            return false;
+        return typeNameString.equals("int") || typeNameString.equals("bool") || typeNameString.equals("string")
+                || typeNameString.equals("void") || typeNameString.equals("null");
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof TypeName t) {
-            if (dimen != 0 && t.typeNameString == "null")
+            if ((dimen != 0 || !isBuiltin()) && t.typeNameString == "null")
                 return true;
-            if (typeNameString == "null" && t.dimen != 0)
+            if (typeNameString == "null" && (t.dimen != 0 || !isBuiltin()))
                 return true;
             return typeNameString.equals(t.typeNameString) && dimen == t.dimen;
         }

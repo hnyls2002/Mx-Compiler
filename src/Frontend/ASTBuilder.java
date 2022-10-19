@@ -8,7 +8,6 @@ import AST.ASTNode;
 import AST.ProgramNode;
 import AST.Expr.AssignExprNode;
 import AST.Expr.BinaryOpExprNode;
-import AST.Expr.CommaExprNode;
 import AST.Expr.CreatorExprNode;
 import AST.Expr.ExprNode;
 import AST.Expr.FuncCallExprNode;
@@ -301,17 +300,6 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
             cur.idExpr = new IdentiExprNode(new Position(ctx.Identifier()));
             cur.idExpr.idString = ctx.Identifier().getText();
         }
-        return cur;
-    }
-
-    @Override
-    public ASTNode visitCommaExpr(MxStarParser.CommaExprContext ctx) {
-        if (isDebugging) {
-            System.err.println("Comma Expr");
-        }
-        CommaExprNode cur = new CommaExprNode(new Position(ctx));
-        for (int i = 0; i < ctx.expression().size(); ++i)
-            cur.exprList.add((ExprNode) visit(ctx.expression(i)));
         return cur;
     }
 

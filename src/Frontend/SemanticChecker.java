@@ -4,7 +4,6 @@ import AST.ASTVisitor;
 import AST.ProgramNode;
 import AST.Expr.AssignExprNode;
 import AST.Expr.BinaryOpExprNode;
-import AST.Expr.CommaExprNode;
 import AST.Expr.CreatorExprNode;
 import AST.Expr.FuncCallExprNode;
 import AST.Expr.IdentiExprNode;
@@ -74,9 +73,12 @@ public class SemanticChecker implements ASTVisitor {
         curScope = new Scope(curScope);
 
         if (it.constructor != null) {
-            for (var stmt : it.constructor.body.StmtList)
+            for (var stmt : it.constructor.body.StmtList) {
+                if (stmt.retStmtType != null)
+                    throw new SemanticError("Cannot have return statement in a constructor ", stmt.pos);
                 if (stmt instanceof ReturnStmtNode)
                     throw new SemanticError("Cannot have return statement in a constructor ", stmt.pos);
+            }
         }
         it.varDeclList.forEach(v -> v.accept(this));
 
@@ -114,21 +116,42 @@ public class SemanticChecker implements ASTVisitor {
         });
 
         boolean haveReturn = false;
-        for (var stmt : it.body.StmtList) {
-            stmt.accept(this);
-            if (stmt instanceof ReturnStmtNode retStmt) {
-                haveReturn = true;
-                if (it.retType.typeNameString.equals("void")) {
-                    if (retStmt.expr != null)
-                        throw new SemanticError("Void function cannot return a no-void expression", retStmt.pos);
-                } else if (!retStmt.expr.typeName.equals(it.retType)) {
-                    throw new SemanticError("Return type of the function doesn't match ", retStmt.pos);
-                }
+
+        // -------------------------------------------------------------
+        it.body.accept(this);
+
+        if (it.body.retStmtType != null) {
+            haveReturn = true;
+            if (it.retType.typeNameString.equals("void")) {
+                if (!it.body.retStmtType.equals(gScope.voidName))
+                    throw new SemanticError("Void function cannot return a no-void expression",
+                            it.body.pos);
+            } else if (!it.body.retStmtType.equals(it.retType)) {
+                throw new SemanticError("Return type of the function doesn't match ",
+                        it.body.pos);
             }
         }
+        // -------------------------------------------------------------
+
+        // for (var stmt : it.body.StmtList) {
+        // stmt.accept(this);
+        // if (stmt.retStmtType != null) {
+        // haveReturn = true;
+        // if (it.retType.typeNameString.equals("void")) {
+        // if (!stmt.retStmtType.equals(gScope.voidName))
+        // throw new SemanticError("Void function cannot return a no-void expression",
+        // stmt.pos);
+        // } else if (!stmt.retStmtType.equals(it.retType)) {
+        // throw new SemanticError("Return type of the function doesn't match ",
+        // stmt.pos);
+        // }
+        // }
+        // }
+
+        // -------------------------------------------------------------
 
         if (!it.retType.equals(gScope.voidName) && !haveReturn && !it.funcNameString.equals("main"))
-            throw new SemanticError("No-return type function must have a return statement ", it.pos);
+            throw new SemanticError("Non-void type function must have a return statement ", it.pos);
 
         curScope = curScope.parent;
     }
@@ -140,7 +163,9 @@ public class SemanticChecker implements ASTVisitor {
             if (!v.typeName.equals(gScope.intName))
                 throw new SemanticError("Subsript can only be int type ", v.pos);
         });
-        it.typeName = new TypeName(it.typeNameString, it.dimen, false);
+        // check type
+        gScope.getType(it.typeNameString, it.pos);
+        it.typeName = new TypeName(it.typeNameString, it.dimen, true);
     }
 
     @Override
@@ -148,16 +173,25 @@ public class SemanticChecker implements ASTVisitor {
         it.lhs.accept(this);
         it.rhs.accept(this);
         switch (it.opcode) {
+            case ADD:
+                if (it.lhs.typeName.equals(gScope.stringName) || it.rhs.typeName.equals(gScope.stringName)) {
+                    if (!it.lhs.typeName.equals(gScope.stringName) || !it.rhs.typeName.equals(gScope.stringName))
+                        throw new SemanticError("Operator " + it.opcode.toString() + " both side should be string ",
+                                it.pos);
+                    else
+                        it.typeName = gScope.stringName;
+                    break;
+                }
             case MUL:
             case DIV:
             case MOD:
-            case ADD:
             case SUB:
             case SHIFT_LEFT:
             case SHIFT_RIGHT:
-                if (!it.lhs.typeName.equals(gScope.intName) || !it.rhs.typeName.equals(gScope.intName))
+                if (!it.lhs.typeName.equals(gScope.intName) || !it.rhs.typeName.equals(gScope.intName)) {
                     throw new SemanticError("Operator " + it.opcode.toString() + " can only be used on int types ",
                             it.pos);
+                }
                 it.typeName = gScope.intName;
                 break;
 
@@ -165,6 +199,16 @@ public class SemanticChecker implements ASTVisitor {
             case LESS_EQUAL:
             case GREATER:
             case GREATER_EQUAL:
+
+                if (it.lhs.typeName.equals(gScope.stringName) || it.rhs.typeName.equals(gScope.stringName)) {
+                    if (!it.lhs.typeName.equals(gScope.stringName) || !it.rhs.typeName.equals(gScope.stringName))
+                        throw new SemanticError("Operator " + it.opcode.toString() + " both side should be string ",
+                                it.pos);
+                    else
+                        it.typeName = gScope.boolName;
+                    break;
+                }
+
                 if (!it.lhs.typeName.equals(gScope.intName) || !it.rhs.typeName.equals(gScope.intName))
                     throw new SemanticError("Operator " + it.opcode.toString() + " can only be used on int types ",
                             it.pos);
@@ -251,12 +295,6 @@ public class SemanticChecker implements ASTVisitor {
     }
 
     @Override
-    public void visit(CommaExprNode it) {
-        // fuck
-
-    }
-
-    @Override
     public void visit(SubscExprNode it) {
         it.arr.accept(this);
         it.sub.accept(this);
@@ -275,6 +313,10 @@ public class SemanticChecker implements ASTVisitor {
         var func = isMember ? curMaster.getFunc(it.FuncNameString, it.pos)
                 : curScope.getFuncInfo(it.FuncNameString, it.pos);
 
+        // since got the function, you don't need the specific field anymore
+        // you will find the arguments : in basic-55
+        isMember = false;
+
         if (func.paraList.size() != it.argList.size())
             throw new SemanticError("Arguments number is not match function " +
                     it.FuncNameString,
@@ -282,7 +324,8 @@ public class SemanticChecker implements ASTVisitor {
 
         int siz = func.paraList.size();
         for (int i = 0; i < siz; ++i) {
-            if (func.paraList.get(i).typeName.equals(it.argList.get(i).typeName))
+            it.argList.get(i).accept(this);
+            if (!func.paraList.get(i).typeName.equals(it.argList.get(i).typeName))
                 throw new SemanticError("Argument's type doesn't match ", it.pos);
         }
 
@@ -313,9 +356,18 @@ public class SemanticChecker implements ASTVisitor {
         it.thenStmt.accept(this);
         curScope = curScope.parent;
 
+        it.retStmtType = it.thenStmt.retStmtType;
+
         if (it.elseStmt != null) {
             curScope = new Scope(curScope);
             it.elseStmt.accept(this);
+            if (it.retStmtType != null && it.elseStmt.retStmtType != null) {
+                if (!it.retStmtType.equals(it.elseStmt.retStmtType))
+                    throw new SemanticError("return types different in if and else blocks ", it.pos);
+            }
+            if (it.elseStmt.retStmtType != null)
+                it.retStmtType = it.elseStmt.retStmtType;
+
             curScope = curScope.parent;
         }
     }
@@ -328,7 +380,10 @@ public class SemanticChecker implements ASTVisitor {
 
         curScope = new Scope(curScope);
         ++inLoop;
+
         it.body.accept(this);
+        it.retStmtType = it.body.retStmtType;
+
         curScope = curScope.parent;
         --inLoop;
     }
@@ -343,13 +398,17 @@ public class SemanticChecker implements ASTVisitor {
         else if (it.initExpr != null)
             it.initExpr.accept(this);
 
-        it.condExpr.accept(this);
-        if (!it.condExpr.typeName.equals(gScope.boolName))
-            throw new SemanticError("Condition expression must be bool type ", it.condExpr.pos);
+        if (it.condExpr != null) {
+            it.condExpr.accept(this);
+            if (!it.condExpr.typeName.equals(gScope.boolName))
+                throw new SemanticError("Condition expression must be bool type ", it.condExpr.pos);
+        }
 
-        it.incExpr.accept(this);
+        if (it.incExpr != null)
+            it.incExpr.accept(this);
 
         it.body.accept(this);
+        it.retStmtType = it.body.retStmtType;
 
         curScope = curScope.parent;
         --inLoop;
@@ -359,9 +418,9 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(ReturnStmtNode it) {
         if (it.expr != null) {
             it.expr.accept(this);
-            it.retType = it.expr.typeName;
+            it.retStmtType = it.expr.typeName;
         } else
-            it.retType = gScope.voidName;
+            it.retStmtType = gScope.voidName;
     }
 
     @Override
@@ -424,16 +483,12 @@ public class SemanticChecker implements ASTVisitor {
             curScope.putDef(v, gScope);
         });
 
-        boolean haveRet = false;
-        for (var stmt : it.body.StmtList) {
-            stmt.accept(this);
-            if (stmt instanceof ReturnStmtNode retStmt) {
-                haveRet = true;
-                it.typeName = retStmt.expr == null ? gScope.voidName : retStmt.expr.typeName;
-            }
-        }
-        if (!haveRet)
+        it.body.accept(this);
+        if (it.body.retStmtType == null)
             throw new SemanticError("Lambda should have a return statement", it.pos);
+
+        it.typeName = it.body.retStmtType;
+
         curScope = curScope.parent;
 
     }
@@ -465,7 +520,14 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(SuiteStmtNode it) {
         curScope = new Scope(curScope);
-        it.StmtList.forEach(v -> v.accept(this));
+        it.StmtList.forEach(v -> {
+            v.accept(this);
+            if (v.retStmtType != null) {
+                if (it.retStmtType != null && !it.retStmtType.equals(v.retStmtType))
+                    throw new SemanticError("Different return types ", it.pos);
+                it.retStmtType = v.retStmtType;
+            }
+        });
         curScope = curScope.parent;
 
     }

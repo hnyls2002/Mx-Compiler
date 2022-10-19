@@ -6,7 +6,7 @@ import Util.TypeName;
 
 public abstract class StmtNode extends ASTNode {
 
-    public TypeName retType = null;
+    public TypeName retStmtType = null;
 
     public StmtNode(Position pos) {
         super(pos);

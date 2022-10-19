@@ -23,10 +23,15 @@ public class Scope {
     public void putDef(TypeIdPair p, GlobalScope gScope) {
         if (DefMap.containsKey(p.Id))
             throw new SemanticError("Redefinition of " + p.toString(), p.pos);
-        if (gScope.typeMap.containsKey(p.Id))
-            throw new SemanticError("Invalid var name, as " + p.toString() + " is a type name ", p.pos);
-        if (gScope.funMap.containsKey(p.Id))
-            throw new SemanticError("Invalid var name, as " + p.toString() + " is a function name ", p.pos);
+        /*
+         * if (gScope.typeMap.containsKey(p.Id))
+         * throw new SemanticError("Invalid var name, as " + p.toString() +
+         * " is a type name ", p.pos);
+         * if (gScope.funMap.containsKey(p.Id))
+         * throw new SemanticError("Invalid var name, as " + p.toString() +
+         * " is a function name ", p.pos);
+         * 
+         */
         DefMap.put(p.Id, p);
     }
 
