@@ -74,7 +74,50 @@
 ### `Semantic Checker`
 
 - Traverse the `AST` and check the semantic. Require a class which is extended from `ASTVisitor` and implement the `visit` method for every type of node.
+- `Scope` handling
+- `Types` handling
+- `Members` handling
+- `Control flow` handling : `break` and `continue`.
+- `Return` handling : `return`'s location and type.
 
-- **Types and Scopes Handling**
-  - Recording the `typename` , `varname` , `methodname` and demensions of multi-demensional array. Noticing that one class cannot have an inner class, and can only be defined globally.  
-  - `BaseType` class for recording the above information.
+**Scopes Handling**
+- `GlobalScope` : collect the func def, global var def and class def(as well as var and func in class).
+- `Scope` : Scope is a `tree` or `stack` structure, which stores the var local var defs during program execution.
+  - `ClassDeclare` : when checking the body of **a function in specific class**, the checker should know the **local** `variables` and `functions` defined in this class. 
+  - Further more, the vars and funcs can support `back-reference`.
+  - To solve this, checker should add all the `vars` and `funcs` upon entering the declaration of a class.
+
+**Types Handling**
+- Semantic checker should check the type of every `expression` and `expression's match`.
+  - All `expression` checks : using `TypeName`.
+  - `TypeName` : only stores the literal `typeNameString` , `dimension` , `isLeftValue`.
+- When calling a `inner function` or `inner field`, we should know what is contained in s specific `class`.
+  - A `BaseType`.
+  - Then we have `builtinType`, `ArrayType`(array types can have builtin functions), and `ClassType`.
+  - The infos were collected during `SymbolCollector` in GlobalScope.
+  - `FuncInfo` stores the **inner function's signature**.
+
+**Members Handling**
+- The implementation of `member` was not so good now.
+- A global flag `isMember` to indicate whether the current `expression` is a `member` or not.
+- A global reference `curMaster` to link to the spefic `class`.
+- `identifier` or `function` can be called in `memberExpr`
+  - `indentifier` : find the `var` in **only** `curMaster`.
+  - `function` : find the `func` in **only** `curMaster`.
+- Ugly code : `function call`'s arguments are not members, so quit `isMember` mode when visiting `arguments`.
+
+**Control Flow Handling**
+- A trick in semantic : `++inLoop` and `--inLoop` to indicate whether the current `statement` is in a `loop`.
+
+**Return Handling**
+- A good ideal.
+- Similar to every `expression` has a `TypeName`, every `statement` has a `retStmtType`.
+- It's a tree-shape collection of `return` statements and `return` type **in a single function**.
+- Once out of the function, the `retStmtType` will be `null`.
+- So we can easily collect all the `return` statements in a body and check the mathing relationship.
+
+### Maybe can be improved
+- `Scope` handling and `Types` handling have similar structure.
+  - Just define a more universal `BaseScope` which contains `vars` and `funcs` and `types` and `classes` and so on.
+- `Member` handling is not so good.
+- `Loop` handling is not so good.

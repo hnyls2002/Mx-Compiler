@@ -26,13 +26,13 @@ public class Compiler {
             Test.showShowWay();
             Test1.showShowWay();
             System.out.println(" --------------------------------- ");
-            // File testCode = new File("testcases/sema/test.mx");
+            File testCode = new File("testcases/sema/test.mx");
 
             // File testCode = new File("testcases/sema/basic-package/basic-32.mx");
 
-            // InputStream testCodeStream = new FileInputStream(testCode);
+            InputStream testCodeStream = new FileInputStream(testCode);
 
-            InputStream testCodeStream = System.in;
+            // InputStream testCodeStream = System.in;
 
             // get lexer
             MxStarLexer lexer = new MxStarLexer(CharStreams.fromStream(testCodeStream));
@@ -45,7 +45,7 @@ public class Compiler {
             parser.addErrorListener(new MxStarErrorListener());
 
             ParseTree treeRoot = parser.program();
-            ASTBuilder astBuilder = new ASTBuilder(false);
+            ASTBuilder astBuilder = new ASTBuilder(true);
             ProgramNode ast = (ProgramNode) astBuilder.visit(treeRoot);
 
             GlobalScope gScope = new GlobalScope();
