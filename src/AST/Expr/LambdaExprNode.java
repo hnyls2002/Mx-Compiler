@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import AST.ASTVisitor;
 import AST.Stmt.SuiteStmtNode;
-import Util.Position;
-import Util.TypeIdPair;
+import Frontend.Util.Position;
+import Frontend.Util.TypeIdPair;
 
 public class LambdaExprNode extends ExprNode {
 

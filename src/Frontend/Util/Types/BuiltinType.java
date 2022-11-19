@@ -1,6 +1,6 @@
-package Util.Types;
+package Frontend.Util.Types;
 
-import Util.Position;
+import Frontend.Util.Position;
 
 public class BuiltinType extends BaseType {
 

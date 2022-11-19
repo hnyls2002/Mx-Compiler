@@ -3,7 +3,7 @@ package AST.Stmt;
 import java.util.ArrayList;
 
 import AST.ASTVisitor;
-import Util.Position;
+import Frontend.Util.Position;
 
 public class SuiteStmtNode extends StmtNode {
 

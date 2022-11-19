@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch Compiler",
+            "request": "launch",
+            "mainClass": "Compiler",
+            "projectName": "Mx-Compiler_d46a71ba"
+        },
+        {
+            "type": "java",
             "name": "Launch Main",
             "request": "launch",
             "mainClass": "Compiler",

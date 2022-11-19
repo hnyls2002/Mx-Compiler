@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import AST.ASTNode;
 import AST.ASTVisitor;
-import Util.Position;
-import Util.TypeIdPair;
-import Util.TypeName;
+import Frontend.Util.Position;
+import Frontend.Util.TypeIdPair;
+import Frontend.Util.TypeName;
 
 public class FuncDeclrStmtNode extends ASTNode {
 

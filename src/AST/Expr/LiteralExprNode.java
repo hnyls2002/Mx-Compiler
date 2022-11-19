@@ -1,7 +1,7 @@
 package AST.Expr;
 
 import AST.ASTVisitor;
-import Util.Position;
+import Frontend.Util.Position;
 
 public class LiteralExprNode extends ExprNode {
 

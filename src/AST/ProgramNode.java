@@ -1,7 +1,8 @@
 package AST;
 
 import java.util.ArrayList;
-import Util.Position;
+
+import Frontend.Util.Position;
 
 public class ProgramNode extends ASTNode {
 

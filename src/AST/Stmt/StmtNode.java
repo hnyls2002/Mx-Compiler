@@ -1,8 +1,8 @@
 package AST.Stmt;
 
 import AST.ASTNode;
-import Util.Position;
-import Util.TypeName;
+import Frontend.Util.Position;
+import Frontend.Util.TypeName;
 
 public abstract class StmtNode extends ASTNode {
 

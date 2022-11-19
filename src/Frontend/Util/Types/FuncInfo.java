@@ -1,10 +1,10 @@
-package Util.Types;
+package Frontend.Util.Types;
 
 import java.util.ArrayList;
 
-import Util.Position;
-import Util.TypeIdPair;
-import Util.TypeName;
+import Frontend.Util.Position;
+import Frontend.Util.TypeIdPair;
+import Frontend.Util.TypeName;
 
 public class FuncInfo {
     public TypeName retType;

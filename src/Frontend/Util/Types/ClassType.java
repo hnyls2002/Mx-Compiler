@@ -1,10 +1,10 @@
-package Util.Types;
+package Frontend.Util.Types;
 
 import java.util.HashMap;
 
-import Util.Position;
-import Util.TypeIdPair;
-import Util.MxStarErrors.SemanticError;
+import Frontend.Util.Position;
+import Frontend.Util.TypeIdPair;
+import Frontend.Util.MxStarErrors.SemanticError;
 
 public class ClassType extends BaseType {
     public HashMap<String, TypeIdPair> varMap = new HashMap<>();

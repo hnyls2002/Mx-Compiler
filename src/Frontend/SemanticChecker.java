@@ -28,16 +28,16 @@ import AST.Stmt.SingleVarDeclStmtNode;
 import AST.Stmt.SuiteStmtNode;
 import AST.Stmt.VarDeclStmtNode;
 import AST.Stmt.WhileStmtNode;
-import Util.Position;
-import Util.TypeIdPair;
-import Util.TypeName;
-import Util.MxStarErrors.BaseError;
-import Util.MxStarErrors.SemanticError;
-import Util.Scopes.GlobalScope;
-import Util.Scopes.Scope;
-import Util.Types.ArrayType;
-import Util.Types.BaseType;
-import Util.Types.ClassType;
+import Frontend.Util.Position;
+import Frontend.Util.TypeIdPair;
+import Frontend.Util.TypeName;
+import Frontend.Util.MxStarErrors.BaseError;
+import Frontend.Util.MxStarErrors.SemanticError;
+import Frontend.Util.Scopes.GlobalScope;
+import Frontend.Util.Scopes.Scope;
+import Frontend.Util.Types.ArrayType;
+import Frontend.Util.Types.BaseType;
+import Frontend.Util.Types.ClassType;
 
 public class SemanticChecker implements ASTVisitor {
 

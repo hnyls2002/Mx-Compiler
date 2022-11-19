@@ -1,6 +1,6 @@
 package AST;
 
-import Util.Position;
+import Frontend.Util.Position;
 
 public abstract class ASTNode {
     public Position pos;

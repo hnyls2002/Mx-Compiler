@@ -36,6 +36,10 @@ import AST.Stmt.StmtNode;
 import AST.Stmt.SuiteStmtNode;
 import AST.Stmt.VarDeclStmtNode;
 import AST.Stmt.WhileStmtNode;
+import Frontend.Util.Position;
+import Frontend.Util.TypeIdPair;
+import Frontend.Util.TypeName;
+import Frontend.Util.MxStarErrors.SyntaxError;
 import Parser.MxStarParser;
 import Parser.MxStarParserBaseVisitor;
 import Parser.MxStarParser.ArrayCreatorContext;
@@ -55,10 +59,6 @@ import Parser.MxStarParser.FuncDeclarContext;
 import Parser.MxStarParser.Unary1ExprContext;
 import Parser.MxStarParser.Unary2ExprContext;
 import Parser.MxStarParser.VarDeclarContext;
-import Util.Position;
-import Util.TypeIdPair;
-import Util.TypeName;
-import Util.MxStarErrors.SyntaxError;
 
 // This definition is used to check whether there are some methods missed
 

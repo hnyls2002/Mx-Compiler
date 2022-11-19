@@ -1,9 +1,9 @@
-package Util.Types;
+package Frontend.Util.Types;
 
 import java.util.HashMap;
 
-import Util.Position;
-import Util.MxStarErrors.SemanticError;
+import Frontend.Util.Position;
+import Frontend.Util.MxStarErrors.SemanticError;
 
 public abstract class BaseType {
     public String typeNameString;

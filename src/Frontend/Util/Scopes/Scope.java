@@ -1,12 +1,12 @@
-package Util.Scopes;
+package Frontend.Util.Scopes;
 
 import java.util.HashMap;
 
-import Util.Position;
-import Util.TypeIdPair;
-import Util.MxStarErrors.SemanticError;
-import Util.Types.BaseType;
-import Util.Types.FuncInfo;
+import Frontend.Util.Position;
+import Frontend.Util.TypeIdPair;
+import Frontend.Util.MxStarErrors.SemanticError;
+import Frontend.Util.Types.BaseType;
+import Frontend.Util.Types.FuncInfo;
 
 public class Scope {
     public HashMap<String, BaseType> typeMap = new HashMap<>(); // suppose class can be in class

@@ -2,8 +2,8 @@ package AST.Stmt;
 
 import AST.ASTVisitor;
 import AST.Expr.ExprNode;
-import Util.Position;
-import Util.TypeIdPair;
+import Frontend.Util.Position;
+import Frontend.Util.TypeIdPair;
 
 public class SingleVarDeclStmtNode extends StmtNode {
     public TypeIdPair decl;

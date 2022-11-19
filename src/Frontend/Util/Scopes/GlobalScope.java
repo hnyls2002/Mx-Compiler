@@ -1,9 +1,9 @@
-package Util.Scopes;
+package Frontend.Util.Scopes;
 
-import Util.Position;
-import Util.TypeName;
-import Util.MxStarErrors.SemanticError;
-import Util.Types.BaseType;
+import Frontend.Util.Position;
+import Frontend.Util.TypeName;
+import Frontend.Util.MxStarErrors.SemanticError;
+import Frontend.Util.Types.BaseType;
 
 public class GlobalScope extends Scope {
     public final TypeName intName = new TypeName("int", 0, false);

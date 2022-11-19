@@ -27,13 +27,13 @@ import AST.Stmt.SingleVarDeclStmtNode;
 import AST.Stmt.SuiteStmtNode;
 import AST.Stmt.VarDeclStmtNode;
 import AST.Stmt.WhileStmtNode;
-import Util.Position;
-import Util.TypeIdPair;
-import Util.MxStarErrors.SemanticError;
-import Util.Scopes.GlobalScope;
-import Util.Types.BuiltinType;
-import Util.Types.ClassType;
-import Util.Types.FuncInfo;
+import Frontend.Util.Position;
+import Frontend.Util.TypeIdPair;
+import Frontend.Util.MxStarErrors.SemanticError;
+import Frontend.Util.Scopes.GlobalScope;
+import Frontend.Util.Types.BuiltinType;
+import Frontend.Util.Types.ClassType;
+import Frontend.Util.Types.FuncInfo;
 
 public class ProgInit implements ASTVisitor {
     private GlobalScope gScope;

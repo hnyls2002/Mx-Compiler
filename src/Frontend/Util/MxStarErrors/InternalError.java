@@ -1,6 +1,6 @@
-package Util.MxStarErrors;
+package Frontend.Util.MxStarErrors;
 
-import Util.Position;
+import Frontend.Util.Position;
 
 public class InternalError extends BaseError {
     public InternalError(String msg, Position pos) {

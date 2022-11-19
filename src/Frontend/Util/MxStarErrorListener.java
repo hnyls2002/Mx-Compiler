@@ -1,10 +1,10 @@
-package Util;
+package Frontend.Util;
 
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
-import Util.MxStarErrors.SyntaxError;
+import Frontend.Util.MxStarErrors.SyntaxError;
 
 public class MxStarErrorListener extends BaseErrorListener {
     @Override

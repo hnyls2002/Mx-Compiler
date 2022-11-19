@@ -1,6 +1,6 @@
-package Util.MxStarErrors;
+package Frontend.Util.MxStarErrors;
 
-import Util.Position;
+import Frontend.Util.Position;
 
 public class SyntaxError extends BaseError {
     public SyntaxError(String msg, Position pos) {

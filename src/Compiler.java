@@ -9,6 +9,9 @@ import AST.ProgramNode;
 import Frontend.ASTBuilder;
 import Frontend.ProgInit;
 import Frontend.SemanticChecker;
+import Frontend.Util.MxStarErrorListener;
+import Frontend.Util.MxStarErrors.BaseError;
+import Frontend.Util.Scopes.GlobalScope;
 
 import org.antlr.v4.runtime.CharStreams;
 
@@ -16,9 +19,6 @@ import Parser.MxStarLexer;
 import Parser.MxStarParser;
 import TestPackage.Test;
 import TestPackage.TestPackage1.Test1;
-import Util.MxStarErrorListener;
-import Util.MxStarErrors.BaseError;
-import Util.Scopes.GlobalScope;
 
 public class Compiler {
     public static void main(String[] args) throws Exception {
@@ -26,9 +26,7 @@ public class Compiler {
             Test.showShowWay();
             Test1.showShowWay();
             System.out.println(" --------------------------------- ");
-            File testCode = new File("testcases/sema/test.mx");
-
-            // File testCode = new File("testcases/sema/basic-package/basic-32.mx");
+            File testCode = new File("testcases/test.mx");
 
             InputStream testCodeStream = new FileInputStream(testCode);
 
@@ -45,14 +43,14 @@ public class Compiler {
             parser.addErrorListener(new MxStarErrorListener());
 
             ParseTree treeRoot = parser.program();
-            ASTBuilder astBuilder = new ASTBuilder(true);
+            ASTBuilder astBuilder = new ASTBuilder(false);
             ProgramNode ast = (ProgramNode) astBuilder.visit(treeRoot);
 
             GlobalScope gScope = new GlobalScope();
             ProgInit progInit = new ProgInit(gScope);
             progInit.visit(ast);
 
-            gScope.showShowWay();
+            //gScope.showShowWay();
 
             SemanticChecker semanticChecker = new SemanticChecker(gScope);
 

@@ -1,4 +1,4 @@
-package Util;
+package Frontend.Util;
 
 import Parser.MxStarParser.ParameterContext;
 

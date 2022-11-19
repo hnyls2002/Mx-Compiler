@@ -1,6 +1,6 @@
-package Util.MxStarErrors;
+package Frontend.Util.MxStarErrors;
 
-import Util.Position;
+import Frontend.Util.Position;
 
 public abstract class BaseError extends RuntimeException {
     private Position pos;

@@ -1,7 +1,7 @@
-package Util.Types;
+package Frontend.Util.Types;
 
-import Util.Position;
-import Util.Scopes.GlobalScope;
+import Frontend.Util.Position;
+import Frontend.Util.Scopes.GlobalScope;
 
 public class ArrayType extends BaseType {
 

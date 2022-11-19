@@ -1,7 +1,7 @@
 package AST.Stmt;
 
 import AST.ASTVisitor;
-import Util.Position;
+import Frontend.Util.Position;
 
 public class ContinueStmtNode extends StmtNode {
 

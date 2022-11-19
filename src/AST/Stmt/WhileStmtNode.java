@@ -2,7 +2,7 @@ package AST.Stmt;
 
 import AST.ASTVisitor;
 import AST.Expr.ExprNode;
-import Util.Position;
+import Frontend.Util.Position;
 
 public class WhileStmtNode extends StmtNode {
 

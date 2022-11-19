@@ -1,8 +1,8 @@
 ### **Stupid Mistakes**
 
 - Using `vscode starter` to learn how to compile java codes.
-    - src folder is default folder for java codes.
-    - classpath for every java program need to be set.
+    - `src/` folder is default folder for java codes.
+    - `classpath` for every java program need to be set.
     - bin folder is default folder for compiled java codes.
 - The `.java` file in `.jar` is not visible. When vscode tries to link the source, it will show the wrong code.
   ```java
@@ -11,7 +11,7 @@
   }
   ```
   `return null` is not the true code!
-### Vistor Pattern
+### Visitor Pattern
 
 - visitor 
   - A `Visitor` interface and some `SomeVisitor` classes.
@@ -63,7 +63,7 @@
 
 ### **Build The `AST`**
 - Interface `ASTVisitor` for `AST` visitor pattern.
-- Abstruce class `ASTNode` for `AST` base and derived classes.
+- Abstract class `ASTNode` for `AST` base and derived classes.
 - AST nodes design
   - `Expr` : all expressions
   - `Stmt` : all statements
