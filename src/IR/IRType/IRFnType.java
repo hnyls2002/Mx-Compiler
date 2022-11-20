@@ -1,9 +1,7 @@
 package IR.IRType;
 
-public class IRFnType extends IRBaseType {
+// function signatures
 
-    public IRFnType(String typeString) {
-        super(typeString);
-    }
+public class IRFnType extends IRBaseType {
 
 }

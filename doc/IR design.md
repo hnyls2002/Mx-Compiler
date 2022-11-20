@@ -1,14 +1,75 @@
-~~trying to guess how the llvm irbuilder process it~~
+[TOC]
+
+Trying to ~~guess~~ learn how the llvm IR(core) works
+
+[llvm document (internal)](https://llvm.org/doxygen/)
+
+### How to read the llvm document ?
+
+Check the core part of the llvm, ~~and then imitate it~~.
+
+<img src="./assets/image-20221120113220529.png" alt="image-20221120113220529.png" style="zoom:40%;" />
 
 ### Hierarchy
+
 - `module` : the whole program
 - `function ` : contains `basic block`
 - `basic block` : contains `instruction`, need to be labeled
 - `instruction`
 
-### Some designs
+### Blocks and CFG design
 
-Show some llvm instructions for example
+just imitate the design of llvm, that is, look at `.ll` file to find out the solution
+
+##### `if` statement
+
+Upon encountering `if` statement, then end the current block, and create `ifthen`,`ifelse` block.
+
+After the `ifthen` and `ifelse` block, create an `afterif` block. The `afterif` block continue to execute the code after `if` statement.
+
+##### `while` statement
+
+- jump to `whilecond` block
+- `whilecond` block
+    - if condition is true, jump to `whilebody` block
+    - if condition is false, jump to `afterwhile` block
+
+##### `for` statement
+
+- execute the initial statements first, and then jump to `forcond` block
+- `forcond` block
+    - if condition is true, jump to `forbody` block
+    - if condition is false, jump to `afterfor` block
+- `forbody` block : execution done, jump to `forstep` block
+- `forstep` block : jump to `forcond` block
+
+##### `break` statement
+
+jump to `afterwhile` or `afterfor` block
+
+##### `continue` statement
+
+jump to `whilecond` or `forstep` block
+
+### SSA(Static Single Assignment)
+
+Eevery virtual register can only be assigned once.
+
+**Every mutable variable is in memory**, register is only used to pass value.
+
+### Scope design (to find the corresponding value)
+
+I have designed the `scope` system in semantic phase.
+
+- local scope : s stack-like to maintain the variables.
+- global scope : global variables, functions, classes
+
+just catch the corresponding id in scopes.
+  - memory load first
+  - pass value by register
+### Some implementation details
+
+Showing some llvm instructions for example
 
 - `new`
     ```llvm
@@ -76,54 +137,3 @@ Show some llvm instructions for example
     store i32 %4, i32* %2, align 4
     ```
     Also follow the principle of **passing value by register**.
-
-### SSA(Static Single Assignment)is 
-
-Eevery virtual register can only be assigned once.
-
-**Every mutable variable is in memory**, register is only used to pass value.
-
-### blocks and CFG design
-
-just imitate the design of llvm, that is, look at `.ll` file to find out the solution
-
-##### `if` statement
-
-Upon encountering `if` statement, then end the current block, and create `ifthen`,`ifelse` block.
-
-After the `ifthen` and `ifelse` block, create an `afterif` block. The `afterif` block continue to execute the code after `if` statement.
-
-##### `while` statement
-
-- jump to `whilecond` block
-- `whilecond` block
-    - if condition is true, jump to `whilebody` block
-    - if condition is false, jump to `afterwhile` block
-
-##### `for` statement
-
-- execute the initial statements first, and then jump to `forcond` block
-- `forcond` block
-    - if condition is true, jump to `forbody` block
-    - if condition is false, jump to `afterfor` block
-- `forbody` block : execution done, jump to `forstep` block
-- `forstep` block : jump to `forcond` block
-
-##### `break` statement
-
-jump to `afterwhile` or `afterfor` block
-
-##### `continue` statement
-
-jump to `whilecond` or `forstep` block
-
-### scope design (to find the corresponding value)
-
-I have designed the `scope` system in semantic phase.
-
-- local scope : s stack-like to maintain the variables.
-- global scope : global variables, functions, classes
-
-just catch the corresponding id in scopes.
-  - memory load first
-  - pass value by register
