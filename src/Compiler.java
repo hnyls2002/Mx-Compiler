@@ -12,6 +12,8 @@ import Frontend.SemanticChecker;
 import Frontend.Util.MxStarErrorListener;
 import Frontend.Util.MxStarErrors.BaseError;
 import Frontend.Util.Scopes.GlobalScope;
+import IR.Util.InfoManager;
+import MiddleEnd.IRBuilder;
 
 import org.antlr.v4.runtime.CharStreams;
 
@@ -50,11 +52,16 @@ public class Compiler {
             ProgInit progInit = new ProgInit(gScope);
             progInit.visit(ast);
 
-            //gScope.showShowWay();
+            // gScope.showShowWay();
 
             SemanticChecker semanticChecker = new SemanticChecker(gScope);
-
             semanticChecker.visit(ast);
+
+            // -------------------------------------------------------
+
+            InfoManager infoManager = new InfoManager();
+            IRBuilder irBuilder = new IRBuilder(ast, gScope, infoManager);
+            irBuilder.buildIR();
 
         } catch (BaseError e) {
             System.err.println(e.toString());

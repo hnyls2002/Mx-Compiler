@@ -1,5 +1,7 @@
 package MiddleEnd;
 
+import java.util.ArrayList;
+
 import AST.ASTNode;
 import AST.ASTVisitor;
 import AST.ProgramNode;
@@ -28,20 +30,59 @@ import AST.Stmt.SingleVarDeclStmtNode;
 import AST.Stmt.SuiteStmtNode;
 import AST.Stmt.VarDeclStmtNode;
 import AST.Stmt.WhileStmtNode;
+import Frontend.Util.Scopes.GlobalScope;
+import Frontend.Util.Types.FuncInfo;
 import IR.Module;
+import IR.IRType.IRFnType;
+import IR.IRType.IRStructType;
+import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
+import IR.Util.InfoManager;
 
 public class IRBuilder implements ASTVisitor {
 
-    public Module IRTopModule;
+    public Module topModule;
+    public ASTNode progRoot;
+    public GlobalScope gScope;
+    public InfoManager infoManager;
 
-    public Module buildIR(ASTNode progRoot) {
+    public IRBuilder(ASTNode progRoot, GlobalScope gScope, InfoManager infoManager) {
+        this.progRoot = progRoot;
+        this.gScope = gScope;
+        this.infoManager = infoManager;
+    }
+
+    public IRFnType collectFn(FuncInfo funcInfo) {
+        var ret = new IRFnType(funcInfo.funcName);
+        // TODO collect the type(retType and arguments)
+        // Maybe I need a transfer function/class
+        return ret;
+    }
+
+    public void collectInfo() {
+        gScope.typeMap.forEach((name, agg) -> {
+            var aClass = new IRStructType(name);
+            aClass.isSolid = true;
+            aClass.fnList = new ArrayList<>();
+            aClass.fieldList = new ArrayList<>();
+            aClass.infoManager = infoManager;
+            // TODO collect the function
+        });
+        gScope.DefMap.forEach((name, gVar) -> {
+            // TODO
+            var globalVar = new GlobalVariable(null, null);
+            topModule.globalVarList.add(null);
+        });
+    }
+
+    public Module buildIR() {
+        collectInfo();
         progRoot.accept(this);
-        return IRTopModule;
+        return topModule;
     }
 
     @Override
     public void visit(ProgramNode it) {
-        // TODO Auto-generated method stub
+        it.blocks.forEach(v -> v.accept(this));
 
     }
 
