@@ -1,5 +1,9 @@
 package IR.IRValue.IRUser.Inst;
 
-public class GEPInst extends BaseInst {
+import IR.IRType.IRType;
 
+public class GEPInst extends IRBaseInst {
+    public GEPInst(IRType gepInsType) {
+        super(gepInsType);
+    }
 }

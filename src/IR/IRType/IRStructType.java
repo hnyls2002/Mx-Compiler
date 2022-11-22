@@ -1,39 +1,26 @@
 package IR.IRType;
 
 import java.util.ArrayList;
-
-import IR.Util.InfoManager;
+import java.util.HashMap;
 
 // reference to https://llvm.org/doxygen/classllvm_1_1StructType.html
 
-public class IRStructType extends IRBaseType {
+public class IRStructType extends IRType {
     public String className;
 
     public boolean isSolid = false;
-    public ArrayList<IRFnType> fnList = null;
-    public ArrayList<IRBaseType> fieldList = null;
+    public ArrayList<IRType> fieldList = null;
 
-    public InfoManager infoManager = null;
+    public HashMap<String, Integer> fieldIdxMap;
 
     public IRStructType(String className) {
+        super(IRTypeId.StructTypeId);
         this.className = className;
     }
 
     public static IRStructType create(String className) {
         var ret = new IRStructType(className);
         return ret;
-    }
-
-    public void link(InfoManager infoManager) {
-        this.infoManager = infoManager;
-    }
-
-    public IRStructType getSolid() {
-        var tmp = infoManager.getSolidStruct(className);
-        this.isSolid = true;
-        this.fnList = tmp.fnList;
-        this.fieldList = tmp.fieldList;
-        return tmp;
     }
 
     @Override

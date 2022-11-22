@@ -1,10 +1,11 @@
 package IR.IRType;
 
-public class IRArrayType extends IRBaseType {
-    public IRBaseType elementType;
+public class IRArrayType extends IRType {
+    public IRType elementType;
     public int arrayLen = 0;
 
-    public IRArrayType(IRBaseType elemenType, int arrayLen) {
+    public IRArrayType(IRType elemenType, int arrayLen) {
+        super(IRTypeId.ArrayTypeId);
         this.elementType = elemenType;
         this.arrayLen = arrayLen;
     }

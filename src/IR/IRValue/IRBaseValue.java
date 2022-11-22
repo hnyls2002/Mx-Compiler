@@ -1,5 +1,11 @@
 package IR.IRValue;
 
-public abstract class IRBaseValue {
+import IR.IRType.IRType;
 
+public abstract class IRBaseValue {
+    public IRType valueType;
+
+    public IRBaseValue(IRType valueType) {
+        this.valueType = valueType;
+    }
 }

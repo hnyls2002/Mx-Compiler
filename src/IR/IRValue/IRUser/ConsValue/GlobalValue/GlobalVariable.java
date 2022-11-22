@@ -1,15 +1,18 @@
 package IR.IRValue.IRUser.ConsValue.GlobalValue;
 
-import IR.IRType.IRBaseType;
+import IR.IRType.IRType;
 import IR.IRValue.IRUser.ConsValue.BaseConstValue;
 
-public class GlobalVariable extends BaseGlobalValue {
-    public IRBaseType ty;
-    public BaseConstValue initData;
+// global variable is address!!!!
 
-    public GlobalVariable(IRBaseType ty, BaseConstValue initData) {
-        this.ty = ty;
+public class GlobalVariable extends BaseGlobalValue {
+    public BaseConstValue initData;
+    public boolean isInit;
+
+    public GlobalVariable(IRType gVarType, Boolean initFlag, BaseConstValue initData) {
+        super(gVarType);
         this.initData = initData;
+        this.isInit = initFlag;
     }
 
 }

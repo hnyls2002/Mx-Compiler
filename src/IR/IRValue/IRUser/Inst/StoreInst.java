@@ -1,5 +1,10 @@
 package IR.IRValue.IRUser.Inst;
 
-public class StoreInst extends BaseInst {
+import IR.IRType.IRType;
+
+public class StoreInst extends IRBaseInst {
+    public StoreInst(IRType storeInstType) {
+        super(storeInstType);
+    }
 
 }

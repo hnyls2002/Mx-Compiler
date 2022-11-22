@@ -12,8 +12,9 @@ import Frontend.SemanticChecker;
 import Frontend.Util.MxStarErrorListener;
 import Frontend.Util.MxStarErrors.BaseError;
 import Frontend.Util.Scopes.GlobalScope;
-import IR.Util.InfoManager;
+import IR.IRModule;
 import MiddleEnd.IRBuilder;
+import MiddleEnd.IRPrinter;
 
 import org.antlr.v4.runtime.CharStreams;
 
@@ -59,9 +60,10 @@ public class Compiler {
 
             // -------------------------------------------------------
 
-            InfoManager infoManager = new InfoManager();
-            IRBuilder irBuilder = new IRBuilder(ast, gScope, infoManager);
-            irBuilder.buildIR();
+            IRBuilder irBuilder = new IRBuilder(ast, gScope);
+            IRModule topModule = irBuilder.buildIR();
+            IRPrinter irPrinter = new IRPrinter(topModule, "testcases/my_test.ll");
+            irPrinter.printIR();
 
         } catch (BaseError e) {
             System.err.println(e.toString());

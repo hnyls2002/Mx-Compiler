@@ -1,5 +1,9 @@
 package IR.IRValue.IRUser.Inst;
 
-public class UnaryInst extends BaseInst {
+import IR.IRType.IRType;
 
+public class UnaryInst extends IRBaseInst {
+    public UnaryInst(IRType unaryInstType) {
+        super(unaryInstType);
+    }
 }

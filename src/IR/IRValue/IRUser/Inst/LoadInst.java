@@ -1,5 +1,9 @@
 package IR.IRValue.IRUser.Inst;
 
-public class LoadInst extends BaseInst {
+import IR.IRType.IRType;
 
+public class LoadInst extends IRBaseInst {
+    public LoadInst(IRType loadInstType) {
+        super(loadInstType);
+    }
 }

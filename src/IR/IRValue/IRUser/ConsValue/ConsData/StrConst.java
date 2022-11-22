@@ -1,7 +1,9 @@
 package IR.IRValue.IRUser.ConsValue.ConsData;
 
-import IR.IRValue.IRUser.ConsValue.BaseConstValue;
+import IR.IRType.IRArrayType;
 
-public class StrConst extends BaseConstValue {
-
+public class StrConst extends BaseConstData {
+    public StrConst(IRArrayType consStrType) {
+        super(consStrType);
+    }
 }

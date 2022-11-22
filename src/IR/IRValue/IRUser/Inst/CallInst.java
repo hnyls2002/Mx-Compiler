@@ -1,5 +1,9 @@
 package IR.IRValue.IRUser.Inst;
 
-public class CallInst extends BaseInst {
+import IR.IRType.IRType;
 
+public class CallInst extends IRBaseInst {
+    public CallInst(IRType callInstType) {
+        super(callInstType);
+    }
 }

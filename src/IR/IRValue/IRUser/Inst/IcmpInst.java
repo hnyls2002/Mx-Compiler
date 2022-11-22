@@ -1,5 +1,9 @@
 package IR.IRValue.IRUser.Inst;
 
-public class IcmpInst extends BaseInst {
+import IR.IRType.IRType;
 
+public class IcmpInst extends IRBaseInst {
+    public IcmpInst(IRType icmpInstType) {
+        super(icmpInstType);
+    }
 }

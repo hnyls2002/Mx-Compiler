@@ -30,52 +30,43 @@ import AST.Stmt.SingleVarDeclStmtNode;
 import AST.Stmt.SuiteStmtNode;
 import AST.Stmt.VarDeclStmtNode;
 import AST.Stmt.WhileStmtNode;
+import Debug.MyException;
 import Frontend.Util.Scopes.GlobalScope;
+import Frontend.Util.Scopes.Scope;
 import Frontend.Util.Types.FuncInfo;
-import IR.Module;
+import IR.IRModule;
 import IR.IRType.IRFnType;
+import IR.IRType.IRIntType;
 import IR.IRType.IRStructType;
+import IR.IRType.IRVoidType;
+import IR.IRValue.IRBasicBlock;
+import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
-import IR.Util.InfoManager;
+import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
+import IR.IRValue.IRUser.Inst.RetInst;
+import IR.Util.Transfer;
 
 public class IRBuilder implements ASTVisitor {
 
-    public Module topModule;
+    private class CurStatus {
+        public IRFn fn = null;
+        public IRBasicBlock block = null;
+        public Scope scope = null;
+    }
+
+    private CurStatus cur = new CurStatus();
+
+    public IRModule topModule;
     public ASTNode progRoot;
     public GlobalScope gScope;
-    public InfoManager infoManager;
 
-    public IRBuilder(ASTNode progRoot, GlobalScope gScope, InfoManager infoManager) {
+    public IRBuilder(ASTNode progRoot, GlobalScope gScope) {
         this.progRoot = progRoot;
         this.gScope = gScope;
-        this.infoManager = infoManager;
     }
 
-    public IRFnType collectFn(FuncInfo funcInfo) {
-        var ret = new IRFnType(funcInfo.funcName);
-        // TODO collect the type(retType and arguments)
-        // Maybe I need a transfer function/class
-        return ret;
-    }
-
-    public void collectInfo() {
-        gScope.typeMap.forEach((name, agg) -> {
-            var aClass = new IRStructType(name);
-            aClass.isSolid = true;
-            aClass.fnList = new ArrayList<>();
-            aClass.fieldList = new ArrayList<>();
-            aClass.infoManager = infoManager;
-            // TODO collect the function
-        });
-        gScope.DefMap.forEach((name, gVar) -> {
-            // TODO
-            var globalVar = new GlobalVariable(null, null);
-            topModule.globalVarList.add(null);
-        });
-    }
-
-    public Module buildIR() {
-        collectInfo();
+    public IRModule buildIR() {
+        topModule = new IRModule();
         progRoot.accept(this);
         return topModule;
     }
@@ -83,25 +74,62 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(ProgramNode it) {
         it.blocks.forEach(v -> v.accept(this));
-
     }
 
     @Override
     public void visit(ClassDeclStmtNode it) {
-        // TODO Auto-generated method stub
+
+        var st = new IRStructType(it.classNameString);
+        st.isSolid = true;
+        st.fieldList = new ArrayList<>();
+        for (var varDecl : it.varDeclList) {
+            int cnt = 0;
+            for (var varSingle : varDecl.varList) {
+                st.fieldList.add(Transfer.typeTransfer(varSingle.decl.typeName));
+                st.fieldIdxMap.put(varSingle.decl.Id, cnt++);
+            }
+        }
 
     }
 
     @Override
     public void visit(VarDeclStmtNode it) {
-        // TODO Auto-generated method stub
+        it.varList.forEach(vardecl -> visit(vardecl));
+    }
 
+    private IRFnType getFnType(FuncInfo funcInfo) {
+        var ret = new IRFnType(funcInfo.funcName);
+        ret.retType = Transfer.typeTransfer(funcInfo.retType);
+        for (var arg : funcInfo.paraList)
+            ret.argumentList.add(Transfer.typeTransfer(arg.typeName));
+        return ret;
+    }
+
+    private void terminalCreator(IRFn fn) {
+        fn.blockList.forEach(block -> {
+            if (block.terminal == null) {
+                if (fn.valueType instanceof IRVoidType)
+                    block.terminal = RetInst.createVoidRetInst();
+                else
+                    throw new MyException("non-void function have a block without terminal");
+            }
+        });
     }
 
     @Override
     public void visit(FuncDeclrStmtNode it) {
-        // TODO Auto-generated method stub
+        IRFn nowFn = new IRFn(it.funcNameString, getFnType(gScope.getFuncInfo(it.funcNameString, null)));
+        topModule.globalFnList.add(nowFn);
 
+        cur.fn = nowFn;
+        cur.block = new IRBasicBlock();
+        cur.fn.AddBlock(cur.block);
+
+        visit(it.body);
+
+        terminalCreator(nowFn);
+
+        cur.fn = null;
     }
 
     @Override
@@ -172,8 +200,7 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(ReturnStmtNode it) {
-        // TODO Auto-generated method stub
-
+        cur.block.terminal = new RetInst(new IntConst(0, new IRIntType(32)));
     }
 
     @Override
@@ -214,8 +241,9 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(SuiteStmtNode it) {
-        // TODO Auto-generated method stub
-
+        cur.scope = new Scope(cur.scope);
+        it.StmtList.forEach(stmtNode -> stmtNode.accept(this));
+        cur.scope = cur.scope.parent;
     }
 
     @Override
@@ -232,7 +260,10 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(SingleVarDeclStmtNode it) {
-        // TODO Auto-generated method stub
+        // TODO Auto-generated method FUCK
 
+        if (cur.fn == null) {// global
+        } else {
+        }
     }
 }

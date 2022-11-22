@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import Frontend.Util.Position;
 import Frontend.Util.TypeIdPair;
 import Frontend.Util.TypeName;
+import IR.IRValue.IRBaseValue;
 
 public class FuncInfo {
     public TypeName retType;
     public String funcName;
     public ArrayList<TypeIdPair> paraList = new ArrayList<>();
     public Position pos;
+    public IRBaseValue val;
 
     public FuncInfo(TypeName ty, String funcName, Position pos) {
         retType = ty;

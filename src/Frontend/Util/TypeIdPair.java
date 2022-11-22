@@ -1,11 +1,13 @@
 package Frontend.Util;
 
+import IR.IRValue.IRBaseValue;
 import Parser.MxStarParser.ParameterContext;
 
 public final class TypeIdPair {
     public TypeName typeName;
     public String Id;
     public Position pos;
+    public IRBaseValue val = null;
 
     public TypeIdPair(TypeName ty, String id, Position pos) {
         this.typeName = ty;
