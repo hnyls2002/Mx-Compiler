@@ -45,3 +45,11 @@
   - [ ] same literal string should only be defined once
 
 - [ ] getelementptr instruction
+
+- [ ] add the new var into scope
+
+- [ ] def-use chain
+
+- store instruction
+- add an init block in organizer
+- use store instruction to store it

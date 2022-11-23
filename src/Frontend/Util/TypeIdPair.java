@@ -7,7 +7,7 @@ public final class TypeIdPair {
     public TypeName typeName;
     public String Id;
     public Position pos;
-    public IRBaseValue val = null;
+    public IRBaseValue varValue = null;
 
     public TypeIdPair(TypeName ty, String id, Position pos) {
         this.typeName = ty;

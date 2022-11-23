@@ -13,4 +13,5 @@ public class IRModule {
     public ArrayList<IRFn> builtinFnList = new ArrayList<>();
     public ArrayList<IRStructType> classList = new ArrayList<>();
     public ArrayList<StrConst> constStrList = new ArrayList<>();
+    public ArrayList<IRFn> varInitFnList = new ArrayList<>();
 }

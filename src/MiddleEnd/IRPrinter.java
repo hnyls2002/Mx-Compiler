@@ -31,19 +31,23 @@ public class IRPrinter {
         System.out.print('\n');
         topModule.globalVarList.forEach(gVar -> printGVar(gVar));
         System.out.print('\n');
+        topModule.varInitFnList.forEach(initFn -> printFn(initFn));
+        System.out.print('\n');
         topModule.globalFnList.forEach(gFn -> printFn(gFn));
     }
 
     private void printConstStr(StrConst constStr) {
-        System.out.println(constStr.toString());
+        System.out.print(constStr.getName() + " = constant ");
+        System.out.print(constStr.defToString() + '\n');
     }
 
     private void printGVar(GlobalVariable gVar) {
-        System.out.print(gVar.toString() + '\n');
+        System.out.print(gVar.getName() + " = global ");
+        System.out.print(gVar.defToString() + '\n');
     }
 
     void printFn(IRFn fn) {
-        System.out.print(fn.toString());
+        System.out.print(fn.defToString());
         System.out.print("{\n");
         fn.blockList.forEach(blk -> printBB(blk));
         System.out.print("}\n");
@@ -57,7 +61,7 @@ public class IRPrinter {
     }
 
     private void printInst(IRBaseInst inst) {
-        System.out.print(tab + inst.toString() + "\n");
+        System.out.print(tab + inst.defToString() + "\n");
     }
 
 }

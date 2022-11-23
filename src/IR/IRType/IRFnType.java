@@ -2,27 +2,29 @@ package IR.IRType;
 
 import java.util.ArrayList;
 
+import Debug.MyException;
+
 // function signatures
 
 public class IRFnType extends IRType {
-    public String fnName;
     public IRType retType;
     public ArrayList<IRType> argumentList = new ArrayList<>();
     public IRStructType methodFrom = null;
+    public boolean isVarInit = false;
 
-    public IRFnType(String fnName) {
+    public IRFnType() {
         super(IRTypeId.FnTypeId);
-        this.fnName = fnName;
+    }
+
+    public static IRFnType getVarInitFnType() {
+        var ret = new IRFnType();
+        ret.retType = new IRVoidType();
+        ret.isVarInit = true;
+        return ret;
     }
 
     @Override
     public String toString() {
-        var ret = "";
-        ret += retType.toString() + ' ';
-        ret += '@' + fnName + '(';
-        for (var arg : argumentList)
-            ret += arg.toString();
-        ret += ')';
-        return ret;
+        throw new MyException("You don't need to use the FnType toString() method");
     }
 }

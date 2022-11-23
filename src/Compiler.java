@@ -14,6 +14,7 @@ import Frontend.Util.MxStarErrors.BaseError;
 import Frontend.Util.Scopes.GlobalScope;
 import IR.IRModule;
 import MiddleEnd.IRBuilder;
+import MiddleEnd.IROrganizer;
 import MiddleEnd.IRPrinter;
 
 import org.antlr.v4.runtime.CharStreams;
@@ -62,7 +63,9 @@ public class Compiler {
 
             IRBuilder irBuilder = new IRBuilder(ast, gScope);
             IRModule topModule = irBuilder.buildIR();
-            IRPrinter irPrinter = new IRPrinter(topModule, "testcases/my_test.ll");
+            IROrganizer irOrganizer = new IROrganizer(topModule);
+            irOrganizer.organizeIR();
+            IRPrinter irPrinter = new IRPrinter(topModule, "testcases/test.ll");
             irPrinter.printIR();
 
         } catch (BaseError e) {

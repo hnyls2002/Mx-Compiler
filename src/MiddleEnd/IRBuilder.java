@@ -36,7 +36,6 @@ import Frontend.Util.Scopes.Scope;
 import Frontend.Util.Types.FuncInfo;
 import IR.IRModule;
 import IR.IRType.IRFnType;
-import IR.IRType.IRIntType;
 import IR.IRType.IRStructType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBasicBlock;
@@ -44,7 +43,9 @@ import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
 import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
+import IR.IRValue.IRUser.Inst.BinaryInst;
 import IR.IRValue.IRUser.Inst.RetInst;
+import IR.IRValue.IRUser.Inst.BinaryInst.binaryOperator;
 import IR.Util.Transfer;
 
 public class IRBuilder implements ASTVisitor {
@@ -68,6 +69,8 @@ public class IRBuilder implements ASTVisitor {
 
     public IRModule buildIR() {
         topModule = new IRModule();
+        cur.scope = gScope;
+        cur.scope.DefMap.clear();
         progRoot.accept(this);
         return topModule;
     }
@@ -80,6 +83,8 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(ClassDeclStmtNode it) {
 
+        cur.scope = new Scope(cur.scope);
+
         var st = new IRStructType(it.classNameString);
         st.isSolid = true;
         st.fieldList = new ArrayList<>();
@@ -91,6 +96,8 @@ public class IRBuilder implements ASTVisitor {
             }
         }
 
+        cur.scope = cur.scope.parent;
+
     }
 
     @Override
@@ -99,7 +106,7 @@ public class IRBuilder implements ASTVisitor {
     }
 
     private IRFnType getFnType(FuncInfo funcInfo) {
-        var ret = new IRFnType(funcInfo.funcName);
+        var ret = new IRFnType();
         ret.retType = Transfer.typeTransfer(funcInfo.retType);
         for (var arg : funcInfo.paraList)
             ret.argumentList.add(Transfer.typeTransfer(arg.typeName));
@@ -124,13 +131,19 @@ public class IRBuilder implements ASTVisitor {
 
         cur.fn = nowFn;
         cur.block = new IRBasicBlock();
-        cur.fn.AddBlock(cur.block);
+        cur.fn.addBlock(cur.block);
+
+        cur.scope = new Scope(cur.scope);
+        System.err.println("entering the function " + it.funcNameString);
 
         visit(it.body);
 
         terminalCreator(nowFn);
 
         cur.fn = null;
+
+        cur.scope = cur.scope.parent;
+        System.err.println("out the function");
     }
 
     @Override
@@ -141,8 +154,23 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(BinaryOpExprNode it) {
-        // TODO Auto-generated method stub
-
+        it.lhs.accept(this);
+        it.rhs.accept(this);
+        binaryOperator opCode = switch (it.opcode) {
+            case ADD -> binaryOperator.irADD;
+            case SUB -> binaryOperator.irSUB;
+            case BIT_AND, LOGIC_AND -> binaryOperator.irAND;
+            case BIT_OR, LOGIC_OR -> binaryOperator.irOR;
+            case DIV -> binaryOperator.irSDIV;
+            case MOD -> binaryOperator.irSREM;
+            case MUL -> binaryOperator.irMUL;
+            case SHIFT_LEFT -> binaryOperator.irSHL;
+            case SHIFT_RIGHT -> binaryOperator.irASHR;
+            case BIT_XOR -> binaryOperator.irXOR;
+            default -> throw new IllegalArgumentException("Wait !!! wo hai mei chuli hao bijiao fuhao");
+        };
+        var irvalue = new BinaryInst(opCode, it.lhs.irValue, it.rhs.irValue);
+        it.irValue = irvalue;
     }
 
     @Override
@@ -171,8 +199,9 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(SelfConstructNode it) {
+        cur.scope = new Scope(cur.scope);
         // TODO Auto-generated method stub
-
+        cur.scope = cur.scope.parent;
     }
 
     @Override
@@ -183,19 +212,24 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(IfStmtNode it) {
+        cur.scope = new Scope(cur.scope);
         // TODO Auto-generated method stub
+        cur.scope = cur.scope.parent;
 
     }
 
     @Override
     public void visit(WhileStmtNode it) {
+        cur.scope = new Scope(cur.scope);
         // TODO Auto-generated method stub
-
+        cur.scope = cur.scope.parent;
     }
 
     @Override
     public void visit(ForStmtNode it) {
+        cur.scope = new Scope(cur.scope);
         // TODO Auto-generated method stub
+        cur.scope = cur.scope.parent;
 
     }
 
@@ -242,7 +276,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(LiteralExprNode it) {
         it.irValue = switch (it.lit) {
-            case INT -> new IntConst(Integer.parseInt(it.litString), new IRIntType(32));
+            case INT -> new IntConst(Integer.parseInt(it.litString), 32);
             // TODO Auto-generated method stub
             case STRING -> {
                 var constStr = Transfer.constStrTranfer(it.litString, topModule.constStrList.size());
@@ -250,8 +284,8 @@ public class IRBuilder implements ASTVisitor {
                 yield constStr;
             }
             case NULL -> new NullConst();
-            case TRUE -> new IntConst(1, new IRIntType(8));
-            case FALSE -> new IntConst(0, new IRIntType(8));
+            case TRUE -> new IntConst(1, 8);
+            case FALSE -> new IntConst(0, 8);
         };
     }
 
@@ -271,7 +305,8 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(IdentiExprNode it) {
         // TODO Auto-generated method stub
-
+        var varDef = cur.scope.getDef(it.idString, null);
+        it.irValue = varDef.varValue;
     }
 
     @Override
@@ -286,8 +321,12 @@ public class IRBuilder implements ASTVisitor {
                 gVar.initData = it.expr.irValue;
             }
             topModule.globalVarList.add(gVar);
+            it.irValue = gVar;
+            it.decl.varValue = gVar;
         } else {
             // TODO
         }
+
+        cur.scope.putDef(it.decl);
     }
 }

@@ -1,5 +1,8 @@
 package IR.IRType;
 
+import IR.IRValue.IRBaseValue;
+import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
+
 public class IRPtType extends IRType {
     public IRType atomicType;
     public int refNum = 0;
@@ -23,5 +26,10 @@ public class IRPtType extends IRType {
     @Override
     public String toString() {
         return atomicType.toString() + "*".repeat(refNum);
+    }
+
+    @Override
+    public IRBaseValue defaultValue() {
+        return new NullConst();
     }
 }

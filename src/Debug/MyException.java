@@ -6,7 +6,7 @@ public class MyException extends RuntimeException {
     public MyException(String msg) {
         super();
         this.msg = msg;
-        this.msg = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" + "in IR phase\n" + msg + "\n";
+        this.msg = "\n" + "~".repeat(100) + "\n" + "in IR phase\n" + msg + "\n";
     }
 
     @Override

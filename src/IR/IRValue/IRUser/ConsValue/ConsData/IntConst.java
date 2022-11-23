@@ -5,19 +5,14 @@ import IR.IRType.IRIntType;
 public class IntConst extends BaseConstData {
     public int constValue;
 
-    public IntConst(int ConsValue, IRIntType consIntType) {
-        super(consIntType);
-        this.constValue = ConsValue;
+    public IntConst(int constValue, int intLen) {
+        super(new IRIntType(intLen));
+        this.constValue = constValue;
     }
 
     @Override
-    public String toStringWithType() {
+    public String useToString() {
         return valueType.toString() + ' ' + constValue;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(constValue);
     }
 
 }

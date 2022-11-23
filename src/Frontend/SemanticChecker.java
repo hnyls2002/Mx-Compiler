@@ -77,7 +77,7 @@ public class SemanticChecker implements ASTVisitor {
 
         // put this into a field
         TypeName nowTypeName = new TypeName(it.classNameString, 0, false, it.pos);
-        curScope.putDef(new TypeIdPair(nowTypeName, "this", it.pos), gScope);
+        curScope.putDef(new TypeIdPair(nowTypeName, "this", it.pos));
 
         // put func
         var typeClass = gScope.getType(it.classNameString, it.pos);
@@ -112,7 +112,7 @@ public class SemanticChecker implements ASTVisitor {
         it.paraList.forEach(pair -> {
             // check parameters type
             gScope.getType(pair.typeName.toString(), pair.typeName.pos);
-            curScope.putDef(pair, gScope);
+            curScope.putDef(pair);
         });
 
         boolean haveReturn = false;
@@ -480,7 +480,7 @@ public class SemanticChecker implements ASTVisitor {
 
         curScope = new Scope(curScope);
         it.paraList.forEach(v -> {
-            curScope.putDef(v, gScope);
+            curScope.putDef(v);
         });
 
         it.body.accept(this);
@@ -566,7 +566,7 @@ public class SemanticChecker implements ASTVisitor {
                 throw new SemanticError("lhs and rhs don't have the same type ", it.pos);
         }
 
-        curScope.putDef(pair, gScope);
+        curScope.putDef(pair);
     }
 
 }

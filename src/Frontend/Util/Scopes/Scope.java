@@ -20,7 +20,7 @@ public class Scope {
     }
 
     // adding vars when semantic checking
-    public void putDef(TypeIdPair p, GlobalScope gScope) {
+    public void putDef(TypeIdPair p) {
         if (DefMap.containsKey(p.Id))
             throw new SemanticError("Redefinition of " + p.toString(), p.pos);
         /*

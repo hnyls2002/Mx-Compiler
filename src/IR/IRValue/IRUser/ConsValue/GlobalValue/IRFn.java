@@ -2,6 +2,7 @@ package IR.IRValue.IRUser.ConsValue.GlobalValue;
 
 import java.util.ArrayList;
 
+import Debug.MyException;
 import IR.IRType.IRFnType;
 import IR.IRValue.IRBasicBlock;
 
@@ -14,15 +15,24 @@ public class IRFn extends BaseGlobalValue {
         this.fnNameString = fnNamString;
     }
 
-    public void AddBlock(IRBasicBlock block) {
+    public void addBlock(IRBasicBlock block) {
         blockList.add(block);
     }
 
     @Override
-    public String toString() {
-        var ret = "define" + ' ';
-        ret += valueType.toString();
-        return ret;
+    public String defToString() {
+        if (valueType instanceof IRFnType fnType) {
+            var ret = "define ";
+            ret += fnType.retType.toString() + ' ';
+            ret += '@' + fnNameString + '(';
+            for (var arg : fnType.argumentList)
+                ret += arg.toString() + ", ";
+            if (!fnType.argumentList.isEmpty())
+                ret = ret.substring(0, ret.length() - 2);
+            ret += ')';
+            return ret;
+        } else
+            throw new MyException("IRFn should have a FnType");
     }
 
 }

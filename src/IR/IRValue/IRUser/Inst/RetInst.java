@@ -24,9 +24,10 @@ public class RetInst extends IRBaseInst {
     }
 
     @Override
-    public String toString() {
+    public String defToString() {
         if (isVoid())
             return "ret void";
-        return "ret" + ' ' + retValue.toStringWithType();
+        return "ret" + ' ' + retValue.useToString();
     }
+
 }
