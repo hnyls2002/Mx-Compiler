@@ -7,11 +7,10 @@ public class LiteralExprNode extends ExprNode {
 
     public enum literalType {
         INT, STRING, TRUE, FALSE, NULL;
-
-        public String litString;
     };
 
     public literalType lit;
+    public String litString;
 
     public LiteralExprNode(Position pos) {
         super(pos);

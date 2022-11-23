@@ -15,9 +15,33 @@
  
 - [ ] a single block have multiple return statement ??? deadcode 
  
-- [ ] block has a type 
+- [x] block has a type 
   - lable type!
   - llvm::type is not a abstract class
  
 - [ ] instruction's type
   - store to void-type!!!
+
+- [x] pointer type : when (i32*)*, implement to i32**
+    that is the atomic type is not a pointer type.
+
+- [ ] global variable initial issue
+    - [ ] if constData, just present it
+    - [ ] if not, explicitly assign a value to a global variable
+
+- [x] printer type to string
+- [x] default value for global variable
+    - [x] int
+    - [x] pointer
+- [x] bool type is i8
+- [x] return an constant value
+- [x] return void
+- [x] literal string transfer
+
+- [ ] string handling
+  - [x] string constant : an array, should be defined as a global variable
+  - [ ] string s = "hello world", s is a i8* pointer 
+        using getelementptr to get the address of the first char
+  - [ ] same literal string should only be defined once
+
+- [ ] getelementptr instruction

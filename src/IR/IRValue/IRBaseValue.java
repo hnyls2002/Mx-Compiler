@@ -8,4 +8,9 @@ public abstract class IRBaseValue {
     public IRBaseValue(IRType valueType) {
         this.valueType = valueType;
     }
+
+    public String toStringWithType() {
+        return "![this is created by a abstract class IRBaseValue]";
+    }
+
 }

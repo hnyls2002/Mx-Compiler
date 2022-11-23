@@ -11,7 +11,13 @@ public class IntConst extends BaseConstData {
     }
 
     @Override
-    public String toString() {
+    public String toStringWithType() {
         return valueType.toString() + ' ' + constValue;
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(constValue);
+    }
+
 }

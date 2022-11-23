@@ -27,6 +27,6 @@ public class RetInst extends IRBaseInst {
     public String toString() {
         if (isVoid())
             return "ret void";
-        return "ret" + ' ' + retValue.toString();
+        return "ret" + ' ' + retValue.toStringWithType();
     }
 }

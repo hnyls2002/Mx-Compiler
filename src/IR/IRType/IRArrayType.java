@@ -9,4 +9,9 @@ public class IRArrayType extends IRType {
         this.elementType = elemenType;
         this.arrayLen = arrayLen;
     }
+
+    @Override
+    public String toString() {
+        return "[" + arrayLen + " x " + elementType.toString() + "]";
+    }
 }

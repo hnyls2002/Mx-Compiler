@@ -6,7 +6,22 @@ public class IRPtType extends IRType {
 
     public IRPtType(IRType atomicType, int refNum) {
         super(IRTypeId.PtTypeId);
+        while (atomicType instanceof IRPtType t) {
+            atomicType = t.atomicType;
+            refNum += t.refNum;
+        }
         this.atomicType = atomicType;
         this.refNum = refNum;
+    }
+
+    public IRType derefType() {
+        if (refNum >= 2)
+            return new IRPtType(atomicType, refNum - 1);
+        return atomicType;
+    }
+
+    @Override
+    public String toString() {
+        return atomicType.toString() + "*".repeat(refNum);
     }
 }

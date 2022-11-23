@@ -331,7 +331,9 @@ public class ASTBuilder extends MxStarParserBaseVisitor<ASTNode> {
             cur.lit = literalType.NULL;
         else
             throw new SyntaxError("Errors happened in literal value parsing", new Position(ctx));
-        cur.lit.litString = ctx.getText();
+        cur.litString = ctx.getText();
+        if (cur.lit == literalType.STRING)
+            cur.litString = cur.litString.substring(1, cur.litString.length() - 1);
         return cur;
     }
 

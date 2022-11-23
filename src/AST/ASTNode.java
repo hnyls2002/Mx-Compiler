@@ -5,7 +5,7 @@ import IR.IRValue.IRBaseValue;
 
 public abstract class ASTNode {
     public Position pos;
-    public IRBaseValue val;
+    public IRBaseValue irValue;
 
     public ASTNode(Position pos) {
         this.pos = pos;

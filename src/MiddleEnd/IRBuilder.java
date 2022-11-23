@@ -41,6 +41,7 @@ import IR.IRType.IRStructType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
+import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.Inst.RetInst;
@@ -200,7 +201,12 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(ReturnStmtNode it) {
-        cur.block.terminal = new RetInst(new IntConst(0, new IRIntType(32)));
+        if (it.expr == null)// return void
+            cur.block.terminal = RetInst.createVoidRetInst();
+        else {
+            it.expr.accept(this);
+            cur.block.terminal = new RetInst(it.expr.irValue);
+        }
     }
 
     @Override
@@ -235,8 +241,18 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(LiteralExprNode it) {
-        // TODO Auto-generated method stub
-
+        it.irValue = switch (it.lit) {
+            case INT -> new IntConst(Integer.parseInt(it.litString), new IRIntType(32));
+            // TODO Auto-generated method stub
+            case STRING -> {
+                var constStr = Transfer.constStrTranfer(it.litString, topModule.constStrList.size());
+                topModule.constStrList.add(constStr);
+                yield constStr;
+            }
+            case NULL -> new NullConst();
+            case TRUE -> new IntConst(1, new IRIntType(8));
+            case FALSE -> new IntConst(0, new IRIntType(8));
+        };
     }
 
     @Override
@@ -263,7 +279,15 @@ public class IRBuilder implements ASTVisitor {
         // TODO Auto-generated method FUCK
 
         if (cur.fn == null) {// global
+            GlobalVariable gVar = new GlobalVariable(it.decl.Id, it.decl.typeName);
+            if (it.expr != null) { // has initial value
+                it.expr.accept(this);
+                gVar.isInit = true;
+                gVar.initData = it.expr.irValue;
+            }
+            topModule.globalVarList.add(gVar);
         } else {
+            // TODO
         }
     }
 }
