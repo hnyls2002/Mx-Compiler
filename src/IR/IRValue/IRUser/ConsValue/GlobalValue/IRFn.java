@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 import Debug.MyException;
 import IR.IRType.IRFnType;
+import IR.IRValue.IRArgument;
 import IR.IRValue.IRBasicBlock;
 
 public class IRFn extends BaseGlobalValue {
     public String fnNameString;
+    public ArrayList<IRArgument> argList = new ArrayList<>();
     public ArrayList<IRBasicBlock> blockList = new ArrayList<>();
 
     public IRFn(String fnNamString, IRFnType fnType) {
@@ -25,8 +27,8 @@ public class IRFn extends BaseGlobalValue {
             var ret = "define ";
             ret += fnType.retType.toString() + ' ';
             ret += '@' + fnNameString + '(';
-            for (var arg : fnType.argumentList)
-                ret += arg.toString() + ", ";
+            for (var arg : argList)
+                ret += arg.defToString() + ", ";
             if (!fnType.argumentList.isEmpty())
                 ret = ret.substring(0, ret.length() - 2);
             ret += ')';

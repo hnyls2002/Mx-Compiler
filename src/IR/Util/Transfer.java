@@ -61,7 +61,17 @@ public class Transfer {
         return null;
     }
 
-    public static IRFnType fnTransfer(FuncInfo funcInfo) {
-        return null;
+    public static IRStructType structTypeTransfer() {
+        var ret = new IRStructType(null);
+        return ret;
     }
+
+    public static IRFnType fnTypeTransfer(FuncInfo funcInfo) {
+        var ret = new IRFnType();
+        ret.retType = Transfer.typeTransfer(funcInfo.retType);
+        for (var arg : funcInfo.paraList)
+            ret.argumentList.add(Transfer.typeTransfer(arg.typeName));
+        return ret;
+    }
+
 }

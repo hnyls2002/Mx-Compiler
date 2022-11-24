@@ -34,17 +34,18 @@ import AST.Stmt.WhileStmtNode;
 import Debug.MyException;
 import Frontend.Util.Scopes.GlobalScope;
 import Frontend.Util.Scopes.Scope;
-import Frontend.Util.Types.FuncInfo;
 import IR.IRModule;
 import IR.IRType.IRFnType;
 import IR.IRType.IRPtType;
 import IR.IRType.IRStructType;
 import IR.IRType.IRVoidType;
+import IR.IRValue.IRArgument;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
 import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
+import IR.IRValue.IRUser.Inst.AllocaInst;
 import IR.IRValue.IRUser.Inst.BinaryInst;
 import IR.IRValue.IRUser.Inst.GEPInst;
 import IR.IRValue.IRUser.Inst.LoadInst;
@@ -110,14 +111,6 @@ public class IRBuilder implements ASTVisitor {
         it.varList.forEach(vardecl -> visit(vardecl));
     }
 
-    private IRFnType getFnType(FuncInfo funcInfo) {
-        var ret = new IRFnType();
-        ret.retType = Transfer.typeTransfer(funcInfo.retType);
-        for (var arg : funcInfo.paraList)
-            ret.argumentList.add(Transfer.typeTransfer(arg.typeName));
-        return ret;
-    }
-
     private void terminalCreator(IRFn fn) {
         fn.blockList.forEach(block -> {
             if (block.terminal == null) {
@@ -131,14 +124,21 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(FuncDeclrStmtNode it) {
-        IRFn nowFn = new IRFn(it.funcNameString, getFnType(gScope.getFuncInfo(it.funcNameString, null)));
+        IRFn nowFn = new IRFn(it.funcNameString,
+                Transfer.fnTypeTransfer((gScope.getFuncInfo(it.funcNameString, null))));
         topModule.globalFnList.add(nowFn);
-
         cur.fn = nowFn;
         cur.block = new IRBasicBlock();
         cur.fn.addBlock(cur.block);
-
         cur.scope = new Scope(cur.scope);
+
+        it.paraList.forEach(para -> {
+            cur.scope.putDef(para);
+            var arg = new IRArgument(Transfer.typeTransfer(para.typeName));
+            nowFn.argList.add(arg);
+            para.varValue = new AllocaInst(arg.valueType, cur.block);
+            new StoreInst(arg, para.varValue, cur.block);
+        });
 
         visit(it.body);
 
@@ -339,16 +339,17 @@ public class IRBuilder implements ASTVisitor {
                     new StoreInst(it.expr.irValue, gVar, cur.block);
 
                     cur.fn = null;
-
-                    System.err.println(gVar.constName);
-                    System.err.println(it.expr.irValue.valueType);
                 }
             }
             topModule.globalVarList.add(gVar);
-            it.irValue = gVar;
-            it.decl.varValue = gVar;
+            it.irValue = it.decl.varValue = gVar;
         } else {
             // TODO
+            it.irValue = it.decl.varValue = new AllocaInst(Transfer.typeTransfer(it.decl.typeName), cur.block);
+            if (it.expr != null) {
+                it.expr.accept(this);
+                new StoreInst(it.expr.irValue, it.irValue, cur.block);
+            }
         }
 
         cur.scope.putDef(it.decl);

@@ -18,13 +18,4 @@ public abstract class BaseConstValue extends IRBaseUser {
         return '@' + constName;
     }
 
-    @Override
-    public String useToString() {
-        return getName();
-    }
-
-    @Override
-    public String useToStringWithType() {
-        return valueType.toString() + ' ' + getName();
-    }
 }

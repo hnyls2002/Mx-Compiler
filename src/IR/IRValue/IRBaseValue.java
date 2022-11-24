@@ -25,11 +25,11 @@ public abstract class IRBaseValue {
     }
 
     public String useToString() {
-        return "This is a unhandled use";
+        return getName();
     }
 
     public String useToStringWithType() {
-        return "This is a unhandled typed-use";
+        return valueType.toString() + ' ' + getName();
     }
 
 }

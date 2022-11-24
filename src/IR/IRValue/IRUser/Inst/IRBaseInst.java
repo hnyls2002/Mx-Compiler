@@ -19,13 +19,4 @@ public abstract class IRBaseInst extends IRBaseUser {
         return "%" + (reName == null ? "reg" : reName);
     }
 
-    @Override
-    public String useToString() {
-        return getName();
-    }
-
-    @Override
-    public String useToStringWithType() {
-        return valueType.toString() + ' ' + getName();
-    }
 }
