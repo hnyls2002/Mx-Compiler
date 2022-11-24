@@ -13,6 +13,18 @@ public abstract class BaseConstValue extends IRBaseUser {
 
     @Override
     public String getName() {
-        throw new MyException("constName doesn't exist!");
+        if (constName == null)
+            throw new MyException("const name is null");
+        return '@' + constName;
+    }
+
+    @Override
+    public String useToString() {
+        return getName();
+    }
+
+    @Override
+    public String useToStringWithType() {
+        return valueType.toString() + ' ' + getName();
     }
 }

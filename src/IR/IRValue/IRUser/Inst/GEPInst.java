@@ -2,10 +2,10 @@ package IR.IRValue.IRUser.Inst;
 
 import java.util.ArrayList;
 
-import Debug.MyException;
 import IR.IRType.IRPtType;
 import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
+import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
 
 public class GEPInst extends IRBaseInst {
@@ -13,13 +13,13 @@ public class GEPInst extends IRBaseInst {
     public IRBaseValue startPtr;
     public ArrayList<IntConst> indices = new ArrayList<>();
 
-    public GEPInst(IRBaseValue startPtr, IRType gepInstType) {
+    public GEPInst(IRBaseValue startPtr, IRType gepInstType, int idx1, int idx2, IRBasicBlock block) {
         super(gepInstType);
         this.startPtr = startPtr;
-        if (this.startPtr.valueType instanceof IRPtType t)
-            this.startType = t.derefType();
-        else
-            throw new MyException("gep instruction's start pointer should be an pointer type");
+        this.startType = ((IRPtType) this.startPtr.valueType).derefType();
+        this.indices.add(new IntConst(idx1, 64));
+        this.indices.add(new IntConst(idx2, 64));
+        block.addInst(this);
     }
 
     public void addIdx(int idx) {
@@ -29,11 +29,10 @@ public class GEPInst extends IRBaseInst {
 
     @Override
     public String defToString() {
-        var ret = "getelementptr" + " (" + startType.toString() + ", ";
+        var ret = "getelementptr " + startType.toString() + ", ";
         ret += startPtr.valueType.toString() + ' ' + startPtr.getName();
         for (var idx : indices)
-            ret += ", " + idx.useToString();
-        ret += ")";
+            ret += ", " + idx.useToStringWithType();
         return ret;
     }
 

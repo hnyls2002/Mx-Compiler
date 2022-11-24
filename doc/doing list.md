@@ -53,3 +53,12 @@
 - store instruction
 - add an init block in organizer
 - use store instruction to store it
+- load the memory first
+- check the type
+
+对于内存、函数调用，寄存器的中间表示
+将globalvar设置成指针是否合理？
+
+对于字符串的gep初始化问题，直接将一个gep赋值给变量，可以先弄一个函数，最后再优化掉？
+
+只有字面int值不用载入寄存器？

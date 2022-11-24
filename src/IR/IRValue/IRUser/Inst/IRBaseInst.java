@@ -1,6 +1,5 @@
 package IR.IRValue.IRUser.Inst;
 
-import Debug.MyException;
 import IR.IRType.IRType;
 import IR.IRValue.IRUser.IRBaseUser;
 
@@ -17,6 +16,16 @@ public abstract class IRBaseInst extends IRBaseUser {
 
     @Override
     public String getName() {
-        throw new MyException("instruction doesn't have a rename");
+        return "%" + (reName == null ? "reg" : reName);
+    }
+
+    @Override
+    public String useToString() {
+        return getName();
+    }
+
+    @Override
+    public String useToStringWithType() {
+        return valueType.toString() + ' ' + getName();
     }
 }

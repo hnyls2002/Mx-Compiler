@@ -1,6 +1,5 @@
 package IR.IRValue;
 
-import Debug.MyException;
 import IR.IRType.IRType;
 
 public abstract class IRBaseValue {
@@ -11,8 +10,8 @@ public abstract class IRBaseValue {
     }
 
     @Override
-    public final String toString() {
-        throw new MyException("Base Value toString Used!");
+    public String toString() {
+        return "an abstract base value";
     }
 
     public String getName() {
@@ -27,6 +26,10 @@ public abstract class IRBaseValue {
 
     public String useToString() {
         return "This is a unhandled use";
+    }
+
+    public String useToStringWithType() {
+        return "This is a unhandled typed-use";
     }
 
 }

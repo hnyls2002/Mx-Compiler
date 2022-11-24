@@ -16,6 +16,7 @@ import AST.Expr.MemberExprNode;
 import AST.Expr.SubscExprNode;
 import AST.Expr.ThisExprNode;
 import AST.Expr.UnaryOpExprNode;
+import AST.Expr.LiteralExprNode.literalType;
 import AST.Stmt.BreakStmtNode;
 import AST.Stmt.ClassDeclStmtNode;
 import AST.Stmt.ContinueStmtNode;
@@ -36,6 +37,7 @@ import Frontend.Util.Scopes.Scope;
 import Frontend.Util.Types.FuncInfo;
 import IR.IRModule;
 import IR.IRType.IRFnType;
+import IR.IRType.IRPtType;
 import IR.IRType.IRStructType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBasicBlock;
@@ -44,7 +46,10 @@ import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.Inst.BinaryInst;
+import IR.IRValue.IRUser.Inst.GEPInst;
+import IR.IRValue.IRUser.Inst.LoadInst;
 import IR.IRValue.IRUser.Inst.RetInst;
+import IR.IRValue.IRUser.Inst.StoreInst;
 import IR.IRValue.IRUser.Inst.BinaryInst.binaryOperator;
 import IR.Util.Transfer;
 
@@ -134,7 +139,6 @@ public class IRBuilder implements ASTVisitor {
         cur.fn.addBlock(cur.block);
 
         cur.scope = new Scope(cur.scope);
-        System.err.println("entering the function " + it.funcNameString);
 
         visit(it.body);
 
@@ -143,7 +147,6 @@ public class IRBuilder implements ASTVisitor {
         cur.fn = null;
 
         cur.scope = cur.scope.parent;
-        System.err.println("out the function");
     }
 
     @Override
@@ -169,7 +172,7 @@ public class IRBuilder implements ASTVisitor {
             case BIT_XOR -> binaryOperator.irXOR;
             default -> throw new IllegalArgumentException("Wait !!! wo hai mei chuli hao bijiao fuhao");
         };
-        var irvalue = new BinaryInst(opCode, it.lhs.irValue, it.rhs.irValue);
+        var irvalue = new BinaryInst(opCode, it.lhs.irValue, it.rhs.irValue, cur.block);
         it.irValue = irvalue;
     }
 
@@ -281,7 +284,7 @@ public class IRBuilder implements ASTVisitor {
             case STRING -> {
                 var constStr = Transfer.constStrTranfer(it.litString, topModule.constStrList.size());
                 topModule.constStrList.add(constStr);
-                yield constStr;
+                yield new GEPInst(constStr, IRPtType.getCharRefType(), 0, 0, cur.block);
             }
             case NULL -> new NullConst();
             case TRUE -> new IntConst(1, 8);
@@ -306,7 +309,7 @@ public class IRBuilder implements ASTVisitor {
     public void visit(IdentiExprNode it) {
         // TODO Auto-generated method stub
         var varDef = cur.scope.getDef(it.idString, null);
-        it.irValue = varDef.varValue;
+        it.irValue = new LoadInst(varDef.varValue, cur.block);
     }
 
     @Override
@@ -316,9 +319,30 @@ public class IRBuilder implements ASTVisitor {
         if (cur.fn == null) {// global
             GlobalVariable gVar = new GlobalVariable(it.decl.Id, it.decl.typeName);
             if (it.expr != null) { // has initial value
-                it.expr.accept(this);
-                gVar.isInit = true;
-                gVar.initData = it.expr.irValue;
+                if (it.expr instanceof LiteralExprNode exprNode && exprNode.lit == literalType.INT) {
+                    // int type(i32) can be handled specially
+                    it.expr.accept(this);
+                    gVar.isInit = true;
+                    gVar.initValue = it.expr.irValue;
+                } else {
+                    var initFnNameString = "__mx_global_var_init." + gVar.constName;
+                    gVar.initFn = new IRFn(initFnNameString, IRFnType.getVarInitFnType());
+                    var block = IRBasicBlock.getVarInitBB();
+                    gVar.initFn.addBlock(block);
+                    topModule.varInitFnList.add(gVar.initFn);
+                    cur.fn = gVar.initFn;
+                    cur.block = block;
+
+                    gVar.isInit = true;
+                    gVar.initValue = gVar.derefType.defaultValue();
+                    it.expr.accept(this);
+                    new StoreInst(it.expr.irValue, gVar, cur.block);
+
+                    cur.fn = null;
+
+                    System.err.println(gVar.constName);
+                    System.err.println(it.expr.irValue.valueType);
+                }
             }
             topModule.globalVarList.add(gVar);
             it.irValue = gVar;

@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
 import IR.IRModule;
+import IR.IRType.IRVoidType;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.StrConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
@@ -50,7 +51,7 @@ public class IRPrinter {
         System.out.print(fn.defToString());
         System.out.print("{\n");
         fn.blockList.forEach(blk -> printBB(blk));
-        System.out.print("}\n");
+        System.out.print("}\n\n");
     }
 
     private void printBB(IRBasicBlock block) {
@@ -61,7 +62,10 @@ public class IRPrinter {
     }
 
     private void printInst(IRBaseInst inst) {
-        System.out.print(tab + inst.defToString() + "\n");
+        var defString = inst.defToString() + "\n";
+        if (!(inst.valueType instanceof IRVoidType))
+            defString = inst.getName() + " = " + defString;
+        System.out.print(tab + defString);
     }
 
 }

@@ -17,6 +17,10 @@ public class IRPtType extends IRType {
         this.refNum = refNum;
     }
 
+    public static IRPtType getCharRefType() {
+        return new IRPtType(new IRIntType(8), 1);
+    }
+
     public IRType derefType() {
         if (refNum >= 2)
             return new IRPtType(atomicType, refNum - 1);
