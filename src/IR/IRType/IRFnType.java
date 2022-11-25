@@ -8,7 +8,7 @@ import Debug.MyException;
 
 public class IRFnType extends IRType {
     public IRType retType;
-    public ArrayList<IRType> argumentList = new ArrayList<>();
+    public ArrayList<IRType> paraTypeList = new ArrayList<>();
     public IRStructType methodFrom = null;
     public boolean isVarInit = false;
 

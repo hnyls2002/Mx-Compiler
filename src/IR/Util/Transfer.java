@@ -83,10 +83,10 @@ public class Transfer {
         ret.retType = Transfer.typeTransfer(funcInfo.retType);
         if (inWhichClass != null) { // set the first parameter to be struct type
             ret.methodFrom = inWhichClass.structType;
-            ret.argumentList.add(ret.methodFrom);
+            ret.paraTypeList.add(ret.methodFrom);
         }
-        for (var arg : funcInfo.paraList)
-            ret.argumentList.add(Transfer.typeTransfer(arg.typeName));
+        for (var para : funcInfo.paraList)
+            ret.paraTypeList.add(Transfer.typeTransfer(para.typeName));
         return ret;
     }
 

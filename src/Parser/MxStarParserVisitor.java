@@ -343,7 +343,7 @@ public interface MxStarParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFuncCall(MxStarParser.FuncCallContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxStarParser#argumentList}.
+	 * Visit a parse tree produced by {@link MxStarParser#paraTypeList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */

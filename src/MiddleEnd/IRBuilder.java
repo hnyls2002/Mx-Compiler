@@ -44,7 +44,7 @@ import Frontend.Util.Types.FuncInfo;
 import IR.IRModule;
 import IR.IRType.IRPtType;
 import IR.IRType.IRVoidType;
-import IR.IRValue.IRArgument;
+import IR.IRValue.IRParameter;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
@@ -145,12 +145,12 @@ public class IRBuilder implements ASTVisitor {
     private void addParameter(TypeIdPair para) { // used in visit(FuncDeclrStmtNode it);
         // 1. put the ast var into function scope
         cur.scope.putDef(para);
-        // 2. create the argument for IRFn
-        var arg = new IRArgument(Transfer.typeTransfer(para.typeName));
-        cur.fn.argList.add(arg);
-        // 3. link the IRFn-arg to AST-para
-        para.varValue = new AllocaInst(arg.valueType, cur.block);
-        new StoreInst(arg, para.varValue, cur.block);
+        // 2. create the parameter for IRFn
+        var irPara = new IRParameter(Transfer.typeTransfer(para.typeName));
+        cur.fn.paraList.add(irPara);
+        // 3. link the IRFn-para to AST-para
+        para.varValue = new AllocaInst(irPara.valueType, cur.block);
+        new StoreInst(irPara, para.varValue, cur.block);
     }
 
     @Override
@@ -170,8 +170,8 @@ public class IRBuilder implements ASTVisitor {
         // 3. add the parameter list for IRFn
         if (cur.inWhichClass != null) {
             // implicitly put this def into a function's parameter
-            TypeIdPair thisArg = new TypeIdPair(new TypeName(cur.inWhichClass.typeNameString, 0, true), "this");
-            addParameter(thisArg);
+            TypeIdPair thisPara = new TypeIdPair(new TypeName(cur.inWhichClass.typeNameString, 0, true), "this");
+            addParameter(thisPara);
         }
         it.paraList.forEach(para -> addParameter(para));
 

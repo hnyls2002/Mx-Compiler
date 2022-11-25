@@ -6,12 +6,12 @@ import Debug.MyException;
 import Frontend.Util.Types.ClassType;
 import Frontend.Util.Types.FuncInfo;
 import IR.IRType.IRFnType;
-import IR.IRValue.IRArgument;
+import IR.IRValue.IRParameter;
 import IR.IRValue.IRBasicBlock;
 import IR.Util.Transfer;
 
 public class IRFn extends BaseGlobalValue {
-    public ArrayList<IRArgument> argList = new ArrayList<>();
+    public ArrayList<IRParameter> paraList = new ArrayList<>();
     public ArrayList<IRBasicBlock> blockList = new ArrayList<>();
 
     public IRFn(FuncInfo fnInfo, ClassType inWhichClass) {
@@ -43,9 +43,9 @@ public class IRFn extends BaseGlobalValue {
             var ret = "define ";
             ret += fnType.retType.toString() + ' ';
             ret += getName() + '(';
-            for (var arg : argList)
-                ret += arg.defToString() + ", ";
-            if (!fnType.argumentList.isEmpty())
+            for (var para : paraList)
+                ret += para.defToString() + ", ";
+            if (!fnType.paraTypeList.isEmpty())
                 ret = ret.substring(0, ret.length() - 2);
             ret += ')';
             return ret;
