@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
 import IR.IRModule;
+import IR.IRType.IRStructType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.StrConst;
@@ -27,14 +28,25 @@ public class IRPrinter {
     }
 
     public void printIR() {
-        System.out.print(ExternInfo.getExternInfo() + '\n');
+        System.out.print(ExternInfo.getExternInfo());
+        System.out.print('\n');
+        topModule.classList.forEach(classDef -> printClassDef(classDef));
+        if (!topModule.classList.isEmpty())
+            System.out.print('\n');
         topModule.constStrList.forEach(constStr -> printConstStr(constStr));
-        System.out.print('\n');
+        if (!topModule.constStrList.isEmpty())
+            System.out.print('\n');
         topModule.globalVarList.forEach(gVar -> printGVar(gVar));
-        System.out.print('\n');
+        if (!topModule.globalVarList.isEmpty())
+            System.out.print('\n');
         topModule.varInitFnList.forEach(initFn -> printFn(initFn));
-        System.out.print('\n');
+        if (!topModule.varInitFnList.isEmpty())
+            System.out.print('\n');
         topModule.globalFnList.forEach(gFn -> printFn(gFn));
+    }
+
+    private void printClassDef(IRStructType classDef) {
+        System.out.print(classDef.getClassName() + " = " + classDef.typeDefToString() + '\n');
     }
 
     private void printConstStr(StrConst constStr) {

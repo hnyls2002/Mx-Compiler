@@ -8,6 +8,7 @@ import AST.ProgramNode;
 import AST.Expr.AssignExprNode;
 import AST.Expr.BinaryOpExprNode;
 import AST.Expr.CreatorExprNode;
+import AST.Expr.ExprNode;
 import AST.Expr.FuncCallExprNode;
 import AST.Expr.IdentiExprNode;
 import AST.Expr.LambdaExprNode;
@@ -32,14 +33,19 @@ import AST.Stmt.SuiteStmtNode;
 import AST.Stmt.VarDeclStmtNode;
 import AST.Stmt.WhileStmtNode;
 import Debug.MyException;
+import Frontend.Util.TypeIdPair;
+import Frontend.Util.TypeName;
 import Frontend.Util.Scopes.GlobalScope;
 import Frontend.Util.Scopes.Scope;
+import Frontend.Util.Types.ArrayType;
+import Frontend.Util.Types.BaseType;
+import Frontend.Util.Types.ClassType;
+import Frontend.Util.Types.FuncInfo;
 import IR.IRModule;
-import IR.IRType.IRFnType;
 import IR.IRType.IRPtType;
-import IR.IRType.IRStructType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRArgument;
+import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
 import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
@@ -47,6 +53,7 @@ import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.Inst.AllocaInst;
 import IR.IRValue.IRUser.Inst.BinaryInst;
+import IR.IRValue.IRUser.Inst.CallInst;
 import IR.IRValue.IRUser.Inst.GEPInst;
 import IR.IRValue.IRUser.Inst.LoadInst;
 import IR.IRValue.IRUser.Inst.RetInst;
@@ -60,6 +67,8 @@ public class IRBuilder implements ASTVisitor {
         public IRFn fn = null;
         public IRBasicBlock block = null;
         public Scope scope = null;
+        public ClassType inWhichClass = null;
+        public BaseType whoseMember = null;
     }
 
     private CurStatus cur = new CurStatus();
@@ -89,21 +98,21 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(ClassDeclStmtNode it) {
 
-        cur.scope = new Scope(cur.scope);
+        // 1. build the class information
+        var classTypeInfo = (ClassType) gScope.typeMap.get(it.classNameString);
+        var structType = Transfer.structTypeTransfer(classTypeInfo);
+        classTypeInfo.structType = structType;
 
-        var st = new IRStructType(it.classNameString);
-        st.isSolid = true;
-        st.fieldList = new ArrayList<>();
-        for (var varDecl : it.varDeclList) {
-            int cnt = 0;
-            for (var varSingle : varDecl.varList) {
-                st.fieldList.add(Transfer.typeTransfer(varSingle.decl.typeName));
-                st.fieldIdxMap.put(varSingle.decl.Id, cnt++);
-            }
-        }
+        // 2. save the current status
+        topModule.classList.add(structType);
+        cur.scope = new Scope(cur.scope);
+        cur.inWhichClass = classTypeInfo;
+
+        // 3. visit the function declaration
+        it.funcDeclList.forEach(fn -> fn.accept(this));
 
         cur.scope = cur.scope.parent;
-
+        cur.inWhichClass = null;
     }
 
     @Override
@@ -122,30 +131,60 @@ public class IRBuilder implements ASTVisitor {
         });
     }
 
+    private FuncInfo findFnInfo(String fnNameString) {
+        FuncInfo ret = null;
+        if (cur.inWhichClass != null)
+            ret = cur.inWhichClass.funMap.get(fnNameString);
+        if (ret == null)
+            ret = gScope.funMap.get(fnNameString);
+        if (ret == null)
+            throw new MyException("I can't find the function in neither calssType nor global scope");
+        return ret;
+    }
+
+    private void addParameter(TypeIdPair para) { // used in visit(FuncDeclrStmtNode it);
+        // 1. put the ast var into function scope
+        cur.scope.putDef(para);
+        // 2. create the argument for IRFn
+        var arg = new IRArgument(Transfer.typeTransfer(para.typeName));
+        cur.fn.argList.add(arg);
+        // 3. link the IRFn-arg to AST-para
+        para.varValue = new AllocaInst(arg.valueType, cur.block);
+        new StoreInst(arg, para.varValue, cur.block);
+    }
+
     @Override
     public void visit(FuncDeclrStmtNode it) {
-        IRFn nowFn = new IRFn(it.funcNameString,
-                Transfer.fnTypeTransfer((gScope.getFuncInfo(it.funcNameString, null))));
+
+        // 1. build the function information
+        var funcInfo = findFnInfo(it.funcNameString);
+        IRFn nowFn = new IRFn(funcInfo, cur.inWhichClass);
+
+        // 2. add it to topModule and set the current status
         topModule.globalFnList.add(nowFn);
         cur.fn = nowFn;
         cur.block = new IRBasicBlock();
         cur.fn.addBlock(cur.block);
         cur.scope = new Scope(cur.scope);
 
-        it.paraList.forEach(para -> {
-            cur.scope.putDef(para);
-            var arg = new IRArgument(Transfer.typeTransfer(para.typeName));
-            nowFn.argList.add(arg);
-            para.varValue = new AllocaInst(arg.valueType, cur.block);
-            new StoreInst(arg, para.varValue, cur.block);
-        });
+        // 3. add the parameter list for IRFn
+        if (cur.inWhichClass != null) {
+            // implicitly put this def into a function's parameter
+            TypeIdPair thisArg = new TypeIdPair(new TypeName(cur.inWhichClass.typeNameString, 0, true), "this");
+            addParameter(thisArg);
+        }
+        it.paraList.forEach(para -> addParameter(para));
 
+        // 4. visit the function's body
         visit(it.body);
 
+        // 5. create terminal instructions for every block
         terminalCreator(nowFn);
 
+        // 6. reset the current status
+        cur.inWhichClass = null;
         cur.fn = null;
-
+        cur.block = null;
         cur.scope = cur.scope.parent;
     }
 
@@ -196,8 +235,13 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(FuncCallExprNode it) {
-        // TODO Auto-generated method stub
-
+        ArrayList<IRBaseValue> argList = new ArrayList<>();
+        it.argList.forEach(argExpr -> {
+            argExpr.accept(this);
+            argList.add(argExpr.irValue);
+        });
+        var calledFn = cur.scope.getFuncInfo(it.FuncNameString, null).fnValue;
+        it.irValue = new CallInst(calledFn, argList, cur.block);
     }
 
     @Override
@@ -258,16 +302,42 @@ public class IRBuilder implements ASTVisitor {
 
     }
 
+    private BaseType getWhoseMember(ExprNode it) {
+        var typeNameL = it.typeName;
+        var uniType = gScope.getType(typeNameL.typeNameString, typeNameL.pos);
+        BaseType ctype = null;
+        if (typeNameL.dimen == 0)
+            ctype = uniType;
+        else
+            ctype = new ArrayType(gScope, uniType, typeNameL.dimen, it.pos);
+        return ctype;
+    }
+
     @Override
     public void visit(MemberExprNode it) {
         // TODO Auto-generated method stub
 
+        // 1. get the base pointer
+        it.expr.accept(this);
+
+        // 2. set the isMember status and get the index of a member
+        cur.whoseMember = getWhoseMember(it.expr);
+
+        // 3. get the id value or fn value
+        if (it.idExpr != null) {
+            it.idExpr.accept(this);
+            var getInstType = new IRPtType(Transfer.typeTransfer(it.typeName), 1);
+            var gep = new GEPInst(it.expr.irValue, getInstType, cur.block, ((IntConst) it.idExpr.irValue));
+            it.irValue = new LoadInst(gep, cur.block);
+        } else if (it.funcCall != null) {
+            // TODO
+        }
+
+        cur.whoseMember = null;
     }
 
     @Override
     public void visit(LambdaExprNode it) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -284,7 +354,8 @@ public class IRBuilder implements ASTVisitor {
             case STRING -> {
                 var constStr = Transfer.constStrTranfer(it.litString, topModule.constStrList.size());
                 topModule.constStrList.add(constStr);
-                yield new GEPInst(constStr, IRPtType.getCharRefType(), 0, 0, cur.block);
+                yield new GEPInst(constStr, IRPtType.getCharRefType(), cur.block, new IntConst(0, 64),
+                        new IntConst(0, 64));
             }
             case NULL -> new NullConst();
             case TRUE -> new IntConst(1, 8);
@@ -308,8 +379,13 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(IdentiExprNode it) {
         // TODO Auto-generated method stub
-        var varDef = cur.scope.getDef(it.idString, null);
-        it.irValue = new LoadInst(varDef.varValue, cur.block);
+        if (cur.whoseMember == null) {
+            var varDef = cur.scope.getDef(it.idString, null);
+            it.irValue = new LoadInst(varDef.varValue, cur.block);
+        } else {
+            var varDef = ((ClassType) cur.whoseMember).varMap.get(it.idString);
+            it.irValue = varDef.varValue;
+        }
     }
 
     @Override
@@ -326,7 +402,7 @@ public class IRBuilder implements ASTVisitor {
                     gVar.initValue = it.expr.irValue;
                 } else {
                     var initFnNameString = "__mx_global_var_init." + gVar.constName;
-                    gVar.initFn = new IRFn(initFnNameString, IRFnType.getVarInitFnType());
+                    gVar.initFn = IRFn.getInitFn(initFnNameString);
                     var block = IRBasicBlock.getVarInitBB();
                     gVar.initFn.addBlock(block);
                     topModule.varInitFnList.add(gVar.initFn);
@@ -339,6 +415,7 @@ public class IRBuilder implements ASTVisitor {
                     new StoreInst(it.expr.irValue, gVar, cur.block);
 
                     cur.fn = null;
+                    cur.block = null;
                 }
             }
             topModule.globalVarList.add(gVar);

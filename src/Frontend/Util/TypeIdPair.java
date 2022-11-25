@@ -8,6 +8,8 @@ public final class TypeIdPair {
     public String Id;
     public Position pos;
     public IRBaseValue varValue = null;
+    // varValue indicates the target var address, so load the varValue first
+    // if var is a member-var, the varValue is its index
 
     public TypeIdPair(TypeName ty, String id, Position pos) {
         this.typeName = ty;

@@ -13,12 +13,12 @@ public class GEPInst extends IRBaseInst {
     public IRBaseValue startPtr;
     public ArrayList<IntConst> indices = new ArrayList<>();
 
-    public GEPInst(IRBaseValue startPtr, IRType gepInstType, int idx1, int idx2, IRBasicBlock block) {
+    public GEPInst(IRBaseValue startPtr, IRType gepInstType, IRBasicBlock block, IntConst... idxList) {
         super(gepInstType);
         this.startPtr = startPtr;
         this.startType = ((IRPtType) this.startPtr.valueType).derefType();
-        this.indices.add(new IntConst(idx1, 64));
-        this.indices.add(new IntConst(idx2, 64));
+        for (var idx : idxList)
+            this.indices.add(idx);
         block.addInst(this);
     }
 

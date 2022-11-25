@@ -1,5 +1,6 @@
 package IR.IRValue.IRUser.Inst;
 
+import IR.IRType.IRPtType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
@@ -17,7 +18,8 @@ public class StoreInst extends IRBaseInst {
     @Override
     public String defToString() {
         var ret = "store ";
-        ret += storedValue.useToStringWithType() + ", ";
+        // stored value can be null
+        ret += ((IRPtType) destAddr.valueType).derefType().toString() + ' ' + storedValue.useToString() + ", ";
         ret += destAddr.useToStringWithType();
         return ret;
     }

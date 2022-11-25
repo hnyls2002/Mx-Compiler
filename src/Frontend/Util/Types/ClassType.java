@@ -5,11 +5,13 @@ import java.util.HashMap;
 import Frontend.Util.Position;
 import Frontend.Util.TypeIdPair;
 import Frontend.Util.MxStarErrors.SemanticError;
+import IR.IRType.IRStructType;
 
 public class ClassType extends BaseType {
     public HashMap<String, TypeIdPair> varMap = new HashMap<>();
     public boolean haveConst = false;
     public Position pos;
+    public IRStructType structType;
 
     public ClassType(String classNameString, Position pos) {
         super(pos);

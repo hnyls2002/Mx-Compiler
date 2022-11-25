@@ -66,8 +66,26 @@
 struct 类型
 - struct transfer
 
-函数的参数 需要存下来
-函数加scope
+函数的调用先实现了再说
+有个大问题，结构体里面的函数不加this使用自己的变量/函数
+我直接把这个变量和函数加入到当前的curScope里面了
+如何解决这个问题？
+
+手动记录inClass, inWhichClass，每次找函数/变量，先在which里面找，再在curScope里面找
+
+isMember, whoseMember 同理
+
+先实现struct 变量的定义，然后再实现成员的访问
+成员访问的时候，identifier做什么类型，干些什么事情？
+可以做为intConst类，也可以在member节点直接查找类的信息
+
+~~垃圾llvm~~ parameter 和 argument 分不清是吧
+所以llvm::argument 其实是 formal argument, which is actually parameter
+
+bitcast 还有问题，裂开
+
+~~函数的参数 需要存下来~~
+~~函数加scope~~
 ~~函数的参数传进来的时候也是有名字的，，，---> llvm::Argument~~
  
 ~~局部变量 alloca~~

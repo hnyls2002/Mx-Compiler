@@ -9,18 +9,20 @@ public class IRStructType extends IRType {
     public String className;
 
     public boolean isSolid = false;
-    public ArrayList<IRType> fieldList = null;
+    public ArrayList<IRType> fieldTypeList = new ArrayList<>();
 
-    public HashMap<String, Integer> fieldIdxMap;
+    public HashMap<String, Integer> fieldIdxMap = new HashMap<>();
 
     public IRStructType(String className) {
         super(IRTypeId.StructTypeId);
         this.className = className;
+        this.isSolid = true;
     }
 
-    public static IRStructType create(String className) {
-        var ret = new IRStructType(className);
-        return ret;
+    public IRStructType getProtoStructType(String className) {
+        var proto = new IRStructType(className);
+        proto.isSolid = false;
+        return proto;
     }
 
     @Override
@@ -28,6 +30,25 @@ public class IRStructType extends IRType {
         if (obj instanceof IRStructType t)
             return this.className == t.className;
         return false;
+    }
+
+    public String getClassName() {
+        return "%struct." + className;
+    }
+
+    public String typeDefToString() {
+        var ret = "type { ";
+        for (var fieldType : fieldTypeList)
+            ret += fieldType.toString() + ", ";
+        if (!fieldTypeList.isEmpty())
+            ret = ret.substring(0, ret.length() - 2);
+        ret += " }";
+        return ret;
+    }
+
+    @Override
+    public String toString() {
+        return getClassName();
     }
 
 }

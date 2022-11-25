@@ -12,11 +12,11 @@ public class IRArgument extends IRBaseValue {
 
     @Override
     public String getName() {
-        return "@" + (argumentName == null ? "arg" : argumentName);
+        return "%" + (argumentName == null ? "arg" : argumentName);
     }
 
     @Override
     public String defToString() {
-        return valueType.toString() + ' ' + argumentName;
+        return valueType.toString() + ' ' + getName();
     }
 }
