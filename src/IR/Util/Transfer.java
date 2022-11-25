@@ -79,7 +79,7 @@ public class Transfer {
     }
 
     public static IRFnType fnTypeTransfer(FuncInfo funcInfo) {
-        var ret = new IRFnType();
+        var ret = new IRFnType(funcInfo.funcName);
         ret.retType = Transfer.typeTransfer(funcInfo.retType);
         if (funcInfo.inWhichClass != null) { // set the first parameter to be struct type
             ret.methodFrom = funcInfo.inWhichClass.structType;

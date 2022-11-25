@@ -78,6 +78,9 @@ isMember, whoseMember 同理
 对于一个类中的函数，我需要知道某个变量是否隐式地调用了this指针，但是classDef的scope可能还在上面几层，所以只能像semantic那样把classDef中的所有变量放到curScope里面。
 不过这个时候这个变量的irValue就是一个index，没有啥问题。
 
+操，所有的类和函数需要预处理，，，
+所有的信息都有，在IRBuilder一开始预处理？
+
 ~~先实现struct 变量的定义，然后再实现成员的访问~~
 ~~成员访问的时候，identifier做什么类型，干些什么事情？~~
 ~~可以做为intConst类，也可以在member节点直接查找类的信息~~

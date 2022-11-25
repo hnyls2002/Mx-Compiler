@@ -21,7 +21,13 @@ public class IRFn extends BaseGlobalValue {
             this.constName = fnInfo.inWhichClass.structType.className + '.' + this.constName;
 
         // 2. add the fnValue to ast fnInfo
-        fnInfo.fnValue = this;
+        // if (fnInfo.fnType != (IRFnType) this.valueType) {
+        // System.err.println(fnInfo.fnType.fnNameString);
+        // System.err.println(fnInfo.fnType.paraTypeList);
+        // System.err.println(((IRFnType) this.valueType).fnNameString);
+        // System.err.println(((IRFnType) this.valueType).paraTypeList);
+        // }
+        fnInfo.fnType = (IRFnType) this.valueType;
     }
 
     private IRFn(IRFnType fnType, String fnNameString) {
@@ -30,7 +36,7 @@ public class IRFn extends BaseGlobalValue {
     }
 
     public static IRFn getInitFn(String initFnNameString) {
-        var ret = new IRFn(IRFnType.getVarInitFnType(), initFnNameString);
+        var ret = new IRFn(IRFnType.getVarInitFnType(initFnNameString), initFnNameString);
         return ret;
     }
 

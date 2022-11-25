@@ -83,10 +83,30 @@ public class IRBuilder implements ASTVisitor {
 
     public IRModule buildIR() {
         topModule = new IRModule();
+        IRPreload();
         cur.scope = gScope;
         cur.scope.DefMap.clear();
         progRoot.accept(this);
         return topModule;
+    }
+
+    private void IRPreload() {
+        gScope.typeMap.forEach((typeNameString, astType) -> {
+            if (astType instanceof ClassType classTypeInfo) {
+                var structType = Transfer.structTypeTransfer(classTypeInfo);
+                classTypeInfo.structType = structType;
+                topModule.classList.add(structType);
+                classTypeInfo.funMap.forEach((fuNameString, fnInfo) -> {
+                    fnInfo.inWhichClass = classTypeInfo;
+                    fnInfo.fnType = Transfer.fnTypeTransfer(fnInfo);
+                });
+            } else {
+                // TODO other types
+            }
+        });
+        gScope.funMap.forEach((funNameString, funcInfo) -> {
+            funcInfo.fnType = Transfer.fnTypeTransfer(funcInfo);
+        });
     }
 
     @Override
@@ -96,24 +116,15 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(ClassDeclStmtNode it) {
-
-        // 1. build the class information
-        var classTypeInfo = (ClassType) gScope.typeMap.get(it.classNameString);
-        var structType = Transfer.structTypeTransfer(classTypeInfo);
-        classTypeInfo.structType = structType;
-
-        // 2. save the current status
-        topModule.classList.add(structType);
+        // since we have got the structType in the preload
         cur.scope = new Scope(cur.scope);
 
-        // 2.1 add the vars and functions into current scope
+        // 1. add the vars and functions into current scope
+        var classTypeInfo = (ClassType) gScope.typeMap.get(it.classNameString);
         classTypeInfo.varMap.forEach((varNameString, memVar) -> cur.scope.DefMap.put(varNameString, memVar));
-        classTypeInfo.funMap.forEach((fuNameString, fn) -> {
-            fn.inWhichClass = classTypeInfo;
-            cur.scope.funMap.put(fuNameString, fn);
-        });
+        classTypeInfo.funMap.forEach((fuNameString, fnInfo) -> cur.scope.funMap.put(fuNameString, fnInfo));
 
-        // 3. visit the function declaration
+        // 2. visit the function declaration
         it.funcDeclList.forEach(fn -> fn.accept(this));
 
         cur.scope = cur.scope.parent;
@@ -149,6 +160,7 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(FuncDeclrStmtNode it) {
+        // since we have got the fnType information
 
         // 1. build the function information
         var funcInfo = cur.scope.getFuncInfo(it.funcNameString, null);
@@ -228,11 +240,11 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(FuncCallExprNode it) {
-        IRFn calledFn = null;
+        IRFnType calledFnType = null;
         ArrayList<IRBaseValue> argList = new ArrayList<>();
 
-        calledFn = cur.whoseMember == null ? cur.scope.getFuncInfo(it.FuncNameString, null).fnValue
-                : cur.whoseMember.getFunc(it.FuncNameString, null).fnValue;
+        calledFnType = cur.whoseMember == null ? cur.scope.getFuncInfo(it.FuncNameString, null).fnType
+                : cur.whoseMember.getFunc(it.FuncNameString, null).fnType;
 
         // you can still get the member-function when using cur.scope
         // as innner function call each other
@@ -240,7 +252,7 @@ public class IRBuilder implements ASTVisitor {
 
         // if calledFn is a member function
         // && you don't get it from a whoseMember scope(no using "this")
-        if (((IRFnType) calledFn.valueType).methodFrom != null && cur.whoseMember == null) {
+        if (calledFnType.methodFrom != null && cur.whoseMember == null) {
             var thisPara = cur.fn.paraList.get(0);
             argList.add(new LoadInst(thisPara.storedAddr, cur.block));
         }
@@ -252,7 +264,7 @@ public class IRBuilder implements ASTVisitor {
             argList.add(argExpr.irValue);
         });
 
-        it.irValue = new CallInst(calledFn, argList, cur.block);
+        it.irValue = new CallInst(calledFnType, argList, cur.block);
     }
 
     @Override
@@ -326,8 +338,6 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(MemberExprNode it) {
-        // TODO Auto-generated method stub
-
         // 1. get the base pointer
         it.expr.accept(this);
 
@@ -349,6 +359,8 @@ public class IRBuilder implements ASTVisitor {
         }
 
         cur.whoseMember = null;
+        // 1. enter the id, then null
+        // 2. enter the call, then null
     }
 
     @Override
@@ -399,6 +411,7 @@ public class IRBuilder implements ASTVisitor {
         if (cur.whoseMember != null) {
             var varDef = ((ClassType) cur.whoseMember).varMap.get(it.idString);
             it.irValue = varDef.varValue;
+            cur.whoseMember = null;
             return;
         }
 
@@ -450,7 +463,7 @@ public class IRBuilder implements ASTVisitor {
             }
             topModule.globalVarList.add(gVar);
             it.irValue = it.decl.varValue = gVar;
-        } else {
+        } else {// local
             // TODO
             it.irValue = it.decl.varValue = new AllocaInst(Transfer.typeTransfer(it.decl.typeName), cur.block);
             if (it.expr != null) {

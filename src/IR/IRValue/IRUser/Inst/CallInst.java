@@ -5,23 +5,22 @@ import java.util.ArrayList;
 import IR.IRType.IRFnType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
-import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 
 public class CallInst extends IRBaseInst {
     public ArrayList<IRBaseValue> argList = null;
-    public IRFn calledFn = null;
+    public IRFnType calledFnType = null;
 
-    public CallInst(IRFn calledFn, ArrayList<IRBaseValue> argList, IRBasicBlock block) {
-        super(((IRFnType) calledFn.valueType).retType);
+    public CallInst(IRFnType calledFnType, ArrayList<IRBaseValue> argList, IRBasicBlock block) {
+        super(calledFnType.retType);
         this.argList = argList;
-        this.calledFn = calledFn;
+        this.calledFnType = calledFnType;
         block.addInst(this);
     }
 
     @Override
     public String defToString() {
         var ret = "call " + valueType.toString() + ' ';
-        ret += calledFn.getName() + "(";
+        ret += calledFnType.getFnName() + "(";
         for (var arg : argList)
             ret += arg.useToStringWithType() + ", ";
         if (!argList.isEmpty())
