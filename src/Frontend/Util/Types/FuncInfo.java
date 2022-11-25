@@ -13,6 +13,7 @@ public class FuncInfo {
     public ArrayList<TypeIdPair> paraList = new ArrayList<>();
     public Position pos;
     public IRFn fnValue;
+    public ClassType inWhichClass = null;
 
     public FuncInfo(TypeName ty, String funcName, Position pos) {
         retType = ty;

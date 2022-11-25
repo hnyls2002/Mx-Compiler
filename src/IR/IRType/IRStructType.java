@@ -15,7 +15,7 @@ public class IRStructType extends IRType {
 
     public IRStructType(String className) {
         super(IRTypeId.StructTypeId);
-        this.className = className;
+        this.className = "struct." + className;
         this.isSolid = true;
     }
 
@@ -33,7 +33,7 @@ public class IRStructType extends IRType {
     }
 
     public String getClassName() {
-        return "%struct." + className;
+        return "%" + className;
     }
 
     public String typeDefToString() {

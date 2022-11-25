@@ -40,8 +40,8 @@ import Frontend.Util.Scopes.Scope;
 import Frontend.Util.Types.ArrayType;
 import Frontend.Util.Types.BaseType;
 import Frontend.Util.Types.ClassType;
-import Frontend.Util.Types.FuncInfo;
 import IR.IRModule;
+import IR.IRType.IRFnType;
 import IR.IRType.IRPtType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRParameter;
@@ -67,7 +67,6 @@ public class IRBuilder implements ASTVisitor {
         public IRFn fn = null;
         public IRBasicBlock block = null;
         public Scope scope = null;
-        public ClassType inWhichClass = null;
         public BaseType whoseMember = null;
     }
 
@@ -106,13 +105,18 @@ public class IRBuilder implements ASTVisitor {
         // 2. save the current status
         topModule.classList.add(structType);
         cur.scope = new Scope(cur.scope);
-        cur.inWhichClass = classTypeInfo;
+
+        // 2.1 add the vars and functions into current scope
+        classTypeInfo.varMap.forEach((varNameString, memVar) -> cur.scope.DefMap.put(varNameString, memVar));
+        classTypeInfo.funMap.forEach((fuNameString, fn) -> {
+            fn.inWhichClass = classTypeInfo;
+            cur.scope.funMap.put(fuNameString, fn);
+        });
 
         // 3. visit the function declaration
         it.funcDeclList.forEach(fn -> fn.accept(this));
 
         cur.scope = cur.scope.parent;
-        cur.inWhichClass = null;
     }
 
     @Override
@@ -123,23 +127,12 @@ public class IRBuilder implements ASTVisitor {
     private void terminalCreator(IRFn fn) {
         fn.blockList.forEach(block -> {
             if (block.terminal == null) {
-                if (fn.valueType instanceof IRVoidType)
+                if (((IRFnType) fn.valueType).retType instanceof IRVoidType)
                     block.terminal = RetInst.createVoidRetInst();
                 else
                     throw new MyException("non-void function have a block without terminal");
             }
         });
-    }
-
-    private FuncInfo findFnInfo(String fnNameString) {
-        FuncInfo ret = null;
-        if (cur.inWhichClass != null)
-            ret = cur.inWhichClass.funMap.get(fnNameString);
-        if (ret == null)
-            ret = gScope.funMap.get(fnNameString);
-        if (ret == null)
-            throw new MyException("I can't find the function in neither calssType nor global scope");
-        return ret;
     }
 
     private void addParameter(TypeIdPair para) { // used in visit(FuncDeclrStmtNode it);
@@ -148,8 +141,9 @@ public class IRBuilder implements ASTVisitor {
         // 2. create the parameter for IRFn
         var irPara = new IRParameter(Transfer.typeTransfer(para.typeName));
         cur.fn.paraList.add(irPara);
-        // 3. link the IRFn-para to AST-para
+        // 3. store the format-argument into some space
         para.varValue = new AllocaInst(irPara.valueType, cur.block);
+        irPara.storedAddr = para.varValue;
         new StoreInst(irPara, para.varValue, cur.block);
     }
 
@@ -157,8 +151,8 @@ public class IRBuilder implements ASTVisitor {
     public void visit(FuncDeclrStmtNode it) {
 
         // 1. build the function information
-        var funcInfo = findFnInfo(it.funcNameString);
-        IRFn nowFn = new IRFn(funcInfo, cur.inWhichClass);
+        var funcInfo = cur.scope.getFuncInfo(it.funcNameString, null);
+        IRFn nowFn = new IRFn(funcInfo);
 
         // 2. add it to topModule and set the current status
         topModule.globalFnList.add(nowFn);
@@ -168,9 +162,9 @@ public class IRBuilder implements ASTVisitor {
         cur.scope = new Scope(cur.scope);
 
         // 3. add the parameter list for IRFn
-        if (cur.inWhichClass != null) {
+        if (funcInfo.inWhichClass != null) {
             // implicitly put this def into a function's parameter
-            TypeIdPair thisPara = new TypeIdPair(new TypeName(cur.inWhichClass.typeNameString, 0, true), "this");
+            TypeIdPair thisPara = new TypeIdPair(new TypeName(funcInfo.inWhichClass.typeNameString, 0, true), "this");
             addParameter(thisPara);
         }
         it.paraList.forEach(para -> addParameter(para));
@@ -182,7 +176,6 @@ public class IRBuilder implements ASTVisitor {
         terminalCreator(nowFn);
 
         // 6. reset the current status
-        cur.inWhichClass = null;
         cur.fn = null;
         cur.block = null;
         cur.scope = cur.scope.parent;
@@ -235,12 +228,30 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(FuncCallExprNode it) {
+        IRFn calledFn = null;
         ArrayList<IRBaseValue> argList = new ArrayList<>();
+
+        calledFn = cur.whoseMember == null ? cur.scope.getFuncInfo(it.FuncNameString, null).fnValue
+                : cur.whoseMember.getFunc(it.FuncNameString, null).fnValue;
+
+        // you can still get the member-function when using cur.scope
+        // as innner function call each other
+        // so still need add this argument when call
+
+        // if calledFn is a member function
+        // && you don't get it from a whoseMember scope(no using "this")
+        if (((IRFnType) calledFn.valueType).methodFrom != null && cur.whoseMember == null) {
+            var thisPara = cur.fn.paraList.get(0);
+            argList.add(new LoadInst(thisPara.storedAddr, cur.block));
+        }
+
+        cur.whoseMember = null;
+
         it.argList.forEach(argExpr -> {
             argExpr.accept(this);
             argList.add(argExpr.irValue);
         });
-        var calledFn = cur.scope.getFuncInfo(it.FuncNameString, null).fnValue;
+
         it.irValue = new CallInst(calledFn, argList, cur.block);
     }
 
@@ -254,7 +265,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(ExprStmtNode it) {
         // TODO Auto-generated method stub
-
+        it.expr.accept(this);
     }
 
     @Override
@@ -326,11 +337,15 @@ public class IRBuilder implements ASTVisitor {
         // 3. get the id value or fn value
         if (it.idExpr != null) {
             it.idExpr.accept(this);
-            var getInstType = new IRPtType(Transfer.typeTransfer(it.typeName), 1);
-            var gep = new GEPInst(it.expr.irValue, getInstType, cur.block, ((IntConst) it.idExpr.irValue));
+            var gepInstType = new IRPtType(Transfer.typeTransfer(it.typeName), 1);
+            var gep = new GEPInst(it.expr.irValue, gepInstType, cur.block, ((IntConst) it.idExpr.irValue));
             it.irValue = new LoadInst(gep, cur.block);
         } else if (it.funcCall != null) {
-            // TODO
+            Boolean isMemberFunction = cur.whoseMember != null;
+            it.funcCall.accept(this);
+            if (isMemberFunction)
+                ((CallInst) it.funcCall.irValue).argList.add(0, it.expr.irValue);
+            it.irValue = it.funcCall.irValue;
         }
 
         cur.whoseMember = null;
@@ -342,8 +357,8 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(ThisExprNode it) {
-        // TODO Auto-generated method stub
-
+        var thisPara = cur.fn.paraList.get(0);
+        it.irValue = new LoadInst(thisPara.storedAddr, cur.block);
     }
 
     @Override
@@ -379,13 +394,27 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(IdentiExprNode it) {
         // TODO Auto-generated method stub
-        if (cur.whoseMember == null) {
-            var varDef = cur.scope.getDef(it.idString, null);
-            it.irValue = new LoadInst(varDef.varValue, cur.block);
-        } else {
+
+        // 1. member access is prior
+        if (cur.whoseMember != null) {
             var varDef = ((ClassType) cur.whoseMember).varMap.get(it.idString);
             it.irValue = varDef.varValue;
+            return;
         }
+
+        // 2. try to get it in the current scope, whether in class or in global
+        // Q : how to find a varDef is a member ?
+        // A : varDef.varValue instanceof IntConst
+
+        var varDef = cur.scope.getDef(it.idString, null);
+        if (varDef.varValue instanceof IntConst idx) {
+            var thisPara = cur.fn.paraList.get(0);
+            var gepInstType = new IRPtType(Transfer.typeTransfer(varDef.typeName), 1);
+            var startPtr = new LoadInst(thisPara.storedAddr, cur.block);
+            var gep = new GEPInst(startPtr, gepInstType, cur.block, new IntConst(0, 64), idx);
+            it.irValue = new LoadInst(gep, cur.block);
+        } else
+            it.irValue = new LoadInst(varDef.varValue, cur.block);
     }
 
     @Override
@@ -394,6 +423,7 @@ public class IRBuilder implements ASTVisitor {
 
         if (cur.fn == null) {// global
             GlobalVariable gVar = new GlobalVariable(it.decl.Id, it.decl.typeName);
+            gVar.initValue = gVar.derefType.defaultValue();
             if (it.expr != null) { // has initial value
                 if (it.expr instanceof LiteralExprNode exprNode && exprNode.lit == literalType.INT) {
                     // int type(i32) can be handled specially

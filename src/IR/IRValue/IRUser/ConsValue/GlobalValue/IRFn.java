@@ -3,7 +3,6 @@ package IR.IRValue.IRUser.ConsValue.GlobalValue;
 import java.util.ArrayList;
 
 import Debug.MyException;
-import Frontend.Util.Types.ClassType;
 import Frontend.Util.Types.FuncInfo;
 import IR.IRType.IRFnType;
 import IR.IRValue.IRParameter;
@@ -14,10 +13,12 @@ public class IRFn extends BaseGlobalValue {
     public ArrayList<IRParameter> paraList = new ArrayList<>();
     public ArrayList<IRBasicBlock> blockList = new ArrayList<>();
 
-    public IRFn(FuncInfo fnInfo, ClassType inWhichClass) {
+    public IRFn(FuncInfo fnInfo) {
         // 1. build the IRFn
-        super(Transfer.fnTypeTransfer(fnInfo, inWhichClass));
+        super(Transfer.fnTypeTransfer(fnInfo));
         this.constName = fnInfo.funcName;
+        if (fnInfo.inWhichClass != null)// put prefix
+            this.constName = fnInfo.inWhichClass.structType.className + '.' + this.constName;
 
         // 2. add the fnValue to ast fnInfo
         fnInfo.fnValue = this;

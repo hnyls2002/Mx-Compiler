@@ -75,12 +75,15 @@ struct 类型
 
 isMember, whoseMember 同理
 
-先实现struct 变量的定义，然后再实现成员的访问
-成员访问的时候，identifier做什么类型，干些什么事情？
-可以做为intConst类，也可以在member节点直接查找类的信息
+对于一个类中的函数，我需要知道某个变量是否隐式地调用了this指针，但是classDef的scope可能还在上面几层，所以只能像semantic那样把classDef中的所有变量放到curScope里面。
+不过这个时候这个变量的irValue就是一个index，没有啥问题。
 
-~~垃圾llvm~~ parameter 和 argument 分不清是吧
-所以llvm::argument 其实是 formal argument, which is actually parameter
+~~先实现struct 变量的定义，然后再实现成员的访问~~
+~~成员访问的时候，identifier做什么类型，干些什么事情？~~
+~~可以做为intConst类，也可以在member节点直接查找类的信息~~
+
+~~垃圾llvm~~ ~~parameter 和 argument 分不清是吧~~
+~~所以llvm::argument 其实是 formal argument, which is actually parameter~~
 
 bitcast 还有问题，裂开
 
