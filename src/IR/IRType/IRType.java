@@ -27,4 +27,10 @@ public class IRType {
         throw new MyException("you should go to the override method!");
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return false;
+        // only override int and pointer type
+    }
+
 }

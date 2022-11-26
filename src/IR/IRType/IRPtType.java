@@ -36,4 +36,11 @@ public class IRPtType extends IRType {
     public IRBaseValue defaultValue() {
         return new NullConst();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof IRPtType t && t.atomicType.equals(atomicType) && t.refNum == refNum)
+            return true;
+        return false;
+    }
 }

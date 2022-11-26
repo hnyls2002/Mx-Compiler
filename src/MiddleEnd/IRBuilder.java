@@ -55,10 +55,12 @@ import IR.IRValue.IRUser.Inst.AllocaInst;
 import IR.IRValue.IRUser.Inst.BinaryInst;
 import IR.IRValue.IRUser.Inst.CallInst;
 import IR.IRValue.IRUser.Inst.GEPInst;
+import IR.IRValue.IRUser.Inst.IcmpInst;
 import IR.IRValue.IRUser.Inst.LoadInst;
 import IR.IRValue.IRUser.Inst.RetInst;
 import IR.IRValue.IRUser.Inst.StoreInst;
 import IR.IRValue.IRUser.Inst.BinaryInst.binaryOperator;
+import IR.IRValue.IRUser.Inst.IcmpInst.icmpOperator;
 import IR.Util.Transfer;
 
 public class IRBuilder implements ASTVisitor {
@@ -203,7 +205,7 @@ public class IRBuilder implements ASTVisitor {
     public void visit(BinaryOpExprNode it) {
         it.lhs.accept(this);
         it.rhs.accept(this);
-        binaryOperator opCode = switch (it.opcode) {
+        binaryOperator binaryOpCode = switch (it.opcode) {
             case ADD -> binaryOperator.irADD;
             case SUB -> binaryOperator.irSUB;
             case BIT_AND, LOGIC_AND -> binaryOperator.irAND;
@@ -214,10 +216,26 @@ public class IRBuilder implements ASTVisitor {
             case SHIFT_LEFT -> binaryOperator.irSHL;
             case SHIFT_RIGHT -> binaryOperator.irASHR;
             case BIT_XOR -> binaryOperator.irXOR;
-            default -> throw new IllegalArgumentException("Wait !!! wo hai mei chuli hao bijiao fuhao");
+            default -> null;
         };
-        var irvalue = new BinaryInst(opCode, it.lhs.irValue, it.rhs.irValue, cur.block);
-        it.irValue = irvalue;
+        icmpOperator icmpOpCode = switch (it.opcode) {
+            case EQUAL -> icmpOperator.irEQ;
+            case NOT_EQUAL -> icmpOperator.irNE;
+            case GREATER -> icmpOperator.irSGT;
+            case GREATER_EQUAL -> icmpOperator.irSGE;
+            case LESS -> icmpOperator.irSLT;
+            case LESS_EQUAL -> icmpOperator.irSLE;
+            default -> null;
+        };
+
+        IRBaseValue irValue = null;
+        if (binaryOpCode != null)
+            irValue = new BinaryInst(binaryOpCode, it.lhs.irValue, it.rhs.irValue, cur.block);
+        else
+            irValue = new IcmpInst(icmpOpCode, it.lhs.irValue, it.rhs.irValue, cur.block);
+
+        it.irValue = irValue;
+
     }
 
     @Override

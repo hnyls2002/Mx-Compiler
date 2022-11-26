@@ -28,7 +28,7 @@ public class IRStructType extends IRType {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof IRStructType t)
-            return this.className == t.className;
+            return this.className.equals(t.className);
         return false;
     }
 

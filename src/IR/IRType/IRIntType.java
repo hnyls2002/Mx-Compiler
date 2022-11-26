@@ -21,4 +21,11 @@ public class IRIntType extends IRType {
     public IRBaseValue defaultValue() {
         return new IntConst(0, intLen);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof IRIntType t && t.intLen == intLen)
+            return true;
+        return false;
+    }
 }
