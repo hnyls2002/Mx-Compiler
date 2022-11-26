@@ -66,20 +66,20 @@
 struct 类型
 - struct transfer
 
-函数的调用先实现了再说
-有个大问题，结构体里面的函数不加this使用自己的变量/函数
-我直接把这个变量和函数加入到当前的curScope里面了
-如何解决这个问题？
+~~函数的调用先实现了再说~~
+~~有个大问题，结构体里面的函数不加this使用自己的变量/函数~~
+~~我直接把这个变量和函数加入到当前的curScope里面了~~
+~~如何解决这个问题？~~
 
-手动记录inClass, inWhichClass，每次找函数/变量，先在which里面找，再在curScope里面找
+~~手动记录inClass, inWhichClass，每次找函数/变量，先在which里面找，再在curScope里面找~~
 
-isMember, whoseMember 同理
+~~isMember, whoseMember 同理~~
 
-对于一个类中的函数，我需要知道某个变量是否隐式地调用了this指针，但是classDef的scope可能还在上面几层，所以只能像semantic那样把classDef中的所有变量放到curScope里面。
-不过这个时候这个变量的irValue就是一个index，没有啥问题。
+~~对于一个类中的函数，我需要知道某个变量是否隐式地调用了this指针，但是classDef的scope可能还在上面几层，所以只能像semantic那样把classDef中的所有变量放到curScope里面。~~
+~~不过这个时候这个变量的irValue就是一个index，没有啥问题。~~
 
-操，所有的类和函数需要预处理，，，
-所有的信息都有，在IRBuilder一开始预处理？
+~~操，所有的类和函数需要预处理，，，~~
+~~所有的信息都有，在IRBuilder一开始预处理？~~
 
 ~~先实现struct 变量的定义，然后再实现成员的访问~~
 ~~成员访问的时候，identifier做什么类型，干些什么事情？~~
@@ -95,3 +95,22 @@ bitcast 还有问题，裂开
 ~~函数的参数传进来的时候也是有名字的，，，---> llvm::Argument~~
  
 ~~局部变量 alloca~~
+
+左值和右值的处理。
+
+左值有哪些 ：
+- scope可以找的变量 identifier
+- new 出来的一堆东西
+- 取成员
+- 数组取下标操作
+
+虚拟寄存器和堆栈的处理完全不会了，，，codegen再来吧
+
+- 基本类型 : int, bool 等
+  直接存储在栈上，找的时候直接找到在栈上的地址，**对值进行操作**
+
+- 引用类型 
+  存储了某块内存的地址，对地址进行操作。
+
+对int赋值，store i32 to i32*
+对struct.A 赋值 store struct.A* to struct.A**

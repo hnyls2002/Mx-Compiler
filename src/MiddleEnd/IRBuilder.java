@@ -70,6 +70,7 @@ public class IRBuilder implements ASTVisitor {
         public IRBasicBlock block = null;
         public Scope scope = null;
         public BaseType whoseMember = null;
+        public boolean needAddr = false;
     }
 
     private CurStatus cur = new CurStatus();
@@ -246,8 +247,11 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(AssignExprNode it) {
-        // TODO Auto-generated method stub
-
+        cur.needAddr = true;
+        it.lvalue.accept(this);
+        cur.needAddr = false;
+        it.rvalue.accept(this);
+        it.irValue = new StoreInst(it.rvalue.irValue, it.lvalue.irValue, cur.block);
     }
 
     @Override
@@ -294,7 +298,6 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(ExprStmtNode it) {
-        // TODO Auto-generated method stub
         it.expr.accept(this);
     }
 
@@ -357,6 +360,11 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(MemberExprNode it) {
         // 1. get the base pointer
+
+        // handld the leftValue address : a.b.c.d.e , you need e's address
+        // member's address handled in member node
+        var flag = cur.needAddr;
+        cur.needAddr = false;
         it.expr.accept(this);
 
         // 2. set the isMember status and get the index of a member
@@ -367,7 +375,10 @@ public class IRBuilder implements ASTVisitor {
             it.idExpr.accept(this);
             var gepInstType = new IRPtType(Transfer.typeTransfer(it.typeName), 1);
             var gep = new GEPInst(it.expr.irValue, gepInstType, cur.block, ((IntConst) it.idExpr.irValue));
-            it.irValue = new LoadInst(gep, cur.block);
+            if (flag)
+                it.irValue = gep;
+            else
+                it.irValue = new LoadInst(gep, cur.block);
         } else if (it.funcCall != null) {
             Boolean isMemberFunction = cur.whoseMember != null;
             it.funcCall.accept(this);
@@ -388,6 +399,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(ThisExprNode it) {
         var thisPara = cur.fn.paraList.get(0);
+        // a single this can't be leftValue, but this.a can be
         it.irValue = new LoadInst(thisPara.storedAddr, cur.block);
     }
 
@@ -395,7 +407,6 @@ public class IRBuilder implements ASTVisitor {
     public void visit(LiteralExprNode it) {
         it.irValue = switch (it.lit) {
             case INT -> new IntConst(Integer.parseInt(it.litString), 32);
-            // TODO Auto-generated method stub
             case STRING -> {
                 var constStr = Transfer.constStrTranfer(it.litString, topModule.constStrList.size());
                 topModule.constStrList.add(constStr);
@@ -417,13 +428,10 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(EmptyStmtNode it) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void visit(IdentiExprNode it) {
-        // TODO Auto-generated method stub
 
         // 1. member access is prior
         if (cur.whoseMember != null) {
@@ -443,14 +451,22 @@ public class IRBuilder implements ASTVisitor {
             var gepInstType = new IRPtType(Transfer.typeTransfer(varDef.typeName), 1);
             var startPtr = new LoadInst(thisPara.storedAddr, cur.block);
             var gep = new GEPInst(startPtr, gepInstType, cur.block, new IntConst(0, 64), idx);
-            it.irValue = new LoadInst(gep, cur.block);
-        } else
-            it.irValue = new LoadInst(varDef.varValue, cur.block);
+            if (cur.needAddr) {
+                it.irValue = gep;
+                cur.needAddr = false;
+            } else
+                it.irValue = new LoadInst(gep, cur.block);
+        } else {
+            if (cur.needAddr) {
+                it.irValue = varDef.varValue;
+                cur.needAddr = false;
+            } else
+                it.irValue = new LoadInst(varDef.varValue, cur.block);
+        }
     }
 
     @Override
     public void visit(SingleVarDeclStmtNode it) {
-        // TODO Auto-generated method FUCK
 
         if (cur.fn == null) {// global
             GlobalVariable gVar = new GlobalVariable(it.decl.Id, it.decl.typeName);
@@ -482,7 +498,7 @@ public class IRBuilder implements ASTVisitor {
             topModule.globalVarList.add(gVar);
             it.irValue = it.decl.varValue = gVar;
         } else {// local
-            // TODO
+
             it.irValue = it.decl.varValue = new AllocaInst(Transfer.typeTransfer(it.decl.typeName), cur.block);
             if (it.expr != null) {
                 it.expr.accept(this);

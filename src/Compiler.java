@@ -29,7 +29,7 @@ public class Compiler {
             Test.showShowWay();
             Test1.showShowWay();
             System.out.println(" --------------------------------- ");
-            File testCode = new File("testcases/test_binary.mx");
+            File testCode = new File("testcases/test_assign.mx");
 
             InputStream testCodeStream = new FileInputStream(testCode);
 
