@@ -205,15 +205,13 @@ public class IRBuilder implements ASTVisitor {
 
     }
 
-    @Override
-    public void visit(BinaryOpExprNode it) {
-        it.lhs.accept(this);
-        it.rhs.accept(this);
+    private void intBinary(BinaryOpExprNode it) {
+
         binaryOperator binaryOpCode = switch (it.opcode) {
             case ADD -> binaryOperator.irADD;
             case SUB -> binaryOperator.irSUB;
-            case BIT_AND, LOGIC_AND -> binaryOperator.irAND;
-            case BIT_OR, LOGIC_OR -> binaryOperator.irOR;
+            case BIT_AND -> binaryOperator.irAND;
+            case BIT_OR -> binaryOperator.irOR;
             case DIV -> binaryOperator.irSDIV;
             case MOD -> binaryOperator.irSREM;
             case MUL -> binaryOperator.irMUL;
@@ -235,11 +233,63 @@ public class IRBuilder implements ASTVisitor {
         IRBaseValue irValue = null;
         if (binaryOpCode != null)
             irValue = new BinaryInst(binaryOpCode, it.lhs.irValue, it.rhs.irValue, cur.block);
-        else
+        else if (icmpOpCode != null)
             irValue = new IcmpInst(icmpOpCode, it.lhs.irValue, it.rhs.irValue, cur.block);
+        else
+            throw new MyException("Binary i32 opCode could not find");
 
         it.irValue = irValue;
 
+    }
+
+    private void stringBinary(BinaryOpExprNode it) {
+        // TODO
+    }
+
+    private void shortCircuit() {
+        // TODO
+    }
+
+    @Override
+    public void visit(BinaryOpExprNode it) {
+        it.lhs.accept(this);
+        it.rhs.accept(this);
+        if (it.lhs.irValue.valueType instanceof IRPtType ptr) {
+            if (ptr.atomicType instanceof IRIntType i8 && i8.intLen == 8)
+                stringBinary(it);
+            else {
+                var irOpCode = switch (it.opcode) { // array ptr or class ptr
+                    case EQUAL -> icmpOperator.irEQ;
+                    case NOT_EQUAL -> icmpOperator.irNE;
+                    default -> throw new MyException("ptr type can only '==' '!=' ");
+                };
+                it.irValue = new IcmpInst(irOpCode, it.lhs.irValue, it.rhs.irValue, cur.block);
+            }
+        } else {
+            var len1 = ((IRIntType) it.lhs.irValue.valueType).intLen;
+            var len2 = ((IRIntType) it.rhs.irValue.valueType).intLen;
+            if (len1 == 32 && len2 == 32) // int
+                intBinary(it);
+            else if (len1 == 8 || len1 == 1 || len2 == 8 || len2 == 1) { // bool
+                IRBaseValue lhs = it.lhs.irValue, rhs = it.rhs.irValue;
+                if (len1 == 8)
+                    lhs = new CastInst(lhs, new IRIntType(1), castType.TRUNC, cur.block);
+                if (len2 == 8)
+                    rhs = new CastInst(rhs, new IRIntType(1), castType.TRUNC, cur.block);
+                var irOpCode = switch (it.opcode) {
+                    case EQUAL -> icmpOperator.irEQ;
+                    case NOT_EQUAL -> icmpOperator.irNE;
+                    default -> null;
+                };
+                if (irOpCode != null)
+                    it.irValue = new IcmpInst(irOpCode, lhs, rhs, cur.block);
+                else {
+                    // TODO
+                    shortCircuit();
+                }
+            } else
+                throw new MyException("int WHAT type ? in binary operator");
+        }
     }
 
     @Override
@@ -371,6 +421,8 @@ public class IRBuilder implements ASTVisitor {
             cur.block.terminal = RetInst.createVoidRetInst();
         else {
             it.expr.accept(this);
+            if (it.expr.irValue.valueType instanceof IRIntType b && b.intLen == 1)
+                it.expr.irValue = new CastInst(it.expr.irValue, new IRIntType(8), castType.ZEXT, cur.block);
             cur.block.terminal = new RetInst(it.expr.irValue);
         }
     }

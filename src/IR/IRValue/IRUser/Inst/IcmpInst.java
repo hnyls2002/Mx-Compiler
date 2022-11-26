@@ -1,6 +1,8 @@
 package IR.IRValue.IRUser.Inst;
 
+import Debug.MyException;
 import IR.IRType.IRIntType;
+import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 
@@ -28,12 +30,16 @@ public class IcmpInst extends IRBaseInst {
         this.opCode = opCode;
         this.lhs = lhs;
         this.rhs = rhs;
+        IRType lType = lhs.valueType, rType = rhs.valueType;
+        if (!lType.equals(rType))
+            throw new MyException(
+                    "icmp " + this.opCode + " " + lType.toString() + " " + rType.toString() + " not match");
         block.addInst(this);
     }
 
     @Override
     public String defToString() {
-        var ret = "icmp " + opCode.toString() + ' ' + valueType.toString() + ' ';
+        var ret = "icmp " + opCode.toString() + ' ' + lhs.valueType.toString() + ' ';
         ret += lhs.useToString() + ", " + rhs.useToString();
         return ret;
     }
