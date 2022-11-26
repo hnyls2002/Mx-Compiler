@@ -42,6 +42,7 @@ import Frontend.Util.Types.BaseType;
 import Frontend.Util.Types.ClassType;
 import IR.IRModule;
 import IR.IRType.IRFnType;
+import IR.IRType.IRIntType;
 import IR.IRType.IRPtType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRParameter;
@@ -54,12 +55,14 @@ import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.Inst.AllocaInst;
 import IR.IRValue.IRUser.Inst.BinaryInst;
 import IR.IRValue.IRUser.Inst.CallInst;
+import IR.IRValue.IRUser.Inst.CastInst;
 import IR.IRValue.IRUser.Inst.GEPInst;
 import IR.IRValue.IRUser.Inst.IcmpInst;
 import IR.IRValue.IRUser.Inst.LoadInst;
 import IR.IRValue.IRUser.Inst.RetInst;
 import IR.IRValue.IRUser.Inst.StoreInst;
 import IR.IRValue.IRUser.Inst.BinaryInst.binaryOperator;
+import IR.IRValue.IRUser.Inst.CastInst.castType;
 import IR.IRValue.IRUser.Inst.IcmpInst.icmpOperator;
 import IR.Util.Transfer;
 
@@ -70,7 +73,7 @@ public class IRBuilder implements ASTVisitor {
         public IRBasicBlock block = null;
         public Scope scope = null;
         public BaseType whoseMember = null;
-        public boolean needAddr = false;
+        public boolean justNeedAddr = false;
     }
 
     private CurStatus cur = new CurStatus();
@@ -241,17 +244,55 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(UnaryOpExprNode it) {
-        // TODO Auto-generated method stub
-
+        it.expr.accept(this);
+        switch (it.opCode) {
+            case BIT_NOT -> {
+                it.irValue = new BinaryInst(binaryOperator.irXOR, it.expr.irValue, new IntConst(-1, 32), cur.block);
+            }
+            case LOGIC_NOT -> { // bool type : transfer to i1 first
+                IRBaseValue i1Value = it.expr.irValue;
+                if (((IRIntType) i1Value.valueType).intLen != 1)
+                    i1Value = new CastInst(i1Value, new IRIntType(1), castType.TRUNC, cur.block);
+                it.irValue = new BinaryInst(binaryOperator.irXOR, i1Value, new IntConst(1, 1), cur.block);
+            }
+            case PRE_ADD -> {
+                it.irValue = it.expr.irValue;
+            }
+            case PRE_SUB -> {
+                it.irValue = new BinaryInst(binaryOperator.irSUB, new IntConst(0, 32), it.expr.irValue, cur.block);
+            }
+            case PRE_INC -> {
+                it.irValue = new BinaryInst(binaryOperator.irADD, it.expr.irValue, new IntConst(1, 32), cur.block);
+                new StoreInst(it.irValue, it.expr.irAddr, cur.block);
+                it.irAddr = it.expr.irAddr;
+            }
+            case PRE_DEC -> {
+                it.irValue = new BinaryInst(binaryOperator.irSUB, it.expr.irValue, new IntConst(1, 32), cur.block);
+                new StoreInst(it.irValue, it.expr.irAddr, cur.block);
+                it.irAddr = it.expr.irAddr;
+            }
+            case SUF_INC -> {
+                it.irValue = it.expr.irValue;
+                var updatedValue = new BinaryInst(binaryOperator.irADD, it.expr.irValue, new IntConst(1, 32),
+                        cur.block);
+                new StoreInst(updatedValue, it.expr.irAddr, cur.block);
+            }
+            case SUF_DEC -> {
+                it.irValue = it.expr.irValue;
+                var updatedValue = new BinaryInst(binaryOperator.irSUB, it.expr.irValue, new IntConst(1, 32),
+                        cur.block);
+                new StoreInst(updatedValue, it.expr.irAddr, cur.block);
+            }
+        }
     }
 
     @Override
     public void visit(AssignExprNode it) {
-        cur.needAddr = true;
+        cur.justNeedAddr = true;
         it.lvalue.accept(this);
-        cur.needAddr = false;
+        cur.justNeedAddr = false;
         it.rvalue.accept(this);
-        it.irValue = new StoreInst(it.rvalue.irValue, it.lvalue.irValue, cur.block);
+        it.irValue = new StoreInst(it.rvalue.irValue, it.lvalue.irAddr, cur.block);
     }
 
     @Override
@@ -363,8 +404,8 @@ public class IRBuilder implements ASTVisitor {
 
         // handld the leftValue address : a.b.c.d.e , you need e's address
         // member's address handled in member node
-        var flag = cur.needAddr;
-        cur.needAddr = false;
+        var onlyAddr = cur.justNeedAddr;
+        cur.justNeedAddr = false;
         it.expr.accept(this);
 
         // 2. set the isMember status and get the index of a member
@@ -375,9 +416,8 @@ public class IRBuilder implements ASTVisitor {
             it.idExpr.accept(this);
             var gepInstType = new IRPtType(Transfer.typeTransfer(it.typeName), 1);
             var gep = new GEPInst(it.expr.irValue, gepInstType, cur.block, ((IntConst) it.idExpr.irValue));
-            if (flag)
-                it.irValue = gep;
-            else
+            it.irAddr = gep;
+            if (!onlyAddr)
                 it.irValue = new LoadInst(gep, cur.block);
         } else if (it.funcCall != null) {
             Boolean isMemberFunction = cur.whoseMember != null;
@@ -451,17 +491,16 @@ public class IRBuilder implements ASTVisitor {
             var gepInstType = new IRPtType(Transfer.typeTransfer(varDef.typeName), 1);
             var startPtr = new LoadInst(thisPara.storedAddr, cur.block);
             var gep = new GEPInst(startPtr, gepInstType, cur.block, new IntConst(0, 64), idx);
-            if (cur.needAddr) {
-                it.irValue = gep;
-                cur.needAddr = false;
-            } else
+
+            it.irAddr = gep;
+            if (!cur.justNeedAddr)
                 it.irValue = new LoadInst(gep, cur.block);
+            cur.justNeedAddr = false;
         } else {
-            if (cur.needAddr) {
-                it.irValue = varDef.varValue;
-                cur.needAddr = false;
-            } else
+            it.irAddr = varDef.varValue;
+            if (!cur.justNeedAddr)
                 it.irValue = new LoadInst(varDef.varValue, cur.block);
+            cur.justNeedAddr = false;
         }
     }
 

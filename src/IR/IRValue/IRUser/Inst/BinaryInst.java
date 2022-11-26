@@ -1,5 +1,7 @@
 package IR.IRValue.IRUser.Inst;
 
+import Debug.MyException;
+import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 
@@ -28,6 +30,10 @@ public class BinaryInst extends IRBaseInst {
         this.opCode = opCode;
         this.lhs = lhs;
         this.rhs = rhs;
+        IRType lType = lhs.valueType, rType = rhs.valueType;
+        if (!lType.equals(rType))
+            throw new MyException(
+                    "Binary " + this.opCode + " " + lType.toString() + " " + rType.toString() + " not match");
         block.addInst(this);
     }
 

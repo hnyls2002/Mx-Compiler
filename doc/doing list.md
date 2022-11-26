@@ -103,6 +103,7 @@ bitcast 还有问题，裂开
 - new 出来的一堆东西
 - 取成员
 - 数组取下标操作
+- ++a
 
 虚拟寄存器和堆栈的处理完全不会了，，，codegen再来吧
 
@@ -114,3 +115,33 @@ bitcast 还有问题，裂开
 
 对int赋值，store i32 to i32*
 对struct.A 赋值 store struct.A* to struct.A**
+
+### 双目单目运算符 裂开
+
+##### 单目运算符
+
+- `++`,`--` int独占
+- 注意`++a`的左值问题
+- `~` `-` 也是int
+
+- `!` bool 独占
+  - logical not 用xor来完成，调用logic not的时候i8转i1
+
+#####  store的时候 再转化i8 !!!
+
+##### ++ 和 -- 的处理
+
+不仅需要获取值，还需要获取地址
+只能再astnode上再加东西了
+
+
+##### bool 类型
+
+bool 的处理。
+申请内存，i8。
+icmp的返回值 i1。
+
+logic 操作在运算的时候，一律转化成i1
+store的时候，i1 -> i8
+
+草，还有短路求值
