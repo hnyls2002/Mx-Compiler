@@ -17,6 +17,7 @@ import AST.Expr.MemberExprNode;
 import AST.Expr.SubscExprNode;
 import AST.Expr.ThisExprNode;
 import AST.Expr.UnaryOpExprNode;
+import AST.Expr.BinaryOpExprNode.binaryOp;
 import AST.Expr.LiteralExprNode.literalType;
 import AST.Stmt.BreakStmtNode;
 import AST.Stmt.ClassDeclStmtNode;
@@ -65,7 +66,6 @@ import IR.IRValue.IRUser.Inst.RetInst;
 import IR.IRValue.IRUser.Inst.StoreInst;
 import IR.IRValue.IRUser.Inst.BinaryInst.binaryOperator;
 import IR.IRValue.IRUser.Inst.CastInst.castType;
-import IR.IRValue.IRUser.Inst.IcmpInst.icmpOperator;
 import IR.Util.Transfer;
 
 public class IRBuilder implements ASTVisitor {
@@ -210,90 +210,32 @@ public class IRBuilder implements ASTVisitor {
 
     }
 
-    private void intBinary(BinaryOpExprNode it) {
-
-        binaryOperator binaryOpCode = switch (it.opcode) {
-            case ADD -> binaryOperator.irADD;
-            case SUB -> binaryOperator.irSUB;
-            case BIT_AND -> binaryOperator.irAND;
-            case BIT_OR -> binaryOperator.irOR;
-            case DIV -> binaryOperator.irSDIV;
-            case MOD -> binaryOperator.irSREM;
-            case MUL -> binaryOperator.irMUL;
-            case SHIFT_LEFT -> binaryOperator.irSHL;
-            case SHIFT_RIGHT -> binaryOperator.irASHR;
-            case BIT_XOR -> binaryOperator.irXOR;
-            default -> null;
-        };
-        icmpOperator icmpOpCode = switch (it.opcode) {
-            case EQUAL -> icmpOperator.irEQ;
-            case NOT_EQUAL -> icmpOperator.irNE;
-            case GREATER -> icmpOperator.irSGT;
-            case GREATER_EQUAL -> icmpOperator.irSGE;
-            case LESS -> icmpOperator.irSLT;
-            case LESS_EQUAL -> icmpOperator.irSLE;
-            default -> null;
-        };
-
-        IRBaseValue irValue = null;
-        if (binaryOpCode != null)
-            irValue = new BinaryInst(binaryOpCode, it.lhs.irValue, it.rhs.irValue, cur.block);
-        else if (icmpOpCode != null)
-            irValue = new IcmpInst(icmpOpCode, it.lhs.irValue, it.rhs.irValue, cur.block);
-        else
-            throw new MyException("Binary i32 opCode could not find");
-
-        it.irValue = irValue;
-
-    }
-
     private void stringBinary(BinaryOpExprNode it) {
-        // TODO
-    }
-
-    private void shortCircuit() {
         // TODO
     }
 
     @Override
     public void visit(BinaryOpExprNode it) {
-        it.lhs.accept(this);
-        it.rhs.accept(this);
-        if (it.lhs.irValue.valueType instanceof IRPtType ptr) {
-            if (ptr.atomicType instanceof IRIntType i8 && i8.intLen == 8)
-                stringBinary(it);
-            else {
-                var irOpCode = switch (it.opcode) { // array ptr or class ptr
-                    case EQUAL -> icmpOperator.irEQ;
-                    case NOT_EQUAL -> icmpOperator.irNE;
-                    default -> throw new MyException("ptr type can only '==' '!=' ");
-                };
-                it.irValue = new IcmpInst(irOpCode, it.lhs.irValue, it.rhs.irValue, cur.block);
-            }
+        if (it.lhs.typeName.equals(gScope.stringName))
+            stringBinary(it);
+        else if (it.opcode == binaryOp.LOGIC_AND || it.opcode == binaryOp.LOGIC_OR) {
         } else {
-            var len1 = ((IRIntType) it.lhs.irValue.valueType).intLen;
-            var len2 = ((IRIntType) it.rhs.irValue.valueType).intLen;
-            if (len1 == 32 && len2 == 32) // int
-                intBinary(it);
-            else if (len1 == 8 || len1 == 1 || len2 == 8 || len2 == 1) { // bool
-                IRBaseValue lhs = it.lhs.irValue, rhs = it.rhs.irValue;
-                if (len1 == 8)
-                    lhs = new CastInst(lhs, new IRIntType(1), castType.TRUNC, cur.block);
-                if (len2 == 8)
-                    rhs = new CastInst(rhs, new IRIntType(1), castType.TRUNC, cur.block);
-                var irOpCode = switch (it.opcode) {
-                    case EQUAL -> icmpOperator.irEQ;
-                    case NOT_EQUAL -> icmpOperator.irNE;
-                    default -> null;
-                };
-                if (irOpCode != null)
-                    it.irValue = new IcmpInst(irOpCode, lhs, rhs, cur.block);
-                else {
-                    // TODO
-                    shortCircuit();
-                }
-            } else
-                throw new MyException("int WHAT type ? in binary operator");
+            it.lhs.accept(this);
+            it.rhs.accept(this);
+            if (it.lhs.typeName.equals(gScope.boolName)) {
+                it.lhs.irValue = new CastInst(it.lhs.irValue, new IRIntType(1), castType.TRUNC, cur.block);
+                it.rhs.irValue = new CastInst(it.rhs.irValue, new IRIntType(1), castType.TRUNC, cur.block);
+            }
+            IRBaseValue irValue = null;
+            var binaryOpCode = Transfer.binaryArthTransfer(it.opcode);
+            var icmpOpCode = Transfer.binaryCmpTransfer(it.opcode);
+            if (binaryOpCode != null)
+                irValue = new BinaryInst(binaryOpCode, it.lhs.irValue, it.rhs.irValue, cur.block);
+            else if (icmpOpCode != null)
+                irValue = new IcmpInst(icmpOpCode, it.lhs.irValue, it.rhs.irValue, cur.block);
+            else
+                throw new MyException("opCode could not find");
+            it.irValue = irValue;
         }
     }
 
@@ -306,8 +248,7 @@ public class IRBuilder implements ASTVisitor {
             }
             case LOGIC_NOT -> { // bool type : transfer to i1 first
                 IRBaseValue i1Value = it.expr.irValue;
-                if (((IRIntType) i1Value.valueType).intLen != 1)
-                    i1Value = new CastInst(i1Value, new IRIntType(1), castType.TRUNC, cur.block);
+                i1Value = new CastInst(i1Value, new IRIntType(1), castType.TRUNC, cur.block);
                 it.irValue = new BinaryInst(binaryOperator.irXOR, i1Value, new IntConst(1, 1), cur.block);
             }
             case PRE_ADD -> {

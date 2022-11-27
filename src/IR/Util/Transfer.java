@@ -1,8 +1,8 @@
 package IR.Util;
 
+import AST.Expr.BinaryOpExprNode.binaryOp;
 import Debug.MyException;
 import Frontend.Util.TypeName;
-import Frontend.Util.Types.BaseType;
 import Frontend.Util.Types.ClassType;
 import Frontend.Util.Types.FuncInfo;
 import IR.IRType.IRType;
@@ -13,6 +13,8 @@ import IR.IRType.IRStructType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
 import IR.IRValue.IRUser.ConsValue.ConsData.StrConst;
+import IR.IRValue.IRUser.Inst.BinaryInst.binaryOperator;
+import IR.IRValue.IRUser.Inst.IcmpInst.icmpOperator;
 
 public class Transfer {
     private static IRType typeTransferNoRef(TypeName astTypeName) {
@@ -59,10 +61,6 @@ public class Transfer {
         return new StrConst(literalString, len, constStrIdx);
     }
 
-    public static IRType infoTransfer(BaseType astType) {
-        return null;
-    }
-
     public static IRStructType structTypeTransfer(ClassType classType) {
         var ret = new IRStructType(classType.typeNameString);
         classType.varMap.forEach((memVarString, memVar) -> {
@@ -90,4 +88,33 @@ public class Transfer {
         return ret;
     }
 
+    public static binaryOperator binaryArthTransfer(binaryOp astOpCode) {
+        binaryOperator binaryOpCode = switch (astOpCode) {
+            case ADD -> binaryOperator.irADD;
+            case SUB -> binaryOperator.irSUB;
+            case BIT_AND -> binaryOperator.irAND;
+            case BIT_OR -> binaryOperator.irOR;
+            case DIV -> binaryOperator.irSDIV;
+            case MOD -> binaryOperator.irSREM;
+            case MUL -> binaryOperator.irMUL;
+            case SHIFT_LEFT -> binaryOperator.irSHL;
+            case SHIFT_RIGHT -> binaryOperator.irASHR;
+            case BIT_XOR -> binaryOperator.irXOR;
+            default -> null;
+        };
+        return binaryOpCode;
+    }
+
+    public static icmpOperator binaryCmpTransfer(binaryOp astOpCode) {
+        icmpOperator icmpOpCode = switch (astOpCode) {
+            case EQUAL -> icmpOperator.irEQ;
+            case NOT_EQUAL -> icmpOperator.irNE;
+            case GREATER -> icmpOperator.irSGT;
+            case GREATER_EQUAL -> icmpOperator.irSGE;
+            case LESS -> icmpOperator.irSLT;
+            case LESS_EQUAL -> icmpOperator.irSLE;
+            default -> null;
+        };
+        return icmpOpCode;
+    }
 }

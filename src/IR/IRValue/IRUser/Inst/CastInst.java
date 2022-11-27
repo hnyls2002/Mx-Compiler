@@ -1,5 +1,6 @@
 package IR.IRValue.IRUser.Inst;
 
+import IR.IRType.IRIntType;
 import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
@@ -30,6 +31,9 @@ public class CastInst extends IRBaseInst {
         this.srcValue = srcValue;
         this.targetType = targetType;
         this.opCode = opCode;
+        if (srcValue.valueType instanceof IRIntType int1 && targetType instanceof IRIntType int2 && int1.intLen == 1
+                && int2.intLen == 1)
+            return;
         block.addInst(this);
     }
 

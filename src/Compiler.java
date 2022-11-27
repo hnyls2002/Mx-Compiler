@@ -30,7 +30,7 @@ public class Compiler {
             Test.showShowWay();
             Test1.showShowWay();
             System.out.println(" --------------------------------- ");
-            File testCode = new File("testcases/test_control.mx");
+            File testCode = new File("testcases/test_short_circuit.mx");
 
             InputStream testCodeStream = new FileInputStream(testCode);
 
