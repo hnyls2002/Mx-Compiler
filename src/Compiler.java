@@ -15,6 +15,7 @@ import Frontend.Util.Scopes.GlobalScope;
 import IR.IRModule;
 import MiddleEnd.IRBuilder;
 import MiddleEnd.IRPrinter;
+import MiddleEnd.IRRenamer;
 
 import org.antlr.v4.runtime.CharStreams;
 
@@ -29,7 +30,7 @@ public class Compiler {
             Test.showShowWay();
             Test1.showShowWay();
             System.out.println(" --------------------------------- ");
-            File testCode = new File("testcases/test_binary.mx");
+            File testCode = new File("testcases/test_control.mx");
 
             InputStream testCodeStream = new FileInputStream(testCode);
 
@@ -62,6 +63,8 @@ public class Compiler {
 
             IRBuilder irBuilder = new IRBuilder(ast, gScope);
             IRModule topModule = irBuilder.buildIR();
+            IRRenamer irRenamer = new IRRenamer(topModule);
+            irRenamer.renameIR();
             IRPrinter irPrinter = new IRPrinter(topModule, "testcases/test.ll");
             irPrinter.printIR();
 

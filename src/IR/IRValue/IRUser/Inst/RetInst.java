@@ -2,6 +2,7 @@ package IR.IRValue.IRUser.Inst;
 
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBaseValue;
+import IR.IRValue.IRBasicBlock;
 
 public class RetInst extends IRBaseInst {
     public IRBaseValue retValue;
@@ -12,15 +13,15 @@ public class RetInst extends IRBaseInst {
     }
 
     // "ret %3" is void type ?
-    public RetInst(IRBaseValue retValue) {
+    public RetInst(IRBaseValue retValue, IRBasicBlock block) {
         super(new IRVoidType());
         this.retValue = retValue;
+        block.setTerminal(this);
     }
 
-    public static RetInst createVoidRetInst() {
-        var ret = new RetInst(null);
-        ret.isVoid = true;
-        return ret;
+    public static void createVoidRetInst(IRBasicBlock block) {
+        var retInst = new RetInst(null, block);
+        retInst.isVoid = true;
     }
 
     @Override

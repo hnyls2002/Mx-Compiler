@@ -160,3 +160,21 @@ logic 操作在运算的时候，一律转化成i1
 store的时候，i1 -> i8
 
 草，还有短路求值
+
+llvm 你怎么这么逆天啊
+
+对于逻辑表达式的短路求值
+### 先把值算出来
+
+### 函数开空间存储返回值
+
+函数的block：
+不但有空间存储返回值，还有一个专门的return block
+一旦遇到return，先把return的值存下来，然后跳转到return block
+
+跳转到return block后，即使是跳转到afterif也没有用，不会覆写。
+return后面接了return，也不会覆写。
+
+一旦一个block的terminal存在了，就不能被覆写了，所以terminal 必须最后赋值。
+
+一个block被terminated了，但是还会新建其他的block，这些是dead block，不会被执行到。

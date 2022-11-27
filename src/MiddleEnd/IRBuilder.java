@@ -44,6 +44,7 @@ import IR.IRModule;
 import IR.IRType.IRFnType;
 import IR.IRType.IRIntType;
 import IR.IRType.IRPtType;
+import IR.IRType.IRType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRParameter;
 import IR.IRValue.IRBaseValue;
@@ -54,6 +55,7 @@ import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.Inst.AllocaInst;
 import IR.IRValue.IRUser.Inst.BinaryInst;
+import IR.IRValue.IRUser.Inst.BrInst;
 import IR.IRValue.IRUser.Inst.CallInst;
 import IR.IRValue.IRUser.Inst.CastInst;
 import IR.IRValue.IRUser.Inst.GEPInst;
@@ -68,15 +70,7 @@ import IR.Util.Transfer;
 
 public class IRBuilder implements ASTVisitor {
 
-    private class CurStatus {
-        public IRFn fn = null;
-        public IRBasicBlock block = null;
-        public Scope scope = null;
-        public BaseType whoseMember = null;
-        public boolean justNeedAddr = false;
-    }
-
-    private CurStatus cur = new CurStatus();
+    public IRCurrent cur = new IRCurrent();
 
     public IRModule topModule;
     public ASTNode progRoot;
@@ -141,14 +135,10 @@ public class IRBuilder implements ASTVisitor {
         it.varList.forEach(vardecl -> visit(vardecl));
     }
 
-    private void terminalCreator(IRFn fn) {
+    private void terminalToRet(IRFn fn) {
         fn.blockList.forEach(block -> {
-            if (block.terminal == null) {
-                if (((IRFnType) fn.valueType).retType instanceof IRVoidType)
-                    block.terminal = RetInst.createVoidRetInst();
-                else
-                    throw new MyException("non-void function have a block without terminal");
-            }
+            if (block.getTerminal() == null)
+                new BrInst(fn.retBlock, block);
         });
     }
 
@@ -164,6 +154,13 @@ public class IRBuilder implements ASTVisitor {
         new StoreInst(irPara, para.varValue, cur.block);
     }
 
+    private void terminateRetBlock(IRFn fn) {
+        if (fn.retValueAddr == null)
+            RetInst.createVoidRetInst(fn.retBlock);
+        else
+            new RetInst(new LoadInst(fn.retValueAddr, fn.retBlock), fn.retBlock);
+    }
+
     @Override
     public void visit(FuncDeclrStmtNode it) {
         // since we have got the fnType information
@@ -175,9 +172,14 @@ public class IRBuilder implements ASTVisitor {
         // 2. add it to topModule and set the current status
         topModule.globalFnList.add(nowFn);
         cur.fn = nowFn;
-        cur.block = new IRBasicBlock();
-        cur.fn.addBlock(cur.block);
+        cur.block = new IRBasicBlock(cur.fn);
         cur.scope = new Scope(cur.scope);
+
+        // 2.1 add retBlock and retAddr
+        IRBasicBlock.addRetBlock(nowFn);
+        IRType retType = ((IRFnType) nowFn.valueType).retType;
+        if (!(retType instanceof IRVoidType))
+            nowFn.retValueAddr = new AllocaInst(retType, cur.block);
 
         // 3. add the parameter list for IRFn
         if (funcInfo.inWhichClass != null) {
@@ -191,7 +193,10 @@ public class IRBuilder implements ASTVisitor {
         visit(it.body);
 
         // 5. create terminal instructions for every block
-        terminalCreator(nowFn);
+        terminalToRet(nowFn);
+
+        // 5.1 terminate the retBlock
+        terminateRetBlock(nowFn);
 
         // 6. reset the current status
         cur.fn = null;
@@ -394,49 +399,134 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(IfStmtNode it) {
+        var beforeIfBlock = cur.block;
+        it.expr.accept(this);
+
+        IRBasicBlock thenBlock = new IRBasicBlock(cur.fn);
         cur.scope = new Scope(cur.scope);
-        // TODO Auto-generated method stub
+        cur.block = thenBlock;
+        it.thenStmt.accept(this);
         cur.scope = cur.scope.parent;
 
+        IRBasicBlock elseBlock = null;
+        if (it.elseStmt != null) {
+            elseBlock = new IRBasicBlock(cur.fn);
+            cur.scope = new Scope(cur.scope);
+            cur.block = elseBlock;
+            it.elseStmt.accept(this);
+            cur.scope = cur.scope.parent;
+        }
+
+        IRBasicBlock afterIfBlock = new IRBasicBlock(cur.fn);
+        cur.block = afterIfBlock;
+
+        beforeIfBlock.tailBlock = cur.block;
+
+        if (elseBlock != null) {
+            new BrInst(it.expr.irValue, thenBlock, elseBlock, beforeIfBlock);
+            new BrInst(afterIfBlock, thenBlock.tailBlock);
+            new BrInst(afterIfBlock, elseBlock.tailBlock);
+        } else {
+            new BrInst(it.expr.irValue, thenBlock, afterIfBlock, beforeIfBlock);
+            new BrInst(afterIfBlock, thenBlock.tailBlock);
+        }
     }
 
     @Override
     public void visit(WhileStmtNode it) {
+        IRBasicBlock beforeBlock = cur.block;
         cur.scope = new Scope(cur.scope);
-        // TODO Auto-generated method stub
+
+        IRBasicBlock conditionBlock = new IRBasicBlock(cur.fn);
+        cur.block = conditionBlock;
+        it.expr.accept(this);
+
+        IRBasicBlock whileBodyBlock = new IRBasicBlock(cur.fn);
+        IRBasicBlock afterWhileBlock = new IRBasicBlock();
+        cur.block = whileBodyBlock;
+        cur.pushInfo(afterWhileBlock, conditionBlock);
+        it.body.accept(this);
+        cur.popInfo();
+
+        cur.fn.addBlock(afterWhileBlock);
+        cur.block = afterWhileBlock;
+        beforeBlock.tailBlock = afterWhileBlock;
+
+        new BrInst(conditionBlock, beforeBlock);
+        new BrInst(it.expr.irValue, whileBodyBlock, afterWhileBlock, conditionBlock.tailBlock);
+        new BrInst(conditionBlock, whileBodyBlock.tailBlock);
+
         cur.scope = cur.scope.parent;
     }
 
     @Override
     public void visit(ForStmtNode it) {
+        IRBasicBlock beforeBlock = cur.block;
         cur.scope = new Scope(cur.scope);
-        // TODO Auto-generated method stub
-        cur.scope = cur.scope.parent;
 
+        if (it.varDecl != null)
+            it.varDecl.accept(this);
+        else if (it.incExpr != null)
+            it.initExpr.accept(this);
+
+        IRBasicBlock conditionBlock = new IRBasicBlock(cur.fn);
+        cur.block = conditionBlock;
+        if (it.condExpr != null)
+            it.condExpr.accept(this);
+
+        IRBasicBlock forBodyBlock = new IRBasicBlock(cur.fn);
+        IRBasicBlock stepBlock = new IRBasicBlock(); // continue
+        IRBasicBlock afterForBlock = new IRBasicBlock(); // break
+        cur.block = forBodyBlock;
+        cur.pushInfo(afterForBlock, stepBlock);
+        it.body.accept(this);
+        cur.popInfo();
+
+        cur.fn.addBlock(stepBlock);
+        cur.block = stepBlock;
+        if (it.incExpr != null)
+            it.incExpr.accept(this);
+
+        cur.fn.addBlock(afterForBlock);
+        cur.block = afterForBlock;
+        beforeBlock.tailBlock = afterForBlock;
+
+        // before -> condition
+        new BrInst(conditionBlock, beforeBlock);
+        // condition -> forbody or afeterFor
+        if (it.condExpr != null)
+            new BrInst(it.condExpr.irValue, forBodyBlock, afterForBlock, conditionBlock.tailBlock);
+        else // condition -> forbody
+            new BrInst(forBodyBlock, conditionBlock.tailBlock);
+        // forbody -> step
+        new BrInst(stepBlock, forBodyBlock.tailBlock);
+        // step -> condition
+        new BrInst(conditionBlock, stepBlock.tailBlock);
+
+        cur.scope = cur.scope.parent;
     }
 
     @Override
     public void visit(ReturnStmtNode it) {
         if (it.expr == null)// return void
-            cur.block.terminal = RetInst.createVoidRetInst();
+            new BrInst(cur.fn.retBlock, cur.block);
         else {
             it.expr.accept(this);
             if (it.expr.irValue.valueType instanceof IRIntType b && b.intLen == 1)
                 it.expr.irValue = new CastInst(it.expr.irValue, new IRIntType(8), castType.ZEXT, cur.block);
-            cur.block.terminal = new RetInst(it.expr.irValue);
+            new StoreInst(it.expr.irValue, cur.fn.retValueAddr, cur.block);
+            new BrInst(cur.fn.retBlock, cur.block);
         }
     }
 
     @Override
     public void visit(ContinueStmtNode it) {
-        // TODO Auto-generated method stub
-
+        new BrInst(cur.getCurContinue(), cur.block);
     }
 
     @Override
     public void visit(BreakStmtNode it) {
-        // TODO Auto-generated method stub
-
+        new BrInst(cur.getCurBreak(), cur.block);
     }
 
     private BaseType getWhoseMember(ExprNode it) {
@@ -556,40 +646,45 @@ public class IRBuilder implements ASTVisitor {
         }
     }
 
+    private void varInit(GlobalVariable gVar, SingleVarDeclStmtNode it) {
+        if (it.expr instanceof LiteralExprNode exprNode && exprNode.lit == literalType.INT) {
+            // int type(i32) can be handled specially
+            it.expr.accept(this);
+            gVar.isInit = true;
+            gVar.initValue = it.expr.irValue;
+        } else {
+            var initFnNameString = "__mx_global_var_init." + gVar.constName;
+            gVar.initFn = IRFn.getInitFn(initFnNameString);
+            IRBasicBlock.addRetBlock(gVar.initFn);
+            var block = gVar.initFn.retBlock;
+            topModule.varInitFnList.add(gVar.initFn);
+            cur.fn = gVar.initFn;
+            cur.block = block;
+
+            gVar.isInit = true;
+            gVar.initValue = gVar.derefType.defaultValue();
+            it.expr.accept(this);
+            new StoreInst(it.expr.irValue, gVar, cur.block);
+
+            RetInst.createVoidRetInst(cur.block);
+
+            cur.fn = null;
+            cur.block = null;
+        }
+    }
+
     @Override
     public void visit(SingleVarDeclStmtNode it) {
 
         if (cur.fn == null) {// global
             GlobalVariable gVar = new GlobalVariable(it.decl.Id, it.decl.typeName);
             gVar.initValue = gVar.derefType.defaultValue();
-            if (it.expr != null) { // has initial value
-                if (it.expr instanceof LiteralExprNode exprNode && exprNode.lit == literalType.INT) {
-                    // int type(i32) can be handled specially
-                    it.expr.accept(this);
-                    gVar.isInit = true;
-                    gVar.initValue = it.expr.irValue;
-                } else {
-                    var initFnNameString = "__mx_global_var_init." + gVar.constName;
-                    gVar.initFn = IRFn.getInitFn(initFnNameString);
-                    var block = IRBasicBlock.getVarInitBB();
-                    gVar.initFn.addBlock(block);
-                    topModule.varInitFnList.add(gVar.initFn);
-                    cur.fn = gVar.initFn;
-                    cur.block = block;
+            if (it.expr != null) // has initial value
+                varInit(gVar, it);
 
-                    gVar.isInit = true;
-                    gVar.initValue = gVar.derefType.defaultValue();
-                    it.expr.accept(this);
-                    new StoreInst(it.expr.irValue, gVar, cur.block);
-
-                    cur.fn = null;
-                    cur.block = null;
-                }
-            }
             topModule.globalVarList.add(gVar);
             it.irValue = it.decl.varValue = gVar;
         } else {// local
-
             it.irValue = it.decl.varValue = new AllocaInst(Transfer.typeTransfer(it.decl.typeName), cur.block);
             if (it.expr != null) {
                 it.expr.accept(this);

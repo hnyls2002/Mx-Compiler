@@ -6,12 +6,15 @@ import Debug.MyException;
 import Frontend.Util.Types.FuncInfo;
 import IR.IRType.IRFnType;
 import IR.IRValue.IRParameter;
+import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import IR.Util.Transfer;
 
 public class IRFn extends BaseGlobalValue {
     public ArrayList<IRParameter> paraList = new ArrayList<>();
     public ArrayList<IRBasicBlock> blockList = new ArrayList<>();
+    public IRBaseValue retValueAddr = null;
+    public IRBasicBlock retBlock = null;
 
     public IRFn(FuncInfo fnInfo) {
         // 1. build the IRFn

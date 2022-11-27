@@ -62,15 +62,18 @@ public class IRPrinter {
     void printFn(IRFn fn) {
         System.out.print(fn.defToString());
         System.out.print("{\n");
-        fn.blockList.forEach(blk -> printBB(blk));
+        fn.blockList.forEach(block -> {
+            printBB(block);
+            System.out.print('\n');
+        });
+        printBB(fn.retBlock);
         System.out.print("}\n\n");
     }
 
     private void printBB(IRBasicBlock block) {
-        if (block.entryString != null)
-            System.out.print(block.entryString);
+        System.out.print(block.defToString() + '\n');
         block.instList.forEach(inst -> printInst(inst));
-        printInst(block.terminal);
+        printInst(block.getTerminal());
     }
 
     private void printInst(IRBaseInst inst) {
