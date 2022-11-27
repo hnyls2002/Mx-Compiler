@@ -48,6 +48,10 @@ public class IRBasicBlock extends IRBaseValue {
             instList.add(inst);
     }
 
+    public IRBasicBlock getTail() {
+        return tailBlock == this ? this : (tailBlock = tailBlock.getTail());
+    }
+
     @Override
     public String getName() {
         return entryString == null ? "entry" : entryString;

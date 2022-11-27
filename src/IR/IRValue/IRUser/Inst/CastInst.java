@@ -26,14 +26,20 @@ public class CastInst extends IRBaseInst {
     IRType targetType = null;
     castType opCode = null;
 
+    public static IRBaseValue tryBoolCast(IRBaseValue srcValue, IRType targetType, castType opCode,
+            IRBasicBlock block) {
+        if (srcValue.valueType instanceof IRIntType int1 && targetType instanceof IRIntType int2 && int1.intLen == 1
+                && int2.intLen == 1)
+            return srcValue;
+        else
+            return new CastInst(srcValue, targetType, opCode, block);
+    }
+
     public CastInst(IRBaseValue srcValue, IRType targetType, castType opCode, IRBasicBlock block) {
         super(targetType);
         this.srcValue = srcValue;
         this.targetType = targetType;
         this.opCode = opCode;
-        if (srcValue.valueType instanceof IRIntType int1 && targetType instanceof IRIntType int2 && int1.intLen == 1
-                && int2.intLen == 1)
-            return;
         block.addInst(this);
     }
 

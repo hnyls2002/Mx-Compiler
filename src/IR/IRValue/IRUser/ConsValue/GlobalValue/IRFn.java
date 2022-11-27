@@ -23,13 +23,6 @@ public class IRFn extends BaseGlobalValue {
         if (fnInfo.inWhichClass != null)// put prefix
             this.constName = fnInfo.inWhichClass.structType.className + '.' + this.constName;
 
-        // 2. add the fnValue to ast fnInfo
-        // if (fnInfo.fnType != (IRFnType) this.valueType) {
-        // System.err.println(fnInfo.fnType.fnNameString);
-        // System.err.println(fnInfo.fnType.paraTypeList);
-        // System.err.println(((IRFnType) this.valueType).fnNameString);
-        // System.err.println(((IRFnType) this.valueType).paraTypeList);
-        // }
         fnInfo.fnType = (IRFnType) this.valueType;
     }
 

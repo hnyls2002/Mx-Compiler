@@ -62,6 +62,7 @@ import IR.IRValue.IRUser.Inst.CastInst;
 import IR.IRValue.IRUser.Inst.GEPInst;
 import IR.IRValue.IRUser.Inst.IcmpInst;
 import IR.IRValue.IRUser.Inst.LoadInst;
+import IR.IRValue.IRUser.Inst.PhiInst;
 import IR.IRValue.IRUser.Inst.RetInst;
 import IR.IRValue.IRUser.Inst.StoreInst;
 import IR.IRValue.IRUser.Inst.BinaryInst.binaryOperator;
@@ -219,12 +220,39 @@ public class IRBuilder implements ASTVisitor {
         if (it.lhs.typeName.equals(gScope.stringName))
             stringBinary(it);
         else if (it.opcode == binaryOp.LOGIC_AND || it.opcode == binaryOp.LOGIC_OR) {
+            it.lhs.accept(this);
+            IRBasicBlock beforeBlock = cur.block;
+            IRBasicBlock rhsBlock = new IRBasicBlock();
+            IRBasicBlock endBlock = new IRBasicBlock();
+            boolean isOr = (it.opcode == binaryOp.LOGIC_OR);
+
+            cur.fn.addBlock(rhsBlock);
+            cur.block = rhsBlock;
+            it.rhs.accept(this);
+
+            cur.fn.addBlock(endBlock);
+            cur.block = endBlock;
+            beforeBlock.tailBlock = endBlock.getTail();
+
+            if (isOr) {
+                new BrInst(it.lhs.irValue, endBlock, rhsBlock, beforeBlock);
+                new BrInst(endBlock, rhsBlock.getTail());
+                it.irValue = new PhiInst(beforeBlock, new IntConst(isOr ? 1 : 0, 1), rhsBlock.getTail(),
+                        it.rhs.irValue,
+                        endBlock);
+            } else {
+                new BrInst(it.lhs.irValue, rhsBlock, endBlock, beforeBlock);
+                new BrInst(endBlock, rhsBlock.getTail());
+                it.irValue = new PhiInst(beforeBlock, new IntConst(isOr ? 1 : 0, 1), rhsBlock.getTail(),
+                        it.rhs.irValue,
+                        endBlock);
+            }
         } else {
             it.lhs.accept(this);
             it.rhs.accept(this);
             if (it.lhs.typeName.equals(gScope.boolName)) {
-                it.lhs.irValue = new CastInst(it.lhs.irValue, new IRIntType(1), castType.TRUNC, cur.block);
-                it.rhs.irValue = new CastInst(it.rhs.irValue, new IRIntType(1), castType.TRUNC, cur.block);
+                it.lhs.irValue = CastInst.tryBoolCast(it.lhs.irValue, new IRIntType(1), castType.TRUNC, cur.block);
+                it.rhs.irValue = CastInst.tryBoolCast(it.rhs.irValue, new IRIntType(1), castType.TRUNC, cur.block);
             }
             IRBaseValue irValue = null;
             var binaryOpCode = Transfer.binaryArthTransfer(it.opcode);
@@ -248,7 +276,7 @@ public class IRBuilder implements ASTVisitor {
             }
             case LOGIC_NOT -> { // bool type : transfer to i1 first
                 IRBaseValue i1Value = it.expr.irValue;
-                i1Value = new CastInst(i1Value, new IRIntType(1), castType.TRUNC, cur.block);
+                i1Value = CastInst.tryBoolCast(i1Value, new IRIntType(1), castType.TRUNC, cur.block);
                 it.irValue = new BinaryInst(binaryOperator.irXOR, i1Value, new IntConst(1, 1), cur.block);
             }
             case PRE_ADD -> {
@@ -365,11 +393,11 @@ public class IRBuilder implements ASTVisitor {
 
         if (elseBlock != null) {
             new BrInst(it.expr.irValue, thenBlock, elseBlock, beforeIfBlock);
-            new BrInst(afterIfBlock, thenBlock.tailBlock);
-            new BrInst(afterIfBlock, elseBlock.tailBlock);
+            new BrInst(afterIfBlock, thenBlock.getTail());
+            new BrInst(afterIfBlock, elseBlock.getTail());
         } else {
             new BrInst(it.expr.irValue, thenBlock, afterIfBlock, beforeIfBlock);
-            new BrInst(afterIfBlock, thenBlock.tailBlock);
+            new BrInst(afterIfBlock, thenBlock.getTail());
         }
     }
 
@@ -391,11 +419,11 @@ public class IRBuilder implements ASTVisitor {
 
         cur.fn.addBlock(afterWhileBlock);
         cur.block = afterWhileBlock;
-        beforeBlock.tailBlock = afterWhileBlock;
+        beforeBlock.tailBlock = afterWhileBlock.getTail();
 
         new BrInst(conditionBlock, beforeBlock);
-        new BrInst(it.expr.irValue, whileBodyBlock, afterWhileBlock, conditionBlock.tailBlock);
-        new BrInst(conditionBlock, whileBodyBlock.tailBlock);
+        new BrInst(it.expr.irValue, whileBodyBlock, afterWhileBlock, conditionBlock.getTail());
+        new BrInst(conditionBlock, whileBodyBlock.getTail());
 
         cur.scope = cur.scope.parent;
     }
@@ -430,19 +458,19 @@ public class IRBuilder implements ASTVisitor {
 
         cur.fn.addBlock(afterForBlock);
         cur.block = afterForBlock;
-        beforeBlock.tailBlock = afterForBlock;
+        beforeBlock.tailBlock = afterForBlock.getTail();
 
         // before -> condition
         new BrInst(conditionBlock, beforeBlock);
         // condition -> forbody or afeterFor
         if (it.condExpr != null)
-            new BrInst(it.condExpr.irValue, forBodyBlock, afterForBlock, conditionBlock.tailBlock);
+            new BrInst(it.condExpr.irValue, forBodyBlock, afterForBlock, conditionBlock.getTail());
         else // condition -> forbody
-            new BrInst(forBodyBlock, conditionBlock.tailBlock);
+            new BrInst(forBodyBlock, conditionBlock.getTail());
         // forbody -> step
-        new BrInst(stepBlock, forBodyBlock.tailBlock);
+        new BrInst(stepBlock, forBodyBlock.getTail());
         // step -> condition
-        new BrInst(conditionBlock, stepBlock.tailBlock);
+        new BrInst(conditionBlock, stepBlock.getTail());
 
         cur.scope = cur.scope.parent;
     }
