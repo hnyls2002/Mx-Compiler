@@ -30,6 +30,8 @@ public class IRPrinter {
     public void printIR() {
         System.out.print(ExternInfo.getExternInfo());
         System.out.print('\n');
+        topModule.builtinFnList.forEach(fnType -> System.out.println(fnType.toString()));
+        System.out.print('\n');
         topModule.classList.forEach(classDef -> printClassDef(classDef));
         if (!topModule.classList.isEmpty())
             System.out.print('\n');

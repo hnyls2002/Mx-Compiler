@@ -7,13 +7,21 @@ import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 
 public class CallInst extends IRBaseInst {
-    public ArrayList<IRBaseValue> argList = null;
+    public ArrayList<IRBaseValue> argList = new ArrayList<>();
     public IRFnType calledFnType = null;
 
     public CallInst(IRFnType calledFnType, ArrayList<IRBaseValue> argList, IRBasicBlock block) {
         super(calledFnType.retType);
         this.argList = argList;
         this.calledFnType = calledFnType;
+        block.addInst(this);
+    }
+
+    public CallInst(IRFnType calledFnType, IRBasicBlock block, IRBaseValue... argList) {
+        super(calledFnType.retType);
+        this.calledFnType = calledFnType;
+        for (var arg : argList)
+            this.argList.add(arg);
         block.addInst(this);
     }
 

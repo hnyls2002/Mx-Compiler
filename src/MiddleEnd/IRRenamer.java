@@ -26,7 +26,6 @@ public class IRRenamer {
     public void renameIR() {
         topModule.globalFnList.forEach(fn -> renameFn(fn));
         topModule.varInitFnList.forEach(fn -> renameFn(fn));
-        topModule.builtinFnList.forEach(fn -> renameFn(fn));
     }
 
     public void renameFn(IRFn fn) {

@@ -67,6 +67,7 @@ import IR.IRValue.IRUser.Inst.RetInst;
 import IR.IRValue.IRUser.Inst.StoreInst;
 import IR.IRValue.IRUser.Inst.BinaryInst.binaryOperator;
 import IR.IRValue.IRUser.Inst.CastInst.castType;
+import IR.IRValue.IRUser.Inst.IcmpInst.icmpOperator;
 import IR.Util.Transfer;
 
 public class IRBuilder implements ASTVisitor {
@@ -84,6 +85,7 @@ public class IRBuilder implements ASTVisitor {
 
     public IRModule buildIR() {
         topModule = new IRModule();
+        BuiltinPreload.preload(topModule, gScope);
         IRPreload();
         cur.scope = gScope;
         cur.scope.DefMap.clear();
@@ -101,8 +103,6 @@ public class IRBuilder implements ASTVisitor {
                     fnInfo.inWhichClass = classTypeInfo;
                     fnInfo.fnType = Transfer.fnTypeTransfer(fnInfo);
                 });
-            } else {
-                // TODO other types
             }
         });
         gScope.funMap.forEach((funNameString, funcInfo) -> {
@@ -211,8 +211,33 @@ public class IRBuilder implements ASTVisitor {
 
     }
 
+    private IRFnType getFnType(String funcNameString) {
+        for (var fnType : topModule.builtinFnList) {
+            if (fnType.fnNameString.equals(funcNameString))
+                return (IRFnType) fnType;
+        }
+        return null;
+    }
+
     private void stringBinary(BinaryOpExprNode it) {
-        // TODO
+        it.lhs.accept(this);
+        it.rhs.accept(this);
+        var binaryOpCode = Transfer.binaryArthTransfer(it.opcode);
+        var icmpOpCode = Transfer.binaryCmpTransfer(it.opcode);
+        if (binaryOpCode == binaryOperator.irADD)
+            it.irValue = new CallInst(getFnType("__str_plus"), cur.block, it.lhs.irValue, it.rhs.irValue);
+        if (icmpOpCode == icmpOperator.irEQ)
+            it.irValue = new CallInst(getFnType("__str_eq"), cur.block, it.lhs.irValue, it.rhs.irValue);
+        if (icmpOpCode == icmpOperator.irNE)
+            it.irValue = new CallInst(getFnType("__str_ne"), cur.block, it.lhs.irValue, it.rhs.irValue);
+        if (icmpOpCode == icmpOperator.irSLT)
+            it.irValue = new CallInst(getFnType("__str_lt"), cur.block, it.lhs.irValue, it.rhs.irValue);
+        if (icmpOpCode == icmpOperator.irSLE)
+            it.irValue = new CallInst(getFnType("__str_le"), cur.block, it.lhs.irValue, it.rhs.irValue);
+        if (icmpOpCode == icmpOperator.irSGT)
+            it.irValue = new CallInst(getFnType("__str_gt"), cur.block, it.lhs.irValue, it.rhs.irValue);
+        if (icmpOpCode == icmpOperator.irSGE)
+            it.irValue = new CallInst(getFnType("__str_ge"), cur.block, it.lhs.irValue, it.rhs.irValue);
     }
 
     @Override

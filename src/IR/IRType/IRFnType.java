@@ -2,8 +2,6 @@ package IR.IRType;
 
 import java.util.ArrayList;
 
-import Debug.MyException;
-
 // function signatures
 
 public class IRFnType extends IRType {
@@ -16,6 +14,14 @@ public class IRFnType extends IRType {
     public IRFnType(String fnNamString) {
         super(IRTypeId.FnTypeId);
         this.fnNameString = fnNamString;
+    }
+
+    public IRFnType(String fnNameString, IRType retType, IRType... ParaList) {
+        super(IRTypeId.FnTypeId);
+        this.fnNameString = fnNameString;
+        this.retType = retType;
+        for (var para : ParaList)
+            this.paraTypeList.add(para);
     }
 
     public static IRFnType getVarInitFnType(String initFnNameString) {
@@ -31,6 +37,12 @@ public class IRFnType extends IRType {
 
     @Override
     public String toString() {
-        throw new MyException("You don't need to use the FnType toString() method");
+        var ret = "declare " + retType.toString() + ' ' + getFnName() + '(';
+        for (var para : paraTypeList)
+            ret += para.toString() + ", ";
+        if (!paraTypeList.isEmpty())
+            ret = ret.substring(0, ret.length() - 2);
+        ret += ')';
+        return ret;
     }
 }
