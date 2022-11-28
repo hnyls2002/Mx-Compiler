@@ -508,8 +508,8 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(IfStmtNode it) {
-        var beforeIfBlock = cur.block;
         it.expr.accept(this);
+        var beforeIfBlock = cur.block;
 
         IRBasicBlock thenBlock = new IRBasicBlock(cur.fn);
         cur.scope = new Scope(cur.scope);
