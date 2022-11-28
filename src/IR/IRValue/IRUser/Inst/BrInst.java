@@ -1,8 +1,10 @@
 package IR.IRValue.IRUser.Inst;
 
+import IR.IRType.IRIntType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
+import IR.IRValue.IRUser.Inst.CastInst.castType;
 
 public class BrInst extends IRBaseInst {
     public IRBaseValue condition;
@@ -10,6 +12,11 @@ public class BrInst extends IRBaseInst {
 
     public BrInst(IRBaseValue condition, IRBasicBlock trueBlock, IRBasicBlock falseBlock, IRBasicBlock curBlock) {
         super(new IRVoidType());
+
+        assert condition.valueType instanceof IRIntType;
+        if (condition.valueType instanceof IRIntType t && t.intLen != 1)
+            condition = new CastInst(condition, new IRIntType(1), castType.TRUNC, curBlock);
+
         this.condition = condition;
         this.trueBlock = trueBlock;
         this.falseBlock = falseBlock;

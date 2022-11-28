@@ -12,8 +12,7 @@ import IR.IRType.IRVoidType;
 public class BuiltinPreload {
     public static void preload(IRModule topModule, GlobalScope gScope) {
         IRType i1 = new IRIntType(1);
-        IRType i8 = new IRIntType(8);
-        IRType i8s = new IRPtType(i8, 1);
+        IRType i8s = new IRPtType(new IRIntType(8), 1);
         IRType i32 = new IRIntType(32);
         IRType vd = new IRVoidType();
         topModule.builtinFnList.add(new IRFnType("__malloc", i8s, i32));

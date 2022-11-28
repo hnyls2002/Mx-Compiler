@@ -191,7 +191,7 @@ public class IRBuilder implements ASTVisitor {
 
         // *** call the builtin function
         if (it.funcNameString.equals("main"))
-            topModule.varInitFnList.forEach(initFn -> new CallInst((IRFnType)initFn.valueType, cur.block));
+            topModule.varInitFnList.forEach(initFn -> new CallInst((IRFnType) initFn.valueType, cur.block));
 
         // 2.1 add retBlock and retAddr
         IRBasicBlock.addRetBlock(nowFn);
@@ -334,6 +334,8 @@ public class IRBuilder implements ASTVisitor {
             cur.fn.addBlock(rhsBlock);
             cur.block = rhsBlock;
             it.rhs.accept(this);
+            if (it.rhs.irValue.valueType instanceof IRIntType t && t.intLen != 1)
+                it.rhs.irValue = new CastInst(it.rhs.irValue, new IRIntType(1), castType.TRUNC, cur.block);
 
             cur.fn.addBlock(endBlock);
             cur.block = endBlock;
@@ -723,8 +725,8 @@ public class IRBuilder implements ASTVisitor {
                         new IntConst(0, 32));
             }
             case NULL -> new NullConst();
-            case TRUE -> new IntConst(1, 8);
-            case FALSE -> new IntConst(0, 8);
+            case TRUE -> new IntConst(1, 1);
+            case FALSE -> new IntConst(0, 1);
         };
     }
 
