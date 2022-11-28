@@ -594,7 +594,7 @@ public class IRBuilder implements ASTVisitor {
 
         if (it.varDecl != null)
             it.varDecl.accept(this);
-        else if (it.incExpr != null)
+        else if (it.initExpr != null)
             it.initExpr.accept(this);
 
         IRBasicBlock conditionBlock = new IRBasicBlock(cur.fn);
