@@ -237,7 +237,6 @@ public class IRBuilder implements ASTVisitor {
         new StoreInst(dimList.get(k).irValue, i32Ptr, cur.block);
 
         var elePtr = new CastInst(i8Ptr, addrType, castType.BIT, cur.block);
-        var startPtr = new GEPInst(elePtr, elePtr.valueType, cur.block, new IntConst(1, 32));
 
         if (k < dimList.size() - 1) {
             // curPtr = [startPtr, nexPtr];
@@ -247,6 +246,7 @@ public class IRBuilder implements ASTVisitor {
             IRBasicBlock bodyBlock = new IRBasicBlock();
             IRBasicBlock afterBlock = new IRBasicBlock();
 
+            var startPtr = new GEPInst(elePtr, elePtr.valueType, cur.block, new IntConst(1, 32));
             IRBaseValue endPtr = new GEPInst(startPtr, startPtr.valueType, cur.block, dimList.get(k).irValue);
             IRBaseValue curPtr = new PhiInst(cur.block, startPtr, null, null, null);
             IRBaseValue nexPtr = new GEPInst(curPtr, curPtr.valueType, null, new IntConst(1, 32));
@@ -272,6 +272,7 @@ public class IRBuilder implements ASTVisitor {
             new BrInst(conditionExpr, bodyBlock, afterBlock, conditionBlock.getTail());
             new BrInst(conditionBlock, bodyBlock.getTail());
         }
+
         return elePtr;
     }
 
