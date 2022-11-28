@@ -10,7 +10,7 @@ import IR.IRValue.IRBaseValue;
 
 public class IRType {
     public enum IRTypeId {
-        LabelTypeId, ArrayTypeId, IntTypeId, VoidTypeId, FnTypeId, PtTypeId, StructTypeId
+        LabelTypeId, ArrayTypeId, IntTypeId, VoidTypeId, FnTypeId, PtTypeId, StructTypeId, NullTypeId
     }
 
     public IRTypeId typeId;
@@ -29,8 +29,11 @@ public class IRType {
 
     @Override
     public boolean equals(Object obj) {
+        if (typeId == IRTypeId.NullTypeId && obj instanceof IRType t
+                && (t.typeId == IRTypeId.NullTypeId || t.typeId == IRTypeId.PtTypeId))
+            return true;
         return false;
-        // only override int and pointer type
+        // only override int and pointer type and null type
     }
 
     public int getSize() {

@@ -7,7 +7,7 @@ public class NullConst extends BaseConstData {
 
     // null is only used for pointer initialize, it's type can be any pointer type!
     public NullConst() {
-        super(new IRType(IRTypeId.PtTypeId));
+        super(new IRType(IRTypeId.NullTypeId));
     }
 
     @Override

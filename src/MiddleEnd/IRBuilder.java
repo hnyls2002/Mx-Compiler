@@ -691,7 +691,7 @@ public class IRBuilder implements ASTVisitor {
             if (!onlyAddr)
                 it.irValue = new LoadInst(gep, cur.block);
         } else if (it.funcCall != null) {
-            if (it.funcCall.FuncNameString.equals("size")) {
+            if (it.funcCall.FuncNameString.equals("size") && it.expr.typeName.dimen > 0) {
                 var sizeAddr = new CastInst(it.expr.irValue, new IRPtType(new IRIntType(32), 1), castType.BIT,
                         cur.block);
                 it.irValue = new LoadInst(sizeAddr, cur.block);

@@ -39,6 +39,8 @@ public class IRPtType extends IRType {
 
     @Override
     public boolean equals(Object obj) {
+        if (obj instanceof IRType t && t.typeId == IRTypeId.NullTypeId)
+            return true;
         if (obj instanceof IRPtType t && t.atomicType.equals(atomicType) && t.refNum == refNum)
             return true;
         return false;
