@@ -104,7 +104,9 @@ public class IRBuilder implements ASTVisitor {
                     fnInfo.inWhichClass = classTypeInfo;
                     fnInfo.fnType = Transfer.fnTypeTransfer(fnInfo);
                 });
-                structType.constructFnType = Transfer.constructorTransfer(structType);
+                if (classTypeInfo.haveConst) {
+                    structType.constructFnType = Transfer.constructorTransfer(structType);
+                }
             }
         });
         gScope.funMap.forEach((funNameString, funcInfo) -> {
@@ -283,10 +285,13 @@ public class IRBuilder implements ASTVisitor {
             IRFnType fnType = getFnType("__malloc");
             IRBaseValue size = new IntConst(pt.getSize(), 32);
             it.irValue = new CallInst(fnType, cur.block, size);
-            it.irValue = new CastInst(it.irValue, pt, castType.BIT, cur.block);
-            IRFnType constructorType = ((ClassType) gScope.typeMap
-                    .get(it.typeName.typeNameString)).structType.constructFnType;
-            it.irValue = new CallInst(constructorType, cur.block, it.irValue);
+
+            var classInfo = (ClassType) gScope.typeMap.get(it.typeName.typeNameString);
+            if (classInfo.haveConst) {
+                IRFnType constructorType = classInfo.structType.constructFnType;
+                it.irValue = new CastInst(it.irValue, pt, castType.BIT, cur.block);
+                it.irValue = new CallInst(constructorType, cur.block, it.irValue);
+            }
         } else {
             it.irValue = arrMalloc((IRPtType) pt, it.dimenSize, 0);
         }
