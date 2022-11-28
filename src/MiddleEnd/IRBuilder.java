@@ -114,7 +114,14 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(ProgramNode it) {
-        it.blocks.forEach(v -> v.accept(this));
+        it.blocks.forEach(v -> {
+            if (v instanceof VarDeclStmtNode)
+                v.accept(this);
+        });
+        it.blocks.forEach(v -> {
+            if (!(v instanceof VarDeclStmtNode))
+                v.accept(this);
+        });
     }
 
     @Override
@@ -181,6 +188,10 @@ public class IRBuilder implements ASTVisitor {
         cur.fn = nowFn;
         cur.block = new IRBasicBlock(cur.fn);
         cur.scope = new Scope(cur.scope);
+
+        // *** call the builtin function
+        if (it.funcNameString.equals("main"))
+            topModule.varInitFnList.forEach(initFn -> new CallInst((IRFnType)initFn.valueType, cur.block));
 
         // 2.1 add retBlock and retAddr
         IRBasicBlock.addRetBlock(nowFn);
