@@ -1,6 +1,5 @@
 package IR.IRValue.IRUser.Inst;
 
-import IR.IRType.IRIntType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 
@@ -11,12 +10,13 @@ public class PhiInst extends IRBaseInst {
 
     public PhiInst(IRBasicBlock block1, IRBaseValue res1, IRBasicBlock block2, IRBaseValue res2,
             IRBasicBlock curBlock) {
-        super(new IRIntType(1));
+        super(res1.valueType);
         this.block1 = block1;
         this.res1 = res1;
         this.block2 = block2;
         this.res2 = res2;
-        curBlock.addInst(this);
+        if (curBlock != null)
+            curBlock.addInst(this);
     }
 
     @Override

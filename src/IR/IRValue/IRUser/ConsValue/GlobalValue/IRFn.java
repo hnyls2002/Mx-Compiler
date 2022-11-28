@@ -19,11 +19,13 @@ public class IRFn extends BaseGlobalValue {
     public IRFn(FuncInfo fnInfo) {
         // 1. build the IRFn
         super(Transfer.fnTypeTransfer(fnInfo));
-        this.constName = fnInfo.funcName;
-        if (fnInfo.inWhichClass != null)// put prefix
-            this.constName = fnInfo.inWhichClass.structType.className + '.' + this.constName;
-
+        this.constName = fnInfo.fnType.fnNameString;
         fnInfo.fnType = (IRFnType) this.valueType;
+    }
+
+    public IRFn(IRFnType constructorType) {
+        super(constructorType);
+        this.constName = constructorType.fnNameString;
     }
 
     private IRFn(IRFnType fnType, String fnNameString) {

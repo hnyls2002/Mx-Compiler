@@ -12,6 +12,7 @@ public class IRStructType extends IRType {
     public ArrayList<IRType> fieldTypeList = new ArrayList<>();
 
     public HashMap<String, Integer> fieldIdxMap = new HashMap<>();
+    public IRFnType constructFnType = null;
 
     public IRStructType(String className) {
         super(IRTypeId.StructTypeId);
@@ -49,6 +50,14 @@ public class IRStructType extends IRType {
     @Override
     public String toString() {
         return getClassName();
+    }
+
+    @Override
+    public int getSize() {
+        int sum = 0;
+        for (var ty : fieldTypeList)
+            sum += ty.getSize();
+        return sum;
     }
 
 }

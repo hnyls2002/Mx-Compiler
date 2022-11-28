@@ -69,7 +69,7 @@ public class Transfer {
             // 2. stored the index in sructType
             ret.fieldIdxMap.put(memVarString, ret.fieldTypeList.size() - 1);
             // 3. store the varValue(which is index) into classType's varMap
-            memVar.varValue = new IntConst(ret.fieldTypeList.size() - 1, 64);
+            memVar.varValue = new IntConst(ret.fieldTypeList.size() - 1, 32);
         });
         ret.isSolid = true;
 
@@ -82,6 +82,7 @@ public class Transfer {
         if (funcInfo.inWhichClass != null) { // set the first parameter to be struct type
             ret.methodFrom = funcInfo.inWhichClass.structType;
             ret.paraTypeList.add(ret.methodFrom);
+            ret.fnNameString = "struct." + funcInfo.inWhichClass.typeNameString + '.' + funcInfo.funcName;
         }
         for (var para : funcInfo.paraList)
             ret.paraTypeList.add(Transfer.typeTransfer(para.typeName));
@@ -116,5 +117,9 @@ public class Transfer {
             default -> null;
         };
         return icmpOpCode;
+    }
+
+    public static IRFnType constructorTransfer(IRStructType structType) {
+        return new IRFnType(structType.className + ".__cons", new IRPtType(structType, 1), new IRPtType(structType, 1));
     }
 }

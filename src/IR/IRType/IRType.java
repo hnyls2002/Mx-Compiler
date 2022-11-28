@@ -33,4 +33,11 @@ public class IRType {
         // only override int and pointer type
     }
 
+    public int getSize() {
+        return switch (typeId) {
+            case ArrayTypeId, FnTypeId, LabelTypeId, PtTypeId, VoidTypeId -> 8;
+            case IntTypeId -> 4;
+            default -> throw new IllegalArgumentException("Unexpected value: " + typeId);
+        };
+    }
 }

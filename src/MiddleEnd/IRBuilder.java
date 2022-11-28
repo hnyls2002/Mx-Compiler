@@ -60,6 +60,7 @@ import IR.IRValue.IRUser.Inst.BrInst;
 import IR.IRValue.IRUser.Inst.CallInst;
 import IR.IRValue.IRUser.Inst.CastInst;
 import IR.IRValue.IRUser.Inst.GEPInst;
+import IR.IRValue.IRUser.Inst.IRBaseInst;
 import IR.IRValue.IRUser.Inst.IcmpInst;
 import IR.IRValue.IRUser.Inst.LoadInst;
 import IR.IRValue.IRUser.Inst.PhiInst;
@@ -103,6 +104,7 @@ public class IRBuilder implements ASTVisitor {
                     fnInfo.inWhichClass = classTypeInfo;
                     fnInfo.fnType = Transfer.fnTypeTransfer(fnInfo);
                 });
+                structType.constructFnType = Transfer.constructorTransfer(structType);
             }
         });
         gScope.funMap.forEach((funNameString, funcInfo) -> {
@@ -124,6 +126,10 @@ public class IRBuilder implements ASTVisitor {
         var classTypeInfo = (ClassType) gScope.typeMap.get(it.classNameString);
         classTypeInfo.varMap.forEach((varNameString, memVar) -> cur.scope.DefMap.put(varNameString, memVar));
         classTypeInfo.funMap.forEach((fuNameString, fnInfo) -> cur.scope.funMap.put(fuNameString, fnInfo));
+
+        // 2.0 build the constructor
+        if (it.constructor != null)
+            it.constructor.accept(this);
 
         // 2. visit the function declaration
         it.funcDeclList.forEach(fn -> fn.accept(this));
@@ -205,10 +211,73 @@ public class IRBuilder implements ASTVisitor {
         cur.scope = cur.scope.parent;
     }
 
+    private IRBaseValue arrMalloc(IRPtType addrType, ArrayList<ExprNode> dimList, int k) {
+        IRFnType fnType = getFnType("__malloc");
+
+        dimList.get(k).accept(this);
+        IRBaseValue arrLength = new BinaryInst(binaryOperator.irADD, dimList.get(k).irValue, new IntConst(1, 32),
+                cur.block);
+        IRBaseValue arrSize = new BinaryInst(binaryOperator.irMUL, arrLength,
+                new IntConst(addrType.derefType().getSize(), 32), cur.block);
+
+        var i8Ptr = new CallInst(fnType, cur.block, arrSize);
+
+        var i32Ptr = new CastInst(i8Ptr, new IRPtType(new IRIntType(32), 1), castType.BIT, cur.block);
+        new StoreInst(dimList.get(k).irValue, i32Ptr, cur.block);
+
+        var elePtr = new CastInst(i8Ptr, addrType, castType.BIT, cur.block);
+        var startPtr = new GEPInst(elePtr, elePtr.valueType, cur.block, new IntConst(1, 32));
+
+        if (k < dimList.size() - 1) {
+            // curPtr = [startPtr, nexPtr];
+            // while(iPtr != endPtr){malloc(); nexPtr = curPtr + 1;}
+            IRBasicBlock beforeBlock = cur.block;
+            IRBasicBlock conditionBlock = new IRBasicBlock();
+            IRBasicBlock bodyBlock = new IRBasicBlock();
+            IRBasicBlock afterBlock = new IRBasicBlock();
+
+            IRBaseValue endPtr = new GEPInst(startPtr, startPtr.valueType, cur.block, dimList.get(k).irValue);
+            IRBaseValue curPtr = new PhiInst(cur.block, startPtr, null, null, null);
+            IRBaseValue nexPtr = new GEPInst(curPtr, curPtr.valueType, null, new IntConst(1, 32));
+
+            cur.fn.addBlock(conditionBlock);
+            cur.block = conditionBlock;
+            conditionBlock.addInst((IRBaseInst) curPtr);
+            var conditionExpr = new IcmpInst(icmpOperator.irNE, curPtr, endPtr, cur.block);
+
+            cur.fn.addBlock(bodyBlock);
+            cur.block = bodyBlock;
+            new StoreInst(arrMalloc((IRPtType) addrType.derefType(), dimList, k + 1), curPtr, cur.block);
+            cur.block.addInst((IRBaseInst) nexPtr);
+            ((PhiInst) curPtr).block2 = cur.block;
+            ((PhiInst) curPtr).res2 = nexPtr;
+
+            cur.fn.addBlock(afterBlock);
+            cur.block = afterBlock;
+
+            beforeBlock.tailBlock = afterBlock;
+
+            new BrInst(conditionBlock, beforeBlock);
+            new BrInst(conditionExpr, bodyBlock, afterBlock, conditionBlock.getTail());
+            new BrInst(conditionBlock, bodyBlock.getTail());
+        }
+        return elePtr;
+    }
+
     @Override
     public void visit(CreatorExprNode it) {
-        // TODO Auto-generated method stub
-
+        IRType pt = Transfer.typeTransfer(it.typeName);
+        if (it.dimenSize.size() == 0) {
+            IRFnType fnType = getFnType("__malloc");
+            IRBaseValue size = new IntConst(pt.getSize(), 32);
+            it.irValue = new CallInst(fnType, cur.block, size);
+            it.irValue = new CastInst(it.irValue, pt, castType.BIT, cur.block);
+            IRFnType constructorType = ((ClassType) gScope.typeMap
+                    .get(it.typeName.typeNameString)).structType.constructFnType;
+            it.irValue = new CallInst(constructorType, cur.block, it.irValue);
+        } else {
+            it.irValue = arrMalloc((IRPtType) pt, it.dimenSize, 0);
+        }
     }
 
     private IRFnType getFnType(String funcNameString) {
@@ -346,8 +415,21 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(SubscExprNode it) {
-        // TODO Auto-generated method stub
+        it.arr.accept(this);
+        it.sub.accept(this);
+        IRBaseValue arrAddr = it.arr.irValue;
+        if (arrAddr == null)
+            arrAddr = new LoadInst(it.arr.irAddr, cur.block);
+        IRBaseValue subExpr = it.sub.irValue;
 
+        // var tmp = new CastInst(arrAddr, new IRPtType(new IRIntType(32), 1),
+        // castType.BIT, cur.block);
+        // var tmp1 = new LoadInst(tmp, cur.block);
+        // new CallInst(getFnType("printlnInt"), cur.block, tmp1);
+        subExpr = new BinaryInst(binaryOperator.irADD, subExpr, new IntConst(1, 32), cur.block);
+
+        it.irAddr = new GEPInst(arrAddr, arrAddr.valueType, cur.block, subExpr);
+        it.irValue = new LoadInst(it.irAddr, cur.block);
     }
 
     @Override
@@ -381,8 +463,41 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(SelfConstructNode it) {
+        // since we have got the fnType information
+
+        // 1. build the function information
+        var constructType = ((ClassType) gScope.typeMap.get(it.consNameString)).structType.constructFnType;
+        IRFn constructor = new IRFn(constructType);
+
+        // 2. add it to topModule and set the current status
+        topModule.globalFnList.add(constructor);
+        cur.fn = constructor;
+        cur.block = new IRBasicBlock(cur.fn);
         cur.scope = new Scope(cur.scope);
-        // TODO Auto-generated method stub
+
+        // 2.1 add retBlock and retAddr
+        IRBasicBlock.addRetBlock(constructor);
+        IRType retType = constructType.retType;
+        constructor.retValueAddr = new AllocaInst(retType, cur.block);
+
+        // 3. add the parameter list for IRFn
+        TypeIdPair thisPara = new TypeIdPair(new TypeName(it.consNameString, 0, true), "this");
+        addParameter(thisPara);
+
+        // 4. visit the function's body
+        visit(it.body);
+
+        new StoreInst(cur.fn.paraList.get(0), cur.fn.retValueAddr, cur.block);
+
+        // 5. create terminal instructions for every block
+        terminalToRet(constructor);
+
+        // 5.1 terminate the retBlock
+        terminateRetBlock(constructor);
+
+        // 6. reset the current status
+        cur.fn = null;
+        cur.block = null;
         cur.scope = cur.scope.parent;
     }
 
@@ -551,16 +666,23 @@ public class IRBuilder implements ASTVisitor {
         if (it.idExpr != null) {
             it.idExpr.accept(this);
             var gepInstType = new IRPtType(Transfer.typeTransfer(it.typeName), 1);
-            var gep = new GEPInst(it.expr.irValue, gepInstType, cur.block, ((IntConst) it.idExpr.irValue));
+            var gep = new GEPInst(it.expr.irValue, gepInstType, cur.block, new IntConst(0, 32),
+                    ((IntConst) it.idExpr.irValue));
             it.irAddr = gep;
             if (!onlyAddr)
                 it.irValue = new LoadInst(gep, cur.block);
         } else if (it.funcCall != null) {
-            Boolean isMemberFunction = cur.whoseMember != null;
-            it.funcCall.accept(this);
-            if (isMemberFunction)
-                ((CallInst) it.funcCall.irValue).argList.add(0, it.expr.irValue);
-            it.irValue = it.funcCall.irValue;
+            if (it.funcCall.FuncNameString.equals("size")) {
+                var sizeAddr = new CastInst(it.expr.irValue, new IRPtType(new IRIntType(32), 1), castType.BIT,
+                        cur.block);
+                it.irValue = new LoadInst(sizeAddr, cur.block);
+            } else {
+                Boolean isMemberFunction = cur.whoseMember != null;
+                it.funcCall.accept(this);
+                if (isMemberFunction)
+                    ((CallInst) it.funcCall.irValue).argList.add(0, it.expr.irValue);
+                it.irValue = it.funcCall.irValue;
+            }
         }
 
         cur.whoseMember = null;
@@ -586,8 +708,8 @@ public class IRBuilder implements ASTVisitor {
             case STRING -> {
                 var constStr = Transfer.constStrTranfer(it.litString, topModule.constStrList.size());
                 topModule.constStrList.add(constStr);
-                yield new GEPInst(constStr, IRPtType.getCharRefType(), cur.block, new IntConst(0, 64),
-                        new IntConst(0, 64));
+                yield new GEPInst(constStr, IRPtType.getCharRefType(), cur.block, new IntConst(0, 32),
+                        new IntConst(0, 32));
             }
             case NULL -> new NullConst();
             case TRUE -> new IntConst(1, 8);
@@ -626,7 +748,7 @@ public class IRBuilder implements ASTVisitor {
             var thisPara = cur.fn.paraList.get(0);
             var gepInstType = new IRPtType(Transfer.typeTransfer(varDef.typeName), 1);
             var startPtr = new LoadInst(thisPara.storedAddr, cur.block);
-            var gep = new GEPInst(startPtr, gepInstType, cur.block, new IntConst(0, 64), idx);
+            var gep = new GEPInst(startPtr, gepInstType, cur.block, new IntConst(0, 32), idx);
 
             it.irAddr = gep;
             if (!cur.justNeedAddr)
