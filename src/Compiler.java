@@ -21,16 +21,13 @@ import org.antlr.v4.runtime.CharStreams;
 
 import Parser.MxStarLexer;
 import Parser.MxStarParser;
-import TestPackage.Test;
-import TestPackage.TestPackage1.Test1;
 
 public class Compiler {
     public static void main(String[] args) throws Exception {
         try {
-            Test.showShowWay();
-            Test1.showShowWay();
-            System.out.println(" --------------------------------- ");
-            File testCode = new File("testcases/test.mx");
+            boolean testIR = true;
+            String filePath = testIR ? "./irtestspace/" : "./mytest/";
+            File testCode = new File(filePath + "test.mx");
 
             InputStream testCodeStream = new FileInputStream(testCode);
 
@@ -65,7 +62,7 @@ public class Compiler {
             IRModule topModule = irBuilder.buildIR();
             IRRenamer irRenamer = new IRRenamer(topModule);
             irRenamer.renameIR();
-            IRPrinter irPrinter = new IRPrinter(topModule, "testcases/test.ll");
+            IRPrinter irPrinter = new IRPrinter(topModule, filePath + "test.ll");
             irPrinter.printIR();
 
         } catch (BaseError e) {

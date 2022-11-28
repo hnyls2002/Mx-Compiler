@@ -4,3 +4,5 @@ antlr4-runtime/
 testcases/
 bin/
 bugs.txt
+mytest/
+src/irtestspace
