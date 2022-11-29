@@ -1,7 +1,7 @@
 import os
 import time
 
-command = "cp {code_file} ./src/irtestspace/test.mx && sh irtest.sh < {input_file} > {output_file}"
+command = "cp {code_file} ./src/irtestspace/test.mx && sh ir-auto-test.sh < {input_file} > {output_file}"
 
 judge_list = open("testcases/codegen/judgelist.txt").readlines()
 
@@ -52,7 +52,6 @@ for judge in judge_list:
     wrap = os.popen(
         "diff {file1} {file2} -w -B".format(file1=output_file, file2=std_file))
     info = wrap.readlines()
-
 
     if len(info) == 0:
         print("\033[32m[Success] [test]: in {testpoint} \033[0m".format(

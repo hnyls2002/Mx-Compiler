@@ -1,0 +1,32 @@
+### commands
+
+##### LLVM IR generation
+- to `.ll`
+  - `clang -S -emit-llvm test.c`
+  - `clang -S -emit-llvm test.c --target=riscv32`
+- to `.bc`
+  - `clang -c -emit-llvm test.c` 
+
+##### link LLVM IR (to bitcode)
+- `llvm-link test.ll builtin.ll -o linked.bc`
+
+##### compile LLVM IR(`.ll` or `.bc`) to executable
+- `clang test.ll -o test`
+- `clang test.bc -o test`
+
+##### execute program in LLVM IR format
+- `lli test.ll`
+- `lli test.bc`
+
+##### compile LLVM IR to assembly
+- `llc test.ll -o test.s`
+- `llc test.bc -o test.s`
+
+##### code generation (from `.c` to `.s`)
+- `clang -S test.c`
+- `clang -S test.c --target=riscv32 -march=rv32im` 
+`i` means basic integer instructions, `m` means multiply and divide, which we will use in code-generation phase.
+
+##### code generation (from `.ll` to `.s`)
+- `llc test.ll -o test.s -march=riscv32 -mattr=+m`
+`m` tells the compiler not to use `__mul` but to use `mul` instruction.
