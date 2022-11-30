@@ -26,7 +26,7 @@ public class Compiler {
     public static void main(String[] args) throws Exception {
         try {
             boolean testIR = false;
-            String filePath = testIR ? "./irtestspace/" : "./mytest/";
+            String filePath = testIR ? "./irtestspace/" : "./debug/";
             File testCode = new File(filePath + "test.mx");
 
             InputStream testCodeStream = new FileInputStream(testCode);
