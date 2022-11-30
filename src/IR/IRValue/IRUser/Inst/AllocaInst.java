@@ -2,16 +2,21 @@ package IR.IRValue.IRUser.Inst;
 
 import IR.IRType.IRPtType;
 import IR.IRType.IRType;
-import IR.IRValue.IRBasicBlock;
+import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 
 public class AllocaInst extends IRBaseInst {
 
     public IRType elementType;
 
-    public AllocaInst(IRType elemenType, IRBasicBlock block) {
+    public AllocaInst(IRType elemenType, IRFn curFn) {
         super(new IRPtType(elemenType, 1));
         this.elementType = elemenType;
-        block.addInst(this);
+        var block = curFn.blockList.get(0);
+        for (int i = 0; i <= block.instList.size(); ++i)
+            if (i == block.instList.size() || !(block.instList.get(i) instanceof AllocaInst)) {
+                block.instList.add(i, this);
+                break;
+            }
     }
 
     @Override

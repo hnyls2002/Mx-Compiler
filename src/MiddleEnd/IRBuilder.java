@@ -165,7 +165,7 @@ public class IRBuilder implements ASTVisitor {
         var irPara = new IRParameter(Transfer.typeTransfer(para.typeName));
         cur.fn.paraList.add(irPara);
         // 3. store the format-argument into some space
-        para.varValue = new AllocaInst(irPara.valueType, cur.block);
+        para.varValue = new AllocaInst(irPara.valueType, cur.fn);
         irPara.storedAddr = para.varValue;
         new StoreInst(irPara, para.varValue, cur.block);
     }
@@ -199,7 +199,7 @@ public class IRBuilder implements ASTVisitor {
         IRBasicBlock.addRetBlock(nowFn);
         IRType retType = ((IRFnType) nowFn.valueType).retType;
         if (!(retType instanceof IRVoidType))
-            nowFn.retValueAddr = new AllocaInst(retType, cur.block);
+            nowFn.retValueAddr = new AllocaInst(retType, cur.fn);
 
         // 3. add the parameter list for IRFn
         if (funcInfo.inWhichClass != null) {
@@ -497,7 +497,7 @@ public class IRBuilder implements ASTVisitor {
         // 2.1 add retBlock and retAddr
         IRBasicBlock.addRetBlock(constructor);
         IRType retType = constructType.retType;
-        constructor.retValueAddr = new AllocaInst(retType, cur.block);
+        constructor.retValueAddr = new AllocaInst(retType, cur.fn);
 
         // 3. add the parameter list for IRFn
         TypeIdPair thisPara = new TypeIdPair(new TypeName(it.consNameString, 0, true), "this");
@@ -824,7 +824,7 @@ public class IRBuilder implements ASTVisitor {
             topModule.globalVarList.add(gVar);
             it.irValue = it.decl.varValue = gVar;
         } else {// local
-            it.irValue = it.decl.varValue = new AllocaInst(Transfer.typeTransfer(it.decl.typeName), cur.block);
+            it.irValue = it.decl.varValue = new AllocaInst(Transfer.typeTransfer(it.decl.typeName), cur.fn);
             if (it.expr != null) {
                 it.expr.accept(this);
                 new StoreInst(it.expr.irValue, it.irValue, cur.block);
