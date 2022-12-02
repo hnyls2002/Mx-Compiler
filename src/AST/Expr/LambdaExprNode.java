@@ -2,10 +2,10 @@ package AST.Expr;
 
 import java.util.ArrayList;
 
-import AST.ASTVisitor;
 import AST.Info.TypeIdPair;
 import AST.Stmt.SuiteStmtNode;
 import AST.Util.Position;
+import Share.Visitors.ASTVisitor;
 
 public class LambdaExprNode extends ExprNode {
 

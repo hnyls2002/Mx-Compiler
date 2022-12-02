@@ -12,8 +12,8 @@ import IR.IRType.IRStructType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
 import IR.IRValue.IRUser.ConsValue.ConsData.StrConst;
-import IR.IRValue.IRUser.Inst.BinaryInst.binaryOperator;
-import IR.IRValue.IRUser.Inst.IcmpInst.icmpOperator;
+import IR.IRValue.IRUser.IRInst.BinaryInst.binaryOperator;
+import IR.IRValue.IRUser.IRInst.IcmpInst.icmpOperator;
 import Share.MyException;
 
 public class Transfer {

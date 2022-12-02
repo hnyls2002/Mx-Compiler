@@ -11,7 +11,7 @@ import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.StrConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
-import IR.IRValue.IRUser.Inst.IRBaseInst;
+import IR.IRValue.IRUser.IRInst.IRBaseInst;
 import Share.Pass.IRBlockPass;
 import Share.Pass.IRFnPass;
 import Share.Pass.IRModulePass;

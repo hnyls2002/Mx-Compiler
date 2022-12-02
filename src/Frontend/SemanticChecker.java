@@ -1,6 +1,5 @@
 package Frontend;
 
-import AST.ASTVisitor;
 import AST.ProgramNode;
 import AST.Expr.AssignExprNode;
 import AST.Expr.BinaryOpExprNode;
@@ -38,6 +37,7 @@ import AST.Util.Position;
 import AST.Util.TypeName;
 import Frontend.MxStar.MxStarErrors.BaseError;
 import Frontend.MxStar.MxStarErrors.SemanticError;
+import Share.Visitors.ASTVisitor;
 
 public class SemanticChecker implements ASTVisitor {
 

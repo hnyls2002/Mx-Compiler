@@ -1,6 +1,5 @@
 package Frontend;
 
-import AST.ASTVisitor;
 import AST.ProgramNode;
 import AST.Expr.AssignExprNode;
 import AST.Expr.BinaryOpExprNode;
@@ -34,6 +33,7 @@ import AST.Stmt.WhileStmtNode;
 import AST.Types.BuiltinType;
 import AST.Util.Position;
 import Frontend.MxStar.MxStarErrors.SemanticError;
+import Share.Visitors.ASTVisitor;
 
 public class ProgInit implements ASTVisitor {
     private GlobalScope gScope;

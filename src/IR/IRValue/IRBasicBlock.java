@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import IR.IRType.IRType;
 import IR.IRType.IRType.IRTypeId;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
-import IR.IRValue.IRUser.Inst.IRBaseInst;
+import IR.IRValue.IRUser.IRInst.IRBaseInst;
 
 public class IRBasicBlock extends IRBaseValue {
     public String entryString;

@@ -1,7 +1,7 @@
 package AST.Expr;
 
-import AST.ASTVisitor;
 import AST.Util.Position;
+import Share.Visitors.ASTVisitor;
 
 public class BinaryOpExprNode extends ExprNode {
 

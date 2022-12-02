@@ -2,8 +2,8 @@ package AST.Stmt;
 
 import java.util.ArrayList;
 
-import AST.ASTVisitor;
 import AST.Util.Position;
+import Share.Visitors.ASTVisitor;
 
 public class SuiteStmtNode extends StmtNode {
 

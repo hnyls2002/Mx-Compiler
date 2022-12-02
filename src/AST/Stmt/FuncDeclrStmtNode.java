@@ -3,10 +3,10 @@ package AST.Stmt;
 import java.util.ArrayList;
 
 import AST.ASTNode;
-import AST.ASTVisitor;
 import AST.Info.TypeIdPair;
 import AST.Util.Position;
 import AST.Util.TypeName;
+import Share.Visitors.ASTVisitor;
 
 public class FuncDeclrStmtNode extends ASTNode {
 

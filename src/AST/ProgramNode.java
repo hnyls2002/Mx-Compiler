@@ -3,6 +3,7 @@ package AST;
 import java.util.ArrayList;
 
 import AST.Util.Position;
+import Share.Visitors.ASTVisitor;
 
 public class ProgramNode extends ASTNode {
 

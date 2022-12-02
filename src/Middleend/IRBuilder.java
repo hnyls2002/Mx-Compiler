@@ -3,7 +3,6 @@ package Middleend;
 import java.util.ArrayList;
 
 import AST.ASTNode;
-import AST.ASTVisitor;
 import AST.ProgramNode;
 import AST.Expr.AssignExprNode;
 import AST.Expr.BinaryOpExprNode;
@@ -53,23 +52,24 @@ import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
 import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
-import IR.IRValue.IRUser.Inst.AllocaInst;
-import IR.IRValue.IRUser.Inst.BinaryInst;
-import IR.IRValue.IRUser.Inst.BrInst;
-import IR.IRValue.IRUser.Inst.CallInst;
-import IR.IRValue.IRUser.Inst.CastInst;
-import IR.IRValue.IRUser.Inst.GEPInst;
-import IR.IRValue.IRUser.Inst.IRBaseInst;
-import IR.IRValue.IRUser.Inst.IcmpInst;
-import IR.IRValue.IRUser.Inst.LoadInst;
-import IR.IRValue.IRUser.Inst.PhiInst;
-import IR.IRValue.IRUser.Inst.RetInst;
-import IR.IRValue.IRUser.Inst.StoreInst;
-import IR.IRValue.IRUser.Inst.BinaryInst.binaryOperator;
-import IR.IRValue.IRUser.Inst.CastInst.castType;
-import IR.IRValue.IRUser.Inst.IcmpInst.icmpOperator;
+import IR.IRValue.IRUser.IRInst.AllocaInst;
+import IR.IRValue.IRUser.IRInst.BinaryInst;
+import IR.IRValue.IRUser.IRInst.BrInst;
+import IR.IRValue.IRUser.IRInst.CallInst;
+import IR.IRValue.IRUser.IRInst.CastInst;
+import IR.IRValue.IRUser.IRInst.GEPInst;
+import IR.IRValue.IRUser.IRInst.IRBaseInst;
+import IR.IRValue.IRUser.IRInst.IcmpInst;
+import IR.IRValue.IRUser.IRInst.LoadInst;
+import IR.IRValue.IRUser.IRInst.PhiInst;
+import IR.IRValue.IRUser.IRInst.RetInst;
+import IR.IRValue.IRUser.IRInst.StoreInst;
+import IR.IRValue.IRUser.IRInst.BinaryInst.binaryOperator;
+import IR.IRValue.IRUser.IRInst.CastInst.castType;
+import IR.IRValue.IRUser.IRInst.IcmpInst.icmpOperator;
 import IR.Util.Transfer;
 import Share.MyException;
+import Share.Visitors.ASTVisitor;
 
 public class IRBuilder implements ASTVisitor {
 

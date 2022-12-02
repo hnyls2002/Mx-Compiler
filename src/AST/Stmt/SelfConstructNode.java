@@ -1,8 +1,8 @@
 package AST.Stmt;
 
 import AST.ASTNode;
-import AST.ASTVisitor;
 import AST.Util.Position;
+import Share.Visitors.ASTVisitor;
 
 public class SelfConstructNode extends ASTNode {
 

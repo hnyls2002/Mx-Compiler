@@ -1,4 +1,4 @@
-package IR.IRValue.IRUser.Inst;
+package IR.IRValue.IRUser.IRInst;
 
 import IR.IRType.IRType;
 import IR.IRValue.IRUser.IRBaseUser;

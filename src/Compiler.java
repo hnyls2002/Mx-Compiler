@@ -59,11 +59,13 @@ public class Compiler {
             // -------------------------------------------------------
 
             IRBuilder irBuilder = new IRBuilder(ast, gScope);
-            IRModule topModule = irBuilder.buildIR();
+            IRModule irModule = irBuilder.buildIR();
             IRRenamer irRenamer = new IRRenamer();
-            irRenamer.runOnIRModule(topModule);
+            irRenamer.runOnIRModule(irModule);
             IRPrinter irPrinter = new IRPrinter(filePath + "test.ll");
-            irPrinter.runOnIRModule(topModule);
+            irPrinter.runOnIRModule(irModule);
+
+            // -------------------------------------------------------
 
         } catch (BaseError e) {
             System.err.println(e.toString());

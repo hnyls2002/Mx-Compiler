@@ -1,18 +1,18 @@
-package IR.IRValue.IRUser.Inst;
+package IR.IRValue.IRUser.IRInst;
 
+import IR.IRType.IRIntType;
 import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import Share.MyException;
 
-public class BinaryInst extends IRBaseInst {
-    public enum binaryOperator {
-        irADD("add"), irSUB("sub"), irMUL("mul"), irSDIV("sdiv"), irSREM("srem"), irSHL("shl"),
-        irASHR("ashr"), irAND("and"), irOR("or"), irXOR("xor");
+public class IcmpInst extends IRBaseInst {
+    public enum icmpOperator {
+        irEQ("eq"), irNE("ne"), irSGT("sgt"), irSGE("sge"), irSLT("slt"), irSLE("sle");
 
         String insStr;
 
-        private binaryOperator(String insStr) {
+        private icmpOperator(String insStr) {
             this.insStr = insStr;
         }
 
@@ -22,26 +22,25 @@ public class BinaryInst extends IRBaseInst {
         }
     }
 
-    public binaryOperator opCode;
+    public icmpOperator opCode;
     public IRBaseValue lhs, rhs;
 
-    public BinaryInst(binaryOperator opCode, IRBaseValue lhs, IRBaseValue rhs, IRBasicBlock block) {
-        super(lhs.valueType);
+    public IcmpInst(icmpOperator opCode, IRBaseValue lhs, IRBaseValue rhs, IRBasicBlock block) {
+        super(new IRIntType(1));
         this.opCode = opCode;
         this.lhs = lhs;
         this.rhs = rhs;
         IRType lType = lhs.valueType, rType = rhs.valueType;
         if (!lType.equals(rType))
             throw new MyException(
-                    "Binary " + this.opCode + " " + lType.toString() + " " + rType.toString() + " not match");
+                    "icmp " + this.opCode + " " + lType.toString() + " " + rType.toString() + " not match");
         block.addInst(this);
     }
 
     @Override
     public String defToString() {
-        var ret = opCode.toString() + ' ' + valueType.toString() + ' ';
+        var ret = "icmp " + opCode.toString() + ' ' + lhs.valueType.toString() + ' ';
         ret += lhs.useToString() + ", " + rhs.useToString();
         return ret;
     }
-
 }

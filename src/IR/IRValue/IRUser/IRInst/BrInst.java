@@ -1,10 +1,10 @@
-package IR.IRValue.IRUser.Inst;
+package IR.IRValue.IRUser.IRInst;
 
 import IR.IRType.IRIntType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
-import IR.IRValue.IRUser.Inst.CastInst.castType;
+import IR.IRValue.IRUser.IRInst.CastInst.castType;
 
 public class BrInst extends IRBaseInst {
     public IRBaseValue condition;

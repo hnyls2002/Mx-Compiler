@@ -1,5 +1,6 @@
-package AST;
+package Share.Visitors;
 
+import AST.ProgramNode;
 import AST.Expr.AssignExprNode;
 import AST.Expr.BinaryOpExprNode;
 import AST.Expr.CreatorExprNode;

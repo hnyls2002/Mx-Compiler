@@ -2,6 +2,7 @@ package AST;
 
 import AST.Util.Position;
 import IR.IRValue.IRBaseValue;
+import Share.Visitors.ASTVisitor;
 
 public abstract class ASTNode {
     public Position pos;

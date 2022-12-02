@@ -1,4 +1,4 @@
-package IR.IRValue.IRUser.Inst;
+package IR.IRValue.IRUser.IRInst;
 
 import IR.IRType.IRIntType;
 import IR.IRType.IRPtType;
@@ -6,7 +6,7 @@ import IR.IRType.IRVoidType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
-import IR.IRValue.IRUser.Inst.CastInst.castType;
+import IR.IRValue.IRUser.IRInst.CastInst.castType;
 import Share.MyException;
 
 public class StoreInst extends IRBaseInst {

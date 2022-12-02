@@ -2,9 +2,9 @@ package AST.Stmt;
 
 import java.util.ArrayList;
 
-import AST.ASTVisitor;
 import AST.Util.Position;
 import AST.Util.TypeName;
+import Share.Visitors.ASTVisitor;
 
 public class VarDeclStmtNode extends StmtNode {
 
