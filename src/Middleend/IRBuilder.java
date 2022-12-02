@@ -148,7 +148,7 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(VarDeclStmtNode it) {
-        it.varList.forEach(vardecl -> visit(vardecl));
+        it.varList.forEach(this::visit);
     }
 
     private void terminalToRet(IRFn fn) {
@@ -207,7 +207,7 @@ public class IRBuilder implements ASTVisitor {
             TypeIdPair thisPara = new TypeIdPair(new TypeName(funcInfo.inWhichClass.typeNameString, 0, true), "this");
             addParameter(thisPara);
         }
-        it.paraList.forEach(para -> addParameter(para));
+        it.paraList.forEach(this::addParameter);
 
         // 4. visit the function's body
         visit(it.body);

@@ -28,7 +28,7 @@ import Parser.MxStarParser;
 public class Compiler {
     public static void main(String[] args) throws Exception {
         try {
-            boolean testIR = true;
+            boolean testIR = false;
             String filePath = testIR ? "./irtestspace/" : "./debug/";
             File testCode = new File(filePath + "test.mx");
 

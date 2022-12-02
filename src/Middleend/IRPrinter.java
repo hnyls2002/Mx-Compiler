@@ -34,19 +34,19 @@ public class IRPrinter implements IRModulePass, IRFnPass, IRBlockPass {
         System.out.print('\n');
         irModule.builtinFnList.forEach(fnType -> System.out.println(fnType.toString()));
         System.out.print('\n');
-        irModule.classList.forEach(classDef -> printClassDef(classDef));
+        irModule.classList.forEach(this::printClassDef);
         if (!irModule.classList.isEmpty())
             System.out.print('\n');
-        irModule.constStrList.forEach(constStr -> printConstStr(constStr));
+        irModule.constStrList.forEach(this::printConstStr);
         if (!irModule.constStrList.isEmpty())
             System.out.print('\n');
-        irModule.globalVarList.forEach(gVar -> printGVar(gVar));
+        irModule.globalVarList.forEach(this::printGVar);
         if (!irModule.globalVarList.isEmpty())
             System.out.print('\n');
-        irModule.varInitFnList.forEach(initFn -> runOnIRFn(initFn));
+        irModule.varInitFnList.forEach(this::runOnIRFn);
         if (!irModule.varInitFnList.isEmpty())
             System.out.print('\n');
-        irModule.globalFnList.forEach(gFn -> runOnIRFn(gFn));
+        irModule.globalFnList.forEach(this::runOnIRFn);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class IRPrinter implements IRModulePass, IRFnPass, IRBlockPass {
     @Override
     public void runOnBlock(IRBasicBlock block) {
         System.out.print(block.defToString() + '\n');
-        block.instList.forEach(inst -> printInst(inst));
+        block.instList.forEach(this::printInst);
         printInst(block.getTerminal());
     }
 

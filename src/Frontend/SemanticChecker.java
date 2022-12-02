@@ -89,9 +89,7 @@ public class SemanticChecker implements ASTVisitor {
                 throw new SemanticError("Cannot have non-void return statement in a constructor ", it.constructor.pos);
         }
 
-        it.funcDeclList.forEach(v -> {
-            v.accept(this);
-        });
+        it.funcDeclList.forEach(v -> v.accept(this));
 
         curScope = curScope.parent;
     }
@@ -479,9 +477,7 @@ public class SemanticChecker implements ASTVisitor {
         }
 
         curScope = new Scope(curScope);
-        it.paraList.forEach(v -> {
-            curScope.putDef(v);
-        });
+        it.paraList.forEach(curScope::putDef);
 
         it.body.accept(this);
         if (it.body.retStmtType == null)

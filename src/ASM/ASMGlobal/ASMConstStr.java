@@ -8,5 +8,7 @@ public class ASMConstStr {
 
     public ASMConstStr(StrConst irConstStr) {
         this.name = irConstStr.getName();
+        this.data = irConstStr.data;
+        this.size = irConstStr.derefType.getSize();
     }
 }

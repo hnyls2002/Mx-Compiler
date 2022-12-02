@@ -137,7 +137,7 @@ public class ProgInit implements ASTVisitor {
 
         inClass = true;
         curClass = classType;
-        it.funcDeclList.forEach(v -> visit(v));
+        it.funcDeclList.forEach(this::visit);
         inClass = false;
         curClass = null;
 

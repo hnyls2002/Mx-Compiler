@@ -22,15 +22,15 @@ public class IRRenamer implements IRModulePass, IRFnPass, IRBlockPass {
 
     @Override
     public void runOnIRModule(IRModule irModule) {
-        irModule.globalFnList.forEach(fn -> runOnIRFn(fn));
-        irModule.varInitFnList.forEach(fn -> runOnIRFn(fn));
+        irModule.globalFnList.forEach(this::runOnIRFn);
+        irModule.varInitFnList.forEach(this::runOnIRFn);
     }
 
     @Override
     public void runOnIRFn(IRFn fn) {
         allocator = new Allocator();
         fn.paraList.forEach(para -> para.setName(allocator.getNewName()));
-        fn.blockList.forEach(block -> runOnBlock(block));
+        fn.blockList.forEach(this::runOnBlock);
         runOnBlock(fn.retBlock);
     }
 
@@ -38,7 +38,7 @@ public class IRRenamer implements IRModulePass, IRFnPass, IRBlockPass {
     public void runOnBlock(IRBasicBlock block) {
         if (!block.isNamed())
             block.setName(allocator.getNewName());
-        block.instList.forEach(inst -> renameInst(inst));
+        block.instList.forEach(this::renameInst);
     }
 
     private void renameInst(IRBaseInst inst) {
