@@ -8,15 +8,12 @@ import IR.IRValue.IRUser.IRBaseUser;
 /// store is void type!
 
 public abstract class IRBaseInst extends IRBaseUser {
-    public String reName;
-
     public IRBaseInst(IRType insType) {
         super(insType);
     }
 
     @Override
-    public String getName() {
-        return "%" + (reName == null ? "reg" : reName);
+    public String useToString() {
+        return '%' + getName();
     }
-
 }

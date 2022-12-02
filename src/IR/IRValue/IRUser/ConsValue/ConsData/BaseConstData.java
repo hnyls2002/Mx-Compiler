@@ -2,9 +2,15 @@ package IR.IRValue.IRUser.ConsValue.ConsData;
 
 import IR.IRType.IRType;
 import IR.IRValue.IRUser.ConsValue.BaseConstValue;
+import Share.MyException;
 
-public class BaseConstData extends BaseConstValue {
+public abstract class BaseConstData extends BaseConstValue {
     public BaseConstData(IRType constDataType) {
         super(constDataType);
+    }
+
+    @Override
+    public String defToString() {
+        throw new MyException("int and null have no def");
     }
 }

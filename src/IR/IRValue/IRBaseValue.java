@@ -1,9 +1,11 @@
 package IR.IRValue;
 
 import IR.IRType.IRType;
+import Share.MyException;
 
 public abstract class IRBaseValue {
     public IRType valueType;
+    protected String nameString;
 
     public IRBaseValue(IRType valueType) {
         this.valueType = valueType;
@@ -11,25 +13,27 @@ public abstract class IRBaseValue {
 
     @Override
     public String toString() {
-        return "an abstract base value";
+        throw new MyException("Value cannot toString");
     }
 
-    public String getName() {
-        return "I don't have a name (⌣̩̩́_⌣̩̩̀)";
+    public final String getName() {
+        if (nameString == null)
+            throw new MyException("NullName");
+        return nameString;
+    }
+
+    public final void setName(String nameString) {
+        this.nameString = nameString;
     }
 
     // we don't present the name, name was handled during IRPrinter
     // def means when the value is created
-    public String defToString() {
-        return "This is a unhandled def";
-    }
+    public abstract String defToString();
 
-    public String useToString() {
-        return getName();
-    }
+    public abstract String useToString();
 
     public String useToStringWithType() {
-        return valueType.toString() + ' ' + getName();
+        return valueType.toString() + ' ' + useToString();
     }
 
 }

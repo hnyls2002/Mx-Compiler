@@ -788,7 +788,7 @@ public class IRBuilder implements ASTVisitor {
             gVar.isInit = true;
             gVar.initValue = it.expr.irValue;
         } else {
-            var initFnNameString = "__mx_global_var_init." + gVar.constName;
+            var initFnNameString = "__mx_global_var_init." + gVar.getName();
             gVar.initFn = IRFn.getInitFn(initFnNameString);
             topModule.varInitFnList.add(gVar.initFn);
 

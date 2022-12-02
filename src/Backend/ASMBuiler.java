@@ -1,5 +1,6 @@
 package Backend;
 
+import ASM.ASMModule;
 import IR.IRModule;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
@@ -21,10 +22,21 @@ import Share.Visitors.IRInstVisitor;
 
 public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVisitor {
 
-    @Override
-    public void runOnBlock(IRBasicBlock block) {
-        // TODO Auto-generated method stub
+    public IRModule irModule;
+    public ASMModule asmModule;
 
+    public ASMModule buildAsm(IRModule irModule) {
+        asmModule = new ASMModule();
+        runOnIRModule(irModule);
+        return asmModule;
+    }
+
+    @Override
+    public void runOnIRModule(IRModule irModule) {
+        // TODO Auto-generated method stub
+        irModule.constStrList.forEach(constStr -> {
+            asmModule.constStrList.add(null);
+        });
     }
 
     @Override
@@ -34,7 +46,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
     }
 
     @Override
-    public void runOnIRModule(IRModule irModule) {
+    public void runOnBlock(IRBasicBlock block) {
         // TODO Auto-generated method stub
 
     }

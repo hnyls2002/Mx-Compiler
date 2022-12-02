@@ -19,18 +19,18 @@ public class IRFn extends BaseGlobalValue {
     public IRFn(FuncInfo fnInfo) {
         // 1. build the IRFn
         super(Transfer.fnTypeTransfer(fnInfo));
-        this.constName = fnInfo.fnType.fnNameString;
+        this.nameString = fnInfo.fnType.fnNameString;
         fnInfo.fnType = (IRFnType) this.valueType;
     }
 
     public IRFn(IRFnType constructorType) {
         super(constructorType);
-        this.constName = constructorType.fnNameString;
+        this.nameString = constructorType.fnNameString;
     }
 
     private IRFn(IRFnType fnType, String fnNameString) {
         super(fnType);
-        this.constName = fnNameString;
+        this.nameString = fnNameString;
     }
 
     public static IRFn getInitFn(String initFnNameString) {
@@ -47,7 +47,7 @@ public class IRFn extends BaseGlobalValue {
         if (valueType instanceof IRFnType fnType) {
             var ret = "define ";
             ret += fnType.retType.toString() + ' ';
-            ret += getName() + '(';
+            ret += '@' + getName() + '(';
             for (var para : paraList)
                 ret += para.defToString() + ", ";
             if (!fnType.paraTypeList.isEmpty())

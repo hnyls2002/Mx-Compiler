@@ -20,13 +20,13 @@ public class GlobalVariable extends BaseGlobalValue {
     public GlobalVariable(String varNameString, TypeName gVarTypeName) { // from typename
         super(new IRPtType(Transfer.typeTransfer(gVarTypeName), 1));
         this.derefType = ((IRPtType) valueType).derefType();
-        this.constName = varNameString;
+        this.nameString = varNameString;
     }
 
     public GlobalVariable(String varNameString, IRType gVarType) { // from ir type
         super(new IRPtType(gVarType, 1));
         this.derefType = ((IRPtType) valueType).derefType();
-        this.constName = varNameString;
+        this.nameString = varNameString;
     }
 
     @Override
@@ -35,8 +35,4 @@ public class GlobalVariable extends BaseGlobalValue {
         return derefType.toString() + ' ' + initValue.useToString();
     }
 
-    @Override
-    public String getName() {
-        return constName == null ? super.getName() : "@" + constName;
-    }
 }

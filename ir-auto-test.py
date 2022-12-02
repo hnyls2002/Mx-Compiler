@@ -9,6 +9,8 @@ cnt = 0
 
 fail_collect = list()
 
+os.system("cd src/ && javac Compiler.java && cd ..")
+
 for judge in judge_list:
     cnt += 1
 
@@ -65,3 +67,5 @@ for judge in judge_list:
     time.sleep(1)
 
 print(fail_collect)
+
+os.system("rm ./**/*.class")

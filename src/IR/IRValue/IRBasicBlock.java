@@ -8,7 +8,6 @@ import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.IRBaseInst;
 
 public class IRBasicBlock extends IRBaseValue {
-    public String entryString;
     private IRBaseInst terminal = null;
     public ArrayList<IRBaseInst> instList = new ArrayList<>();
     public IRBasicBlock tailBlock;
@@ -29,8 +28,8 @@ public class IRBasicBlock extends IRBaseValue {
         fn.retBlock = retBlock;
     }
 
-    public void setEntry(String entryString) {
-        this.entryString = entryString;
+    public boolean isNamed() {
+        return nameString != null;
     }
 
     // always set at the end of a block
@@ -50,11 +49,6 @@ public class IRBasicBlock extends IRBaseValue {
 
     public IRBasicBlock getTail() {
         return tailBlock == this ? this : (tailBlock = tailBlock.getTail());
-    }
-
-    @Override
-    public String getName() {
-        return entryString == null ? "entry" : entryString;
     }
 
     @Override

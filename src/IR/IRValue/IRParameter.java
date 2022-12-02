@@ -7,7 +7,6 @@ public class IRParameter extends IRBaseValue {
     // IR to assembly, it just links to the real argument's register (?). However
     // inside a function, the parameter needs a space to be stored
 
-    public String parameterName;
     public IRBaseValue storedAddr;
 
     public IRParameter(IRType parameterType) {
@@ -15,12 +14,12 @@ public class IRParameter extends IRBaseValue {
     }
 
     @Override
-    public String getName() {
-        return "%" + (parameterName == null ? "para" : parameterName);
+    public String defToString() {
+        return valueType.toString() + ' ' + '%' + getName();
     }
 
     @Override
-    public String defToString() {
-        return valueType.toString() + ' ' + getName();
+    public String useToString() {
+        return '%' + getName();
     }
 }

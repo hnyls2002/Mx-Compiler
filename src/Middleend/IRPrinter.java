@@ -73,19 +73,19 @@ public class IRPrinter implements IRModulePass, IRFnPass, IRBlockPass {
     }
 
     private void printConstStr(StrConst constStr) {
-        System.out.print(constStr.getName() + " = constant ");
+        System.out.print('@' + constStr.getName() + " = constant ");
         System.out.print(constStr.defToString() + '\n');
     }
 
     private void printGVar(GlobalVariable gVar) {
-        System.out.print(gVar.getName() + " = global ");
+        System.out.print('@' + gVar.getName() + " = global ");
         System.out.print(gVar.defToString() + '\n');
     }
 
     private void printInst(IRBaseInst inst) {
         var defString = inst.defToString() + "\n";
         if (!(inst.valueType instanceof IRVoidType))
-            defString = inst.getName() + " = " + defString;
+            defString = '%' + inst.getName() + " = " + defString;
         System.out.print(tab + defString);
     }
 

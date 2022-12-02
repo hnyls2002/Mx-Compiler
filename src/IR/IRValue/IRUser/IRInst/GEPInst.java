@@ -31,7 +31,7 @@ public class GEPInst extends IRBaseInst {
     @Override
     public String defToString() {
         var ret = "getelementptr " + startType.toString() + ", ";
-        ret += startPtr.valueType.toString() + ' ' + startPtr.getName();
+        ret += startPtr.valueType.toString() + ' ' + startPtr.useToString();
         for (var idx : indices)
             ret += ", " + idx.useToStringWithType();
         return ret;

@@ -29,21 +29,21 @@ public class IRRenamer implements IRModulePass, IRFnPass, IRBlockPass {
     @Override
     public void runOnIRFn(IRFn fn) {
         allocator = new Allocator();
-        fn.paraList.forEach(para -> para.parameterName = allocator.getNewName());
+        fn.paraList.forEach(para -> para.setName(allocator.getNewName()));
         fn.blockList.forEach(block -> runOnBlock(block));
         runOnBlock(fn.retBlock);
     }
 
     @Override
     public void runOnBlock(IRBasicBlock block) {
-        if (block.entryString == null)
-            block.entryString = allocator.getNewName();
+        if (!block.isNamed())
+            block.setName(allocator.getNewName());
         block.instList.forEach(inst -> renameInst(inst));
     }
 
     private void renameInst(IRBaseInst inst) {
         if (inst.valueType.typeId != IRTypeId.VoidTypeId)
-            inst.reName = allocator.getNewName();
+            inst.setName(allocator.getNewName());
     }
 
 }

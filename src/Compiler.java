@@ -5,8 +5,11 @@ import java.io.InputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import ASM.ASMModule;
 import AST.ProgramNode;
 import AST.Scopes.GlobalScope;
+import Backend.ASMBuiler;
+import Backend.ASMPrinter;
 import Frontend.ASTBuilder;
 import Frontend.ProgInit;
 import Frontend.SemanticChecker;
@@ -25,7 +28,7 @@ import Parser.MxStarParser;
 public class Compiler {
     public static void main(String[] args) throws Exception {
         try {
-            boolean testIR = false;
+            boolean testIR = true;
             String filePath = testIR ? "./irtestspace/" : "./debug/";
             File testCode = new File(filePath + "test.mx");
 
@@ -42,6 +45,8 @@ public class Compiler {
             MxStarParser parser = new MxStarParser(new CommonTokenStream(lexer));
             parser.removeErrorListeners();
             parser.addErrorListener(new MxStarErrorListener());
+
+            // -------------------------------------------------------
 
             ParseTree treeRoot = parser.program();
             ASTBuilder astBuilder = new ASTBuilder(false);
@@ -66,6 +71,9 @@ public class Compiler {
             irPrinter.runOnIRModule(irModule);
 
             // -------------------------------------------------------
+
+            ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
+            new ASMPrinter().printASM(filePath + "test.s", asmModule);
 
         } catch (BaseError e) {
             System.err.println(e.toString());
