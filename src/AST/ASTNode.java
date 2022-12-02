@@ -1,6 +1,6 @@
 package AST;
 
-import Frontend.Util.Position;
+import AST.Util.Position;
 import IR.IRValue.IRBaseValue;
 
 public abstract class ASTNode {

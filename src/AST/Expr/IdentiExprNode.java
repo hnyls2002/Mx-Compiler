@@ -1,7 +1,7 @@
 package AST.Expr;
 
 import AST.ASTVisitor;
-import Frontend.Util.Position;
+import AST.Util.Position;
 
 public class IdentiExprNode extends ExprNode {
 

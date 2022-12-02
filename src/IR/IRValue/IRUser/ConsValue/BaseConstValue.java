@@ -1,8 +1,8 @@
 package IR.IRValue.IRUser.ConsValue;
 
-import Debug.MyException;
 import IR.IRType.IRType;
 import IR.IRValue.IRUser.IRBaseUser;
+import Share.MyException;
 
 public abstract class BaseConstValue extends IRBaseUser {
     public String constName;

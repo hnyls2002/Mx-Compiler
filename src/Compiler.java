@@ -6,16 +6,16 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import AST.ProgramNode;
+import AST.Scopes.GlobalScope;
 import Frontend.ASTBuilder;
 import Frontend.ProgInit;
 import Frontend.SemanticChecker;
-import Frontend.Util.MxStarErrorListener;
-import Frontend.Util.MxStarErrors.BaseError;
-import Frontend.Util.Scopes.GlobalScope;
+import Frontend.MxStar.MxStarErrorListener;
+import Frontend.MxStar.MxStarErrors.BaseError;
 import IR.IRModule;
-import MiddleEnd.IRBuilder;
-import MiddleEnd.IRPrinter;
-import MiddleEnd.IRRenamer;
+import Middleend.IRBuilder;
+import Middleend.IRPrinter;
+import Middleend.IRRenamer;
 
 import org.antlr.v4.runtime.CharStreams;
 

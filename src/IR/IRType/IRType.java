@@ -1,7 +1,7 @@
 package IR.IRType;
 
-import Debug.MyException;
 import IR.IRValue.IRBaseValue;
+import Share.MyException;
 
 /// All values have a type
 /// llvm::type is not a abstract type

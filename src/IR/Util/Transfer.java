@@ -1,10 +1,9 @@
 package IR.Util;
 
 import AST.Expr.BinaryOpExprNode.binaryOp;
-import Debug.MyException;
-import Frontend.Util.TypeName;
-import Frontend.Util.Types.ClassType;
-import Frontend.Util.Types.FuncInfo;
+import AST.Info.ClassType;
+import AST.Info.FuncInfo;
+import AST.Util.TypeName;
 import IR.IRType.IRType;
 import IR.IRType.IRFnType;
 import IR.IRType.IRIntType;
@@ -15,6 +14,7 @@ import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
 import IR.IRValue.IRUser.ConsValue.ConsData.StrConst;
 import IR.IRValue.IRUser.Inst.BinaryInst.binaryOperator;
 import IR.IRValue.IRUser.Inst.IcmpInst.icmpOperator;
+import Share.MyException;
 
 public class Transfer {
     private static IRType typeTransferNoRef(TypeName astTypeName) {

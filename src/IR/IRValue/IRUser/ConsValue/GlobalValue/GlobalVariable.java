@@ -1,6 +1,6 @@
 package IR.IRValue.IRUser.ConsValue.GlobalValue;
 
-import Frontend.Util.TypeName;
+import AST.Util.TypeName;
 import IR.IRType.IRPtType;
 import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;

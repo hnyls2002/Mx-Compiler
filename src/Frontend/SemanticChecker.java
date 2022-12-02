@@ -14,6 +14,10 @@ import AST.Expr.SubscExprNode;
 import AST.Expr.ThisExprNode;
 import AST.Expr.UnaryOpExprNode;
 import AST.Expr.UnaryOpExprNode.unaryOp;
+import AST.Info.ClassType;
+import AST.Info.TypeIdPair;
+import AST.Scopes.GlobalScope;
+import AST.Scopes.Scope;
 import AST.Stmt.BreakStmtNode;
 import AST.Stmt.ClassDeclStmtNode;
 import AST.Stmt.ContinueStmtNode;
@@ -28,16 +32,12 @@ import AST.Stmt.SingleVarDeclStmtNode;
 import AST.Stmt.SuiteStmtNode;
 import AST.Stmt.VarDeclStmtNode;
 import AST.Stmt.WhileStmtNode;
-import Frontend.Util.Position;
-import Frontend.Util.TypeIdPair;
-import Frontend.Util.TypeName;
-import Frontend.Util.MxStarErrors.BaseError;
-import Frontend.Util.MxStarErrors.SemanticError;
-import Frontend.Util.Scopes.GlobalScope;
-import Frontend.Util.Scopes.Scope;
-import Frontend.Util.Types.ArrayType;
-import Frontend.Util.Types.BaseType;
-import Frontend.Util.Types.ClassType;
+import AST.Types.ArrayType;
+import AST.Types.BaseType;
+import AST.Util.Position;
+import AST.Util.TypeName;
+import Frontend.MxStar.MxStarErrors.BaseError;
+import Frontend.MxStar.MxStarErrors.SemanticError;
 
 public class SemanticChecker implements ASTVisitor {
 

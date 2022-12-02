@@ -2,13 +2,13 @@ package IR.IRValue.IRUser.ConsValue.GlobalValue;
 
 import java.util.ArrayList;
 
-import Debug.MyException;
-import Frontend.Util.Types.FuncInfo;
+import AST.Info.FuncInfo;
 import IR.IRType.IRFnType;
 import IR.IRValue.IRParameter;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import IR.Util.Transfer;
+import Share.MyException;
 
 public class IRFn extends BaseGlobalValue {
     public ArrayList<IRParameter> paraList = new ArrayList<>();

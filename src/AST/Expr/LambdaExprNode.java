@@ -3,9 +3,9 @@ package AST.Expr;
 import java.util.ArrayList;
 
 import AST.ASTVisitor;
+import AST.Info.TypeIdPair;
 import AST.Stmt.SuiteStmtNode;
-import Frontend.Util.Position;
-import Frontend.Util.TypeIdPair;
+import AST.Util.Position;
 
 public class LambdaExprNode extends ExprNode {
 

@@ -1,6 +1,5 @@
 package IR.IRValue.IRUser.Inst;
 
-import Debug.MyException;
 import IR.IRType.IRIntType;
 import IR.IRType.IRPtType;
 import IR.IRType.IRVoidType;
@@ -8,6 +7,7 @@ import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
 import IR.IRValue.IRUser.Inst.CastInst.castType;
+import Share.MyException;
 
 public class StoreInst extends IRBaseInst {
     public IRBaseValue storedValue, destAddr;

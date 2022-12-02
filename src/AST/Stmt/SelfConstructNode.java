@@ -2,7 +2,7 @@ package AST.Stmt;
 
 import AST.ASTNode;
 import AST.ASTVisitor;
-import Frontend.Util.Position;
+import AST.Util.Position;
 
 public class SelfConstructNode extends ASTNode {
 

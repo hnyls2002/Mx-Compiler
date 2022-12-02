@@ -13,6 +13,10 @@ import AST.Expr.MemberExprNode;
 import AST.Expr.SubscExprNode;
 import AST.Expr.ThisExprNode;
 import AST.Expr.UnaryOpExprNode;
+import AST.Info.ClassType;
+import AST.Info.FuncInfo;
+import AST.Info.TypeIdPair;
+import AST.Scopes.GlobalScope;
 import AST.Stmt.BreakStmtNode;
 import AST.Stmt.ClassDeclStmtNode;
 import AST.Stmt.ContinueStmtNode;
@@ -27,13 +31,9 @@ import AST.Stmt.SingleVarDeclStmtNode;
 import AST.Stmt.SuiteStmtNode;
 import AST.Stmt.VarDeclStmtNode;
 import AST.Stmt.WhileStmtNode;
-import Frontend.Util.Position;
-import Frontend.Util.TypeIdPair;
-import Frontend.Util.MxStarErrors.SemanticError;
-import Frontend.Util.Scopes.GlobalScope;
-import Frontend.Util.Types.BuiltinType;
-import Frontend.Util.Types.ClassType;
-import Frontend.Util.Types.FuncInfo;
+import AST.Types.BuiltinType;
+import AST.Util.Position;
+import Frontend.MxStar.MxStarErrors.SemanticError;
 
 public class ProgInit implements ASTVisitor {
     private GlobalScope gScope;

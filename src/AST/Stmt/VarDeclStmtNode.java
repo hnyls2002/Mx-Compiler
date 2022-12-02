@@ -3,8 +3,8 @@ package AST.Stmt;
 import java.util.ArrayList;
 
 import AST.ASTVisitor;
-import Frontend.Util.Position;
-import Frontend.Util.TypeName;
+import AST.Util.Position;
+import AST.Util.TypeName;
 
 public class VarDeclStmtNode extends StmtNode {
 

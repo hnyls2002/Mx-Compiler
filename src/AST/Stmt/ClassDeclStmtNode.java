@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import AST.ASTNode;
 import AST.ASTVisitor;
-import Frontend.Util.Position;
+import AST.Util.Position;
 
 public class ClassDeclStmtNode extends ASTNode {
 

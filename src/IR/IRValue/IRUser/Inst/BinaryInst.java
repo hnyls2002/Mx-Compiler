@@ -1,9 +1,9 @@
 package IR.IRValue.IRUser.Inst;
 
-import Debug.MyException;
 import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
+import Share.MyException;
 
 public class BinaryInst extends IRBaseInst {
     public enum binaryOperator {
