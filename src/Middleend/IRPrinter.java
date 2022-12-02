@@ -12,39 +12,60 @@ import IR.IRValue.IRUser.ConsValue.ConsData.StrConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.Inst.IRBaseInst;
+import Share.Pass.IRBlockPass;
+import Share.Pass.IRFnPass;
+import Share.Pass.IRModulePass;
 
-public class IRPrinter {
-    IRModule topModule;
+public class IRPrinter implements IRModulePass, IRFnPass, IRBlockPass {
     String fileName;
     File llvmir;
     PrintStream ps;
     final String tab = "    ";
 
-    public IRPrinter(IRModule topModule, String fileName) throws FileNotFoundException {
-        this.topModule = topModule;
+    public IRPrinter(String fileName) throws FileNotFoundException {
         llvmir = new File(fileName);
         ps = new PrintStream(llvmir);
         System.setOut(ps);
     }
 
-    public void printIR() {
+    @Override
+    public void runOnIRModule(IRModule irModule) {
         System.out.print(ExternInfo.getExternInfo());
         System.out.print('\n');
-        topModule.builtinFnList.forEach(fnType -> System.out.println(fnType.toString()));
+        irModule.builtinFnList.forEach(fnType -> System.out.println(fnType.toString()));
         System.out.print('\n');
-        topModule.classList.forEach(classDef -> printClassDef(classDef));
-        if (!topModule.classList.isEmpty())
+        irModule.classList.forEach(classDef -> printClassDef(classDef));
+        if (!irModule.classList.isEmpty())
             System.out.print('\n');
-        topModule.constStrList.forEach(constStr -> printConstStr(constStr));
-        if (!topModule.constStrList.isEmpty())
+        irModule.constStrList.forEach(constStr -> printConstStr(constStr));
+        if (!irModule.constStrList.isEmpty())
             System.out.print('\n');
-        topModule.globalVarList.forEach(gVar -> printGVar(gVar));
-        if (!topModule.globalVarList.isEmpty())
+        irModule.globalVarList.forEach(gVar -> printGVar(gVar));
+        if (!irModule.globalVarList.isEmpty())
             System.out.print('\n');
-        topModule.varInitFnList.forEach(initFn -> printFn(initFn));
-        if (!topModule.varInitFnList.isEmpty())
+        irModule.varInitFnList.forEach(initFn -> runOnIRFn(initFn));
+        if (!irModule.varInitFnList.isEmpty())
             System.out.print('\n');
-        topModule.globalFnList.forEach(gFn -> printFn(gFn));
+        irModule.globalFnList.forEach(gFn -> runOnIRFn(gFn));
+    }
+
+    @Override
+    public void runOnIRFn(IRFn fn) {
+        System.out.print(fn.defToString());
+        System.out.print("{\n");
+        fn.blockList.forEach(block -> {
+            runOnBlock(block);
+            System.out.print('\n');
+        });
+        runOnBlock(fn.retBlock);
+        System.out.print("}\n\n");
+    }
+
+    @Override
+    public void runOnBlock(IRBasicBlock block) {
+        System.out.print(block.defToString() + '\n');
+        block.instList.forEach(inst -> printInst(inst));
+        printInst(block.getTerminal());
     }
 
     private void printClassDef(IRStructType classDef) {
@@ -59,23 +80,6 @@ public class IRPrinter {
     private void printGVar(GlobalVariable gVar) {
         System.out.print(gVar.getName() + " = global ");
         System.out.print(gVar.defToString() + '\n');
-    }
-
-    void printFn(IRFn fn) {
-        System.out.print(fn.defToString());
-        System.out.print("{\n");
-        fn.blockList.forEach(block -> {
-            printBB(block);
-            System.out.print('\n');
-        });
-        printBB(fn.retBlock);
-        System.out.print("}\n\n");
-    }
-
-    private void printBB(IRBasicBlock block) {
-        System.out.print(block.defToString() + '\n');
-        block.instList.forEach(inst -> printInst(inst));
-        printInst(block.getTerminal());
     }
 
     private void printInst(IRBaseInst inst) {

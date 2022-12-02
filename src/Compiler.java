@@ -60,10 +60,10 @@ public class Compiler {
 
             IRBuilder irBuilder = new IRBuilder(ast, gScope);
             IRModule topModule = irBuilder.buildIR();
-            IRRenamer irRenamer = new IRRenamer(topModule);
-            irRenamer.renameIR();
-            IRPrinter irPrinter = new IRPrinter(topModule, filePath + "test.ll");
-            irPrinter.printIR();
+            IRRenamer irRenamer = new IRRenamer();
+            irRenamer.runOnIRModule(topModule);
+            IRPrinter irPrinter = new IRPrinter(filePath + "test.ll");
+            irPrinter.runOnIRModule(topModule);
 
         } catch (BaseError e) {
             System.err.println(e.toString());

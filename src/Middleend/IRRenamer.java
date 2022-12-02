@@ -5,10 +5,11 @@ import IR.IRType.IRType.IRTypeId;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.Inst.IRBaseInst;
+import Share.Pass.IRBlockPass;
+import Share.Pass.IRFnPass;
+import Share.Pass.IRModulePass;
 
-public class IRRenamer {
-    IRModule topModule;
-
+public class IRRenamer implements IRModulePass, IRFnPass, IRBlockPass {
     private class Allocator {
         public int cnt = 0;
 
@@ -19,30 +20,30 @@ public class IRRenamer {
 
     private Allocator allocator;
 
-    public IRRenamer(IRModule topModule) {
-        this.topModule = topModule;
+    @Override
+    public void runOnIRModule(IRModule irModule) {
+        irModule.globalFnList.forEach(fn -> runOnIRFn(fn));
+        irModule.varInitFnList.forEach(fn -> runOnIRFn(fn));
     }
 
-    public void renameIR() {
-        topModule.globalFnList.forEach(fn -> renameFn(fn));
-        topModule.varInitFnList.forEach(fn -> renameFn(fn));
-    }
-
-    public void renameFn(IRFn fn) {
+    @Override
+    public void runOnIRFn(IRFn fn) {
         allocator = new Allocator();
         fn.paraList.forEach(para -> para.parameterName = allocator.getNewName());
-        fn.blockList.forEach(block -> renameBB(block));
-        renameBB(fn.retBlock);
+        fn.blockList.forEach(block -> runOnBlock(block));
+        runOnBlock(fn.retBlock);
     }
 
-    public void renameBB(IRBasicBlock block) {
+    @Override
+    public void runOnBlock(IRBasicBlock block) {
         if (block.entryString == null)
             block.entryString = allocator.getNewName();
         block.instList.forEach(inst -> renameInst(inst));
     }
 
-    public void renameInst(IRBaseInst inst) {
+    private void renameInst(IRBaseInst inst) {
         if (inst.valueType.typeId != IRTypeId.VoidTypeId)
             inst.reName = allocator.getNewName();
     }
+
 }
