@@ -4,6 +4,7 @@ import IR.IRType.IRIntType;
 import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
+import Share.Visitors.IRInstVisitor;
 
 public class CastInst extends IRBaseInst {
 
@@ -48,6 +49,11 @@ public class CastInst extends IRBaseInst {
         var ret = opCode.toString() + ' ' + srcValue.useToStringWithType() + " to ";
         ret += targetType.toString();
         return ret;
+    }
+
+    @Override
+    public void accept(IRInstVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

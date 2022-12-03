@@ -8,6 +8,7 @@ import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
 import IR.IRValue.IRUser.IRInst.CastInst.castType;
 import Share.MyException;
+import Share.Visitors.IRInstVisitor;
 
 public class StoreInst extends IRBaseInst {
     public IRBaseValue storedValue, destAddr;
@@ -51,6 +52,11 @@ public class StoreInst extends IRBaseInst {
         ret += ((IRPtType) destAddr.valueType).derefType().toString() + ' ' + storedValue.useToString() + ", ";
         ret += destAddr.useToStringWithType();
         return ret;
+    }
+
+    @Override
+    public void accept(IRInstVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

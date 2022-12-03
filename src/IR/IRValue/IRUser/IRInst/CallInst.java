@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import IR.IRType.IRFnType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
+import Share.Visitors.IRInstVisitor;
 
 public class CallInst extends IRBaseInst {
     public ArrayList<IRBaseValue> argList = new ArrayList<>();
@@ -35,5 +36,10 @@ public class CallInst extends IRBaseInst {
             ret = ret.substring(0, ret.length() - 2);
         ret += ")";
         return ret;
+    }
+
+    @Override
+    public void accept(IRInstVisitor visitor) {
+        visitor.visit(this);
     }
 }

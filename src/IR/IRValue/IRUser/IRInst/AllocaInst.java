@@ -3,6 +3,7 @@ package IR.IRValue.IRUser.IRInst;
 import IR.IRType.IRPtType;
 import IR.IRType.IRType;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
+import Share.Visitors.IRInstVisitor;
 
 public class AllocaInst extends IRBaseInst {
 
@@ -22,5 +23,10 @@ public class AllocaInst extends IRBaseInst {
     @Override
     public String defToString() {
         return "alloca " + elementType.toString();
+    }
+
+    @Override
+    public void accept(IRInstVisitor visitor) {
+        visitor.visit(this);
     }
 }

@@ -5,6 +5,7 @@ import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import Share.MyException;
+import Share.Visitors.IRInstVisitor;
 
 public class IcmpInst extends IRBaseInst {
     public enum icmpOperator {
@@ -42,5 +43,10 @@ public class IcmpInst extends IRBaseInst {
         var ret = "icmp " + opCode.toString() + ' ' + lhs.valueType.toString() + ' ';
         ret += lhs.useToString() + ", " + rhs.useToString();
         return ret;
+    }
+
+    @Override
+    public void accept(IRInstVisitor visitor) {
+        visitor.visit(this);
     }
 }

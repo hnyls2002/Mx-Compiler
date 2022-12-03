@@ -3,6 +3,7 @@ package IR.IRValue.IRUser.IRInst;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
+import Share.Visitors.IRInstVisitor;
 
 public class RetInst extends IRBaseInst {
     public IRBaseValue retValue;
@@ -29,6 +30,11 @@ public class RetInst extends IRBaseInst {
         if (isVoid())
             return "ret void";
         return "ret" + ' ' + retValue.useToStringWithType();
+    }
+
+    @Override
+    public void accept(IRInstVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

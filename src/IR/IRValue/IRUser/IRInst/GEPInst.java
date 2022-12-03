@@ -7,6 +7,7 @@ import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
+import Share.Visitors.IRInstVisitor;
 
 public class GEPInst extends IRBaseInst {
     public IRType startType;
@@ -35,6 +36,11 @@ public class GEPInst extends IRBaseInst {
         for (var idx : indices)
             ret += ", " + idx.useToStringWithType();
         return ret;
+    }
+
+    @Override
+    public void accept(IRInstVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

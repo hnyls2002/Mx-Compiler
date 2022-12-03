@@ -2,6 +2,7 @@ package IR.IRValue.IRUser.IRInst;
 
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
+import Share.Visitors.IRInstVisitor;
 
 public class PhiInst extends IRBaseInst {
 
@@ -25,5 +26,10 @@ public class PhiInst extends IRBaseInst {
         ret += "[ " + res1.useToString() + ", " + block1.useToString() + " ], ";
         ret += "[ " + res2.useToString() + ", " + block2.useToString() + " ]";
         return ret;
+    }
+
+    @Override
+    public void accept(IRInstVisitor visitor) {
+        visitor.visit(this);
     }
 }

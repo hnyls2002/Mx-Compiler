@@ -4,6 +4,7 @@ import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import Share.MyException;
+import Share.Visitors.IRInstVisitor;
 
 public class BinaryInst extends IRBaseInst {
     public enum binaryOperator {
@@ -42,6 +43,11 @@ public class BinaryInst extends IRBaseInst {
         var ret = opCode.toString() + ' ' + valueType.toString() + ' ';
         ret += lhs.useToString() + ", " + rhs.useToString();
         return ret;
+    }
+
+    @Override
+    public void accept(IRInstVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

@@ -5,6 +5,7 @@ import IR.IRType.IRVoidType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.IRInst.CastInst.castType;
+import Share.Visitors.IRInstVisitor;
 
 public class BrInst extends IRBaseInst {
     public IRBaseValue condition;
@@ -43,5 +44,10 @@ public class BrInst extends IRBaseInst {
             ret += falseBlock.useToStringWithType();
         }
         return ret;
+    }
+
+    @Override
+    public void accept(IRInstVisitor visitor) {
+        visitor.visit(this);
     }
 }
