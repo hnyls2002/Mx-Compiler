@@ -66,8 +66,12 @@ public class Transfer {
         classType.varMap.forEach((memVarString, memVar) -> {
             // 1. store the var-def in structType
             ret.fieldTypeList.add(typeTransfer(memVar.typeName));
+
+            // ----------------------------USELESS------------------------------------
             // 2. stored the index in sructType
-            ret.fieldIdxMap.put(memVarString, ret.fieldTypeList.size() - 1);
+            // ret.fieldIdxMap.put(memVarString, ret.fieldTypeList.size() - 1);
+            // ----------------------------USELESS------------------------------------
+
             // 3. store the varValue(which is index) into classType's varMap
             memVar.varValue = new IntConst(ret.fieldTypeList.size() - 1, 32);
         });

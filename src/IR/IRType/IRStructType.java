@@ -1,29 +1,25 @@
 package IR.IRType;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+
+import IR.IRModule;
+import Share.MyException;
 
 // reference to https://llvm.org/doxygen/classllvm_1_1StructType.html
 
 public class IRStructType extends IRType {
     public String className;
 
+    // proto StructType only used (maybe) during calculate the size
+    // before calcutelate the size, replace the prototype with concret type
     public boolean isSolid = false;
     public ArrayList<IRType> fieldTypeList = new ArrayList<>();
 
-    public LinkedHashMap<String, Integer> fieldIdxMap = new LinkedHashMap<>();
     public IRFnType constructFnType = null;
 
     public IRStructType(String className) {
         super(IRTypeId.StructTypeId);
         this.className = "struct." + className;
-        this.isSolid = true;
-    }
-
-    public IRStructType getProtoStructType(String className) {
-        var proto = new IRStructType(className);
-        proto.isSolid = false;
-        return proto;
     }
 
     @Override
@@ -53,10 +49,23 @@ public class IRStructType extends IRType {
     }
 
     @Override
-    public int getSize() {
+    public int getSize(IRModule irModule) {
+        if (!isSolid) {
+            IRStructType solidStructType = null;
+            for (var st : irModule.classList)
+                if (st.className.equals(className)) {
+                    solidStructType = st;
+                    break;
+                }
+            if (solidStructType == null)
+                throw new MyException("Can not find struct " + className);
+            this.isSolid = true;
+            this.constructFnType = solidStructType.constructFnType;
+            this.fieldTypeList = solidStructType.fieldTypeList;
+        }
         int sum = 0;
         for (var ty : fieldTypeList)
-            sum += ty.getSize();
+            sum += ty.getSize(irModule);
         return sum;
     }
 

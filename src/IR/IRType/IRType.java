@@ -1,5 +1,6 @@
 package IR.IRType;
 
+import IR.IRModule;
 import IR.IRValue.IRBaseValue;
 import Share.MyException;
 
@@ -36,10 +37,11 @@ public class IRType {
         // only override int and pointer type and null type
     }
 
-    public int getSize() {
+    public int getSize(IRModule irModule) {
         return switch (typeId) {
             case ArrayTypeId, FnTypeId, LabelTypeId, PtTypeId, VoidTypeId -> 8;
             case IntTypeId -> 4;
+            // bool type is also 4 byte width
             default -> throw new IllegalArgumentException("Unexpected value: " + typeId);
         };
     }

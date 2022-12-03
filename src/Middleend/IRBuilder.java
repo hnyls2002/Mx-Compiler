@@ -231,7 +231,7 @@ public class IRBuilder implements ASTVisitor {
         IRBaseValue arrLength = new BinaryInst(binaryOperator.irADD, dimList.get(k).irValue, new IntConst(1, 32),
                 cur.block);
         IRBaseValue arrSize = new BinaryInst(binaryOperator.irMUL, arrLength,
-                new IntConst(addrType.derefType().getSize(), 32), cur.block);
+                new IntConst(addrType.derefType().getSize(topModule), 32), cur.block);
 
         var i8Ptr = new CallInst(fnType, cur.block, arrSize);
 
@@ -283,7 +283,7 @@ public class IRBuilder implements ASTVisitor {
         IRType pt = Transfer.typeTransfer(it.typeName);
         if (it.dimenSize.size() == 0) {
             IRFnType fnType = getFnType("__malloc");
-            IRBaseValue size = new IntConst(pt.getSize(), 32);
+            IRBaseValue size = new IntConst((((IRPtType) pt).derefType()).getSize(topModule), 32);
             it.irValue = new CallInst(fnType, cur.block, size);
 
             var classInfo = (ClassType) gScope.typeMap.get(it.typeName.typeNameString);
