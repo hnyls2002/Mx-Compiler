@@ -15,8 +15,4 @@ public class IRArrayType extends IRType {
         return "[" + arrayLen + " x " + elementType.toString() + "]";
     }
 
-    @Override
-    public int getSize() {
-        return arrayLen;
-    }
 }

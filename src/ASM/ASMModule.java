@@ -2,8 +2,8 @@ package ASM;
 
 import java.util.ArrayList;
 
-import ASM.ASMOprand.ASMConstStr;
-import ASM.ASMOprand.ASMGlobalVar;
+import ASM.ASMGlobal.ASMConstStr;
+import ASM.ASMGlobal.ASMGlobalVar;
 
 public class ASMModule {
     public ArrayList<ASMGlobalVar> globalVarList = new ArrayList<>();

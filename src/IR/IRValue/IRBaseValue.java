@@ -1,11 +1,15 @@
 package IR.IRValue;
 
+import ASM.ASMOprand.BaseOprand;
 import IR.IRType.IRType;
 import Share.MyException;
 
 public abstract class IRBaseValue {
     public IRType valueType;
     protected String nameString;
+
+    // for assembly
+    public BaseOprand oprand;
 
     public IRBaseValue(IRType valueType) {
         this.valueType = valueType;

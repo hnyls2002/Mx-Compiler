@@ -1,8 +1,8 @@
 package Backend;
 
 import ASM.ASMFn;
-import ASM.ASMOprand.ASMConstStr;
-import ASM.ASMOprand.ASMGlobalVar;
+import ASM.ASMGlobal.ASMConstStr;
+import ASM.ASMGlobal.ASMGlobalVar;
 
 public class ASMFormatter {
     public static String format(ASMConstStr str) {

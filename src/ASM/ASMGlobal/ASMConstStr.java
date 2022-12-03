@@ -1,5 +1,6 @@
-package ASM.ASMOprand;
+package ASM.ASMGlobal;
 
+import IR.IRType.IRArrayType;
 import IR.IRValue.IRUser.ConsValue.ConsData.StrConst;
 
 public class ASMConstStr {
@@ -9,6 +10,6 @@ public class ASMConstStr {
     public ASMConstStr(StrConst irConstStr) {
         this.name = irConstStr.getName();
         this.data = irConstStr.data;
-        this.size = irConstStr.derefType.getSize();
+        this.size = ((IRArrayType) irConstStr.derefType).arrayLen;
     }
 }

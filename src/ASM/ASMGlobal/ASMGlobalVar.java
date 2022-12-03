@@ -1,4 +1,4 @@
-package ASM.ASMOprand;
+package ASM.ASMGlobal;
 
 import IR.IRType.IRPtType;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
@@ -14,7 +14,9 @@ public class ASMGlobalVar {
     public ASMGlobalVar(GlobalVariable gVar) {
         this.name = gVar.getName();
         this.isPtr = gVar.derefType instanceof IRPtType;
-        this.size = gVar.derefType.getSize() / (this.isPtr ? 2 : 1);
+
+        // global ? int, bool, struct, [] ----> all four bytes
+        this.size = 4;
 
         if (gVar.initValue instanceof NullConst)
             this.data = 0;
@@ -22,7 +24,6 @@ public class ASMGlobalVar {
             this.data = t.constValue;
         else
             throw new MyException("default value should be int");
-
     }
 
 }
