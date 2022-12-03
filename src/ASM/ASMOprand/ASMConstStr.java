@@ -1,4 +1,4 @@
-package ASM.ASMGlobal;
+package ASM.ASMOprand;
 
 import IR.IRValue.IRUser.ConsValue.ConsData.StrConst;
 

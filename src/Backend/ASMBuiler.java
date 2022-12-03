@@ -1,7 +1,9 @@
 package Backend;
 
+import ASM.ASMFn;
 import ASM.ASMModule;
-import ASM.ASMGlobal.ASMConstStr;
+import ASM.ASMOprand.ASMConstStr;
+import ASM.ASMOprand.ASMGlobalVar;
 import IR.IRModule;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
@@ -36,11 +38,16 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
     public void runOnIRModule(IRModule irModule) {
         // TODO Auto-generated method stub
         irModule.constStrList.forEach(constStr -> asmModule.constStrList.add(new ASMConstStr(constStr)));
+        irModule.globalVarList.forEach(gVar -> asmModule.globalVarList.add(new ASMGlobalVar(gVar)));
+        irModule.varInitFnList.forEach(this::runOnIRFn);
+        irModule.globalFnList.forEach(this::runOnIRFn);
     }
 
     @Override
-    public void runOnIRFn(IRFn fn) {
+    public void runOnIRFn(IRFn irfn) {
         // TODO Auto-generated method stub
+        ASMFn asmFn = new ASMFn(irfn);
+        asmModule.fnList.add(asmFn);
 
     }
 
