@@ -1,6 +1,6 @@
 package AST.Types;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import AST.Info.FuncInfo;
 import AST.Util.Position;
@@ -9,7 +9,7 @@ import Frontend.MxStar.MxStarErrors.SemanticError;
 public abstract class BaseType {
     public String typeNameString;
     public Position pos;
-    public HashMap<String, FuncInfo> funMap = new HashMap<>();
+    public LinkedHashMap<String, FuncInfo> funMap = new LinkedHashMap<>();
 
     public abstract boolean isBuiltin();
 

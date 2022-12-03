@@ -1,6 +1,6 @@
 package AST.Info;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import AST.Types.BaseType;
 import AST.Util.Position;
@@ -8,7 +8,7 @@ import Frontend.MxStar.MxStarErrors.SemanticError;
 import IR.IRType.IRStructType;
 
 public class ClassType extends BaseType {
-    public HashMap<String, TypeIdPair> varMap = new HashMap<>();
+    public LinkedHashMap<String, TypeIdPair> varMap = new LinkedHashMap<>();
     public boolean haveConst = false;
     public Position pos;
     public IRStructType structType;

@@ -1,7 +1,7 @@
 package IR.IRType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 // reference to https://llvm.org/doxygen/classllvm_1_1StructType.html
 
@@ -11,7 +11,7 @@ public class IRStructType extends IRType {
     public boolean isSolid = false;
     public ArrayList<IRType> fieldTypeList = new ArrayList<>();
 
-    public HashMap<String, Integer> fieldIdxMap = new HashMap<>();
+    public LinkedHashMap<String, Integer> fieldIdxMap = new LinkedHashMap<>();
     public IRFnType constructFnType = null;
 
     public IRStructType(String className) {

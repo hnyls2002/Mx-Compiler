@@ -1,6 +1,6 @@
 package AST.Scopes;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import AST.Info.FuncInfo;
 import AST.Info.TypeIdPair;
@@ -9,10 +9,11 @@ import AST.Util.Position;
 import Frontend.MxStar.MxStarErrors.SemanticError;
 
 public class Scope {
-    public HashMap<String, BaseType> typeMap = new HashMap<>(); // suppose class can be in class
-    public HashMap<String, FuncInfo> funMap = new HashMap<>();
+    public LinkedHashMap<String, BaseType> typeMap = new LinkedHashMap<>(); // suppose class can be in class
+    public LinkedHashMap<String, FuncInfo> funMap = new LinkedHashMap<>();
     // when you enter a class, the inner function should be added into curScope !
-    public HashMap<String, TypeIdPair> DefMap = new HashMap<>(); // the DefMap only stores the typename literally
+    public LinkedHashMap<String, TypeIdPair> DefMap = new LinkedHashMap<>();
+    // the DefMap only stores the typename literally
     public Scope parent = null;
 
     public Scope(Scope parent) {
