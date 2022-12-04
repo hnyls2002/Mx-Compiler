@@ -21,7 +21,7 @@ public class ASMBrInst extends ASMBaseInst {
 
     @Override
     public String format() {
-        return String.format("\tbeqz\t%s, %s\n", condition.format(), trueBlock.format());
+        return String.format("\tbnez\t%s, %s\n", condition.format(), trueBlock.format());
     }
 
 }
