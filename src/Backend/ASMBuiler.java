@@ -1,8 +1,12 @@
 package Backend;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import ASM.ASMBlock;
 import ASM.ASMFn;
 import ASM.ASMModule;
+import ASM.ASMInst.ASMBaseInst;
 import ASM.ASMInst.ASMBrInst;
 import ASM.ASMInst.ASMCalcInst;
 import ASM.ASMInst.ASMCallInst;
@@ -294,17 +298,54 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         new ASMRetInst(cur.block);
     }
 
+    private boolean judgeBJ(ASMBaseInst inst) {
+        return inst instanceof ASMJInst || inst instanceof ASMBrInst;
+    }
+
+    private ASMBaseInst popBJ(ArrayList<ASMBaseInst> list) {
+        if (list.isEmpty())
+            return null;
+        ASMBaseInst last = list.get(list.size() - 1);
+        if (judgeBJ(last)) {
+            list.remove(list.size() - 1);
+            return last;
+        }
+        return null;
+    }
+
     @Override
     public void visit(PhiInst inst) {
         StackOffset phiResult = new StackOffset(cur.fn.phiStackCnt++, stackDataKind.phi);
 
-        ifConstThenLoad(inst.res1, (ASMBlock) inst.block1.asOprand);
-        ifConstThenLoad(inst.res2, (ASMBlock) inst.block2.asOprand);
+        ASMBlock block1 = (ASMBlock) inst.block1.asOprand;
+        ASMBlock block2 = (ASMBlock) inst.block2.asOprand;
+        ArrayList<ASMBaseInst> t1 = new ArrayList<>();
+        ArrayList<ASMBaseInst> t2 = new ArrayList<>();
+        while (true) {
+            ASMBaseInst i1 = popBJ(block1.instList);
+            if (i1 == null)
+                break;
+            t1.add(i1);
+        }
+        while (true) {
+            ASMBaseInst i2 = popBJ(block2.instList);
+            if (i2 == null)
+                break;
+            t2.add(i2);
+        }
+
+        ifConstThenLoad(inst.res1, block1);
+        ifConstThenLoad(inst.res2, block2);
         Register res1 = (Register) inst.res1.asOprand;
         Register res2 = (Register) inst.res2.asOprand;
 
-        new ASMStoreInst(phiResult, res1, RV32.BitWidth.w, (ASMBlock) inst.block1.asOprand);
-        new ASMStoreInst(phiResult, res2, RV32.BitWidth.w, (ASMBlock) inst.block2.asOprand);
+        new ASMStoreInst(phiResult, res1, RV32.BitWidth.w, block1);
+        new ASMStoreInst(phiResult, res2, RV32.BitWidth.w, block2);
+
+        Collections.reverse(t1);
+        Collections.reverse(t2);
+        block1.instList.addAll(t1);
+        block2.instList.addAll(t2);
 
         Register res = new VirtualReg();
         new ASMLoadInst(phiResult, res, RV32.BitWidth.w, cur.block);
