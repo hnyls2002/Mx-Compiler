@@ -10,6 +10,7 @@ public class ASMFn {
     public int allocaCnt = 0;
     public int spilledArgMax = 0;
     public int phiStackCnt = 0;
+    public int stackRegCnt = 0;
 
     public ASMFn(IRFn irFn) {
         this.name = irFn.getName();

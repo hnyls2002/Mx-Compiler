@@ -10,6 +10,7 @@ import AST.ProgramNode;
 import AST.Scopes.GlobalScope;
 import Backend.ASMBuiler;
 import Backend.ASMPrinter;
+import Backend.RegAllocate.BfRegAllocator;
 import Frontend.ASTBuilder;
 import Frontend.ProgInit;
 import Frontend.SemanticChecker;
@@ -74,6 +75,7 @@ public class Compiler {
 
             ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
             new ASMPrinter().printASM(filePath + "test.s", asmModule);
+            new BfRegAllocator().runOnASMModule(asmModule);
 
         } catch (BaseError e) {
             System.err.println(e.toString());

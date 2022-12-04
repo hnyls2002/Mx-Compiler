@@ -30,7 +30,6 @@ import ASM.ASMOprand.PhysicalReg.ABIType;
 import IR.IRModule;
 import IR.IRType.IRArrayType;
 import IR.IRType.IRIntType;
-import IR.IRType.IRPtType;
 import IR.IRType.IRStructType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBaseValue;
@@ -96,6 +95,9 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         for (int i = 0; i < irfn.blockList.size(); ++i)
             irfn.blockList.get(i).asOprand = new ASMBlock(i);
         irfn.retBlock.asOprand = new ASMBlock(irfn.blockList.size());
+
+        // reset the virtual register counter
+        VirtualReg.virtualRegCnt = 0;
 
         // first block, handle the parameters
         cur.block = (ASMBlock) irfn.blockList.get(0).asOprand;
