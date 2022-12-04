@@ -11,6 +11,8 @@ public class ASMFormatter {
         ret += "\t.section\t.rodata,\"a\",@progbits\n";
         ret += String.format("\t.globl\t%s\n", str.name);
         ret += String.format("%s:\n", str.name);
+        str.data = str.data.replaceAll("\\\\22", "\\\\\"");
+        str.data = str.data.replaceAll("\\\\0A", "\\\\n");
         ret += String.format("\t.asciz\t\"%s\"\n", str.data);
         ret += String.format("\t.size\t%s, %d\n", str.name, str.size);
         ret += "\n";
