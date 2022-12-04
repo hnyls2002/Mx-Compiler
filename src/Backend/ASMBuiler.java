@@ -203,20 +203,24 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
     @Override
     public void visit(GEPInst inst) {
         Register startAddr = ifGlobalThenLoad(inst.startPtr.asOprand);
-        if (inst.startType instanceof IRArrayType) {
+        if (inst.startType instanceof IRArrayType) { // string
             inst.asOprand = startAddr;
-        } else if (inst.startType instanceof IRPtType) {
-            Register rd = new VirtualReg(), rs2 = new VirtualReg();
-            new ASMLiInst(rs2, ((IntConst) inst.indices.get(0)).constValue * 4, cur.block);
-            new ASMCalcInst(ASMBOP.add, rd, startAddr, rs2, cur.block);
-            inst.asOprand = rd;
-        } else if (inst.startType instanceof IRStructType) {
+        } else if (inst.startType instanceof IRStructType) { // struct
             Register rd = new VirtualReg(), rs2 = new VirtualReg();
             new ASMLiInst(rs2, ((IntConst) inst.indices.get(1)).constValue * 4, cur.block);
             new ASMCalcInst(ASMBOP.add, rd, startAddr, rs2, cur.block);
             inst.asOprand = rd;
-        } else
-            throw new MyException("gep on unknow type");
+        } else { // array
+            Register rd = new VirtualReg(), rs2 = new VirtualReg();
+            ifConstThenLoad(inst.indices.get(0), cur.block);
+            Register id = (Register) inst.indices.get(0).asOprand;
+            // ----------------- add twice = mul * 4 --------------------
+            new ASMCalcInst(ASMBOP.add, rs2, id, id, cur.block);
+            new ASMCalcInst(ASMBOP.add, rs2, rs2, rs2, cur.block);
+            // ----------------- add twice = mul * 4 --------------------
+            new ASMCalcInst(ASMBOP.add, rd, startAddr, rs2, cur.block);
+            inst.asOprand = rd;
+        }
     }
 
     @Override
