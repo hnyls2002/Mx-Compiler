@@ -75,7 +75,7 @@ public class Compiler {
             // -------------------------------------------------------
 
             ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
-            new ASMPrinter().printASM(filePath + "test_debug.s", asmModule);
+            //new ASMPrinter().printASM(filePath + "test_debug.s", asmModule);
             new BfRegAllocator().runOnASMModule(asmModule);
             new StackAllocator().runOnASMModule(asmModule);
             new ASMPrinter().printASM(filePath + "test.s", asmModule);

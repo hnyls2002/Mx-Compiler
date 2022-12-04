@@ -253,10 +253,10 @@ public class IRBuilder implements ASTVisitor {
             IRBaseValue curPtr = new PhiInst(cur.block, startPtr, null, null, null);
             IRBaseValue nexPtr = new GEPInst(curPtr, curPtr.valueType, null, new IntConst(1, 32));
 
-            cur.fn.addBlock(conditionBlock);
-            cur.block = conditionBlock;
-            conditionBlock.addInst((IRBaseInst) curPtr);
-            var conditionExpr = new IcmpInst(icmpOperator.irNE, curPtr, endPtr, cur.block);
+            // cur.fn.addBlock(conditionBlock);
+            // cur.block = conditionBlock;
+            // conditionBlock.addInst((IRBaseInst) curPtr);
+            // var conditionExpr = new IcmpInst(icmpOperator.irNE, curPtr, endPtr, cur.block);
 
             cur.fn.addBlock(bodyBlock);
             cur.block = bodyBlock;
@@ -264,6 +264,11 @@ public class IRBuilder implements ASTVisitor {
             cur.block.addInst((IRBaseInst) nexPtr);
             ((PhiInst) curPtr).block2 = cur.block;
             ((PhiInst) curPtr).res2 = nexPtr;
+
+            cur.fn.addBlock(conditionBlock);
+            cur.block = conditionBlock;
+            conditionBlock.addInst((IRBaseInst) curPtr);
+            var conditionExpr = new IcmpInst(icmpOperator.irNE, curPtr, endPtr, cur.block);
 
             cur.fn.addBlock(afterBlock);
             cur.block = afterBlock;

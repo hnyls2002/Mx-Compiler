@@ -91,6 +91,14 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         irModule.globalFnList.forEach(this::runOnIRFn);
     }
 
+    // all phi node's register should be preload
+    private void phiPreload(IRBasicBlock irblock) {
+        irblock.instList.forEach(inst -> {
+            if (inst instanceof PhiInst t)
+                t.asOprand = new VirtualReg();
+        });
+    }
+
     @Override
     public void runOnIRFn(IRFn irfn) {
         ASMFn asmFn = new ASMFn(irfn);
@@ -127,6 +135,10 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
             irfn.paraList.get(i).asOprand = rd;
             new ASMLoadInst(stackPos, rd, RV32.BitWidth.w, cur.block);
         }
+
+        // phi preload
+        irfn.blockList.forEach(this::phiPreload);
+        phiPreload(irfn.retBlock);
 
         // runOnBlock
         irfn.blockList.forEach(this::runOnIRBlock);
@@ -347,10 +359,8 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         block1.instList.addAll(t1);
         block2.instList.addAll(t2);
 
-        Register res = new VirtualReg();
+        Register res = (Register) inst.asOprand;
         new ASMLoadInst(phiResult, res, RV32.BitWidth.w, cur.block);
-
-        inst.asOprand = res;
     }
 
     @Override
