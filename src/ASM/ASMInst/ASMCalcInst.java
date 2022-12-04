@@ -3,6 +3,7 @@ package ASM.ASMInst;
 import ASM.ASMBlock;
 import ASM.ASMOprand.Immediate;
 import ASM.ASMOprand.Register;
+import Share.MyException;
 import Share.Visitors.ASMInstVisitor;
 
 public class ASMCalcInst extends ASMBaseInst {
@@ -52,6 +53,18 @@ public class ASMCalcInst extends ASMBaseInst {
     @Override
     public void accept(ASMInstVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public String format() {
+        if (bop != null)
+            return String.format("\t%s\t%s, %s, %s\n", bop, rd.format(), rs1.format(), rs2.format());
+        else if (biop != null) {
+            return String.format("\t%s\t%s, %s, %s\n", biop, rd.format(), rs1.format(), imm.format());
+        } else if (bzop != null) {
+            return String.format("\t%s\t%s, %s\n", bzop, rd.format(), rs1.format());
+        } else
+            throw new MyException("calc have no operator");
     }
 
 }

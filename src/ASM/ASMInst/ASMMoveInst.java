@@ -17,4 +17,9 @@ public class ASMMoveInst extends ASMBaseInst {
     public void accept(ASMInstVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public String format() {
+        return String.format("\tmv\t%s, %s\n", rd.format(), rs.format());
+    }
 }

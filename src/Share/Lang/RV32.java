@@ -5,6 +5,6 @@ public class RV32 {
     public static final int LO_IMM_LIMIT = (1 << 12) - 1;
 
     public enum BitWidth {
-        B, H, W
+        b, h, w
     }
 }

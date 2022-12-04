@@ -10,4 +10,9 @@ public class ASMConstStr extends ASMGlobalData {
         super(irConstStr.getName(), ((IRArrayType) irConstStr.derefType).arrayLen, false);
         this.data = irConstStr.data;
     }
+
+    @Override
+    public String format() {
+        return name;
+    }
 }

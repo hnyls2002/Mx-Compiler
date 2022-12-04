@@ -18,4 +18,9 @@ public class ASMLiInst extends ASMBaseInst {
     public void accept(ASMInstVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public String format() {
+        return String.format("\tli\t%s, %d\n", rd.format(), imm);
+    }
 }

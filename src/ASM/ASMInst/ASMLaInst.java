@@ -19,4 +19,9 @@ public class ASMLaInst extends ASMBaseInst {
     public void accept(ASMInstVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public String format() {
+        return String.format("\tla\t%s, %s\n", rd.format(), symbol.format());
+    }
 }

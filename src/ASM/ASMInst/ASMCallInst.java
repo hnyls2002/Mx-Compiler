@@ -16,4 +16,9 @@ public class ASMCallInst extends ASMBaseInst {
     public void accept(ASMInstVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public String format() {
+        return String.format("\tcall\t%s\n", fnName);
+    }
 }

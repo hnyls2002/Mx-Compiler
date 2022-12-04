@@ -21,6 +21,7 @@ import ASM.ASMOprand.Register;
 import ASM.ASMOprand.StackOffset;
 import ASM.ASMOprand.VirtualReg;
 import ASM.ASMOprand.PhysicalReg.ABIType;
+import ASM.ASMOprand.StackOffset.stackDataKind;
 import Backend.ASMCurrent;
 import Share.Lang.RV32;
 import Share.Pass.ASMPass.ASMBlockPass;
@@ -36,9 +37,9 @@ public class BfRegAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass, A
 
     private PhysicalReg regAllocateRead(Register reg, PhysicalReg a) {
         if (reg instanceof VirtualReg t) {
-            cur.fn.stackRegCnt = Math.max(cur.fn.stackRegCnt, t.id);
-            StackOffset mem = new StackOffset(t.id);
-            cur.block.addInst(new ASMLoadInst(mem, a, RV32.BitWidth.W, cur.block));
+            cur.fn.stackRegCnt = Math.max(cur.fn.stackRegCnt, t.id + 1);
+            StackOffset mem = new StackOffset(t.id, stackDataKind.vReg);
+            new ASMLoadInst(mem, a, RV32.BitWidth.w, cur.block);
             return a;
         }
         return (PhysicalReg) reg;
@@ -46,9 +47,9 @@ public class BfRegAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass, A
 
     private PhysicalReg regAllocateWrite(Register reg, PhysicalReg a) {
         if (reg instanceof VirtualReg t) {
-            cur.fn.stackRegCnt = Math.max(cur.fn.stackRegCnt, t.id);
-            StackOffset mem = new StackOffset(t.id);
-            cur.block.addInst(new ASMStoreInst(mem, a, RV32.BitWidth.W, cur.block));
+            cur.fn.stackRegCnt = Math.max(cur.fn.stackRegCnt, t.id + 1);
+            StackOffset mem = new StackOffset(t.id, stackDataKind.vReg);
+            new ASMStoreInst(mem, a, RV32.BitWidth.w, cur.block);
             return a;
         }
         return (PhysicalReg) reg;

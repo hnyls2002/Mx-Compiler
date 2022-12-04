@@ -9,4 +9,9 @@ public class RegOffset extends BaseOprand {
         this.reg = reg;
         this.offset = offset;
     }
+
+    @Override
+    public String format() {
+        return String.format("%s(%s)", offset.format(), reg.format());
+    }
 }

@@ -18,4 +18,10 @@ public class ASMBrInst extends ASMBaseInst {
     public void accept(ASMInstVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public String format() {
+        return String.format("\tbeqz\t%s, %s\n", condition.format(), trueBlock.format());
+    }
+
 }

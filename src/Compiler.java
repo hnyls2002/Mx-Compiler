@@ -11,6 +11,7 @@ import AST.Scopes.GlobalScope;
 import Backend.ASMBuiler;
 import Backend.ASMPrinter;
 import Backend.RegAllocate.BfRegAllocator;
+import Backend.RegAllocate.StackAllocator;
 import Frontend.ASTBuilder;
 import Frontend.ProgInit;
 import Frontend.SemanticChecker;
@@ -74,8 +75,10 @@ public class Compiler {
             // -------------------------------------------------------
 
             ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
-            new ASMPrinter().printASM(filePath + "test.s", asmModule);
+            new ASMPrinter().printASM(filePath + "test_debug.s", asmModule);
             new BfRegAllocator().runOnASMModule(asmModule);
+            new StackAllocator().runOnASMModule(asmModule);
+            new ASMPrinter().printASM(filePath + "test.s", asmModule);
 
         } catch (BaseError e) {
             System.err.println(e.toString());

@@ -23,4 +23,9 @@ public class ASMStoreInst extends ASMBaseInst {
         visitor.visit(this);
     }
 
+    @Override
+    public String format() {
+        return String.format("\ts%s\t%s, %s\n", bitWidth, rs.format(), addr.format());
+    }
+
 }

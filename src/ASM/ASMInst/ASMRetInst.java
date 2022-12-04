@@ -12,4 +12,9 @@ public class ASMRetInst extends ASMBaseInst {
     public void accept(ASMInstVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public String format() {
+        return "\tret\n";
+    }
 }

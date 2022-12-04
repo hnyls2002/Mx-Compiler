@@ -22,4 +22,9 @@ public class ASMLoadInst extends ASMBaseInst {
     public void accept(ASMInstVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public String format() {
+        return String.format("\tl%s\t%s, %s\n", bitWidth, rd.format(), addr.format());
+    }
 }

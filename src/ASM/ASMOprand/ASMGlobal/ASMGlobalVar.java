@@ -21,4 +21,8 @@ public class ASMGlobalVar extends ASMGlobalData {
             throw new MyException("default value should be int");
     }
 
+    @Override
+    public String format() {
+        return name;
+    }
 }
