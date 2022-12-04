@@ -3,6 +3,7 @@ package ASM.ASMInst;
 import ASM.ASMBlock;
 import ASM.ASMOprand.Immediate;
 import ASM.ASMOprand.Register;
+import Share.Visitors.ASMInstVisitor;
 
 public class ASMCalcInst extends ASMBaseInst {
     public enum ASMBOP {
@@ -46,6 +47,11 @@ public class ASMCalcInst extends ASMBaseInst {
         this.rd = rd;
         this.rs1 = rs1;
         block.addInst(this);
+    }
+
+    @Override
+    public void accept(ASMInstVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

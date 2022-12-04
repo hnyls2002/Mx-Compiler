@@ -4,6 +4,7 @@ import ASM.ASMBlock;
 import ASM.ASMOprand.RegOffset;
 import ASM.ASMOprand.Register;
 import Share.Lang.RV32;
+import Share.Visitors.ASMInstVisitor;
 
 public class ASMStoreInst extends ASMBaseInst {
     public RV32.BitWidth bitWidth;
@@ -15,6 +16,11 @@ public class ASMStoreInst extends ASMBaseInst {
         this.addr = addr;
         this.rs = rs;
         block.addInst(this);
+    }
+
+    @Override
+    public void accept(ASMInstVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

@@ -3,6 +3,7 @@ package ASM.ASMInst;
 import ASM.ASMBlock;
 import ASM.ASMOprand.Register;
 import ASM.ASMOprand.ASMGlobal.ASMGlobalData;
+import Share.Visitors.ASMInstVisitor;
 
 public class ASMLaInst extends ASMBaseInst {
     public Register rd;
@@ -12,5 +13,10 @@ public class ASMLaInst extends ASMBaseInst {
         this.rd = rd;
         this.symbol = symbol;
         block.addInst(this);
+    }
+
+    @Override
+    public void accept(ASMInstVisitor visitor) {
+        visitor.visit(this);
     }
 }

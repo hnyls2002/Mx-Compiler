@@ -1,4 +1,4 @@
-package Share.Pass;
+package Share.Pass.IRPass;
 
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 

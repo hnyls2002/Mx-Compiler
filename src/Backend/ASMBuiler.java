@@ -51,9 +51,9 @@ import IR.IRValue.IRUser.IRInst.RetInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
 import Share.MyException;
 import Share.Lang.RV32;
-import Share.Pass.IRBlockPass;
-import Share.Pass.IRFnPass;
-import Share.Pass.IRModulePass;
+import Share.Pass.IRPass.IRBlockPass;
+import Share.Pass.IRPass.IRFnPass;
+import Share.Pass.IRPass.IRModulePass;
 import Share.Visitors.IRInstVisitor;
 
 public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVisitor {
@@ -112,12 +112,12 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         }
 
         // runOnBlock
-        irfn.blockList.forEach(this::runOnBlock);
-        runOnBlock(irfn.retBlock);
+        irfn.blockList.forEach(this::runOnIRBlock);
+        runOnIRBlock(irfn.retBlock);
     }
 
     @Override
-    public void runOnBlock(IRBasicBlock irBlock) {
+    public void runOnIRBlock(IRBasicBlock irBlock) {
         cur.block = (ASMBlock) irBlock.asOprand;
         cur.fn.blockList.add(cur.block);
 
@@ -177,11 +177,11 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
         // on stack
         for (int i = RV32.MAX_ARG_NUM; i < inst.argList.size(); ++i) {
-            // TODO
             var addr = new StackOffset(i - RV32.MAX_ARG_NUM);
             var rs = (Register) inst.argList.get(i).asOprand;
             new ASMStoreInst(addr, rs, RV32.BitWidth.W, cur.block);
         }
+        cur.fn.spilledArgMax = Math.max(cur.fn.spilledArgMax, Math.max(inst.argList.size() - RV32.MAX_ARG_NUM, 0));
 
         new ASMCallInst(inst.calledFnType.fnNameString, cur.block);
 

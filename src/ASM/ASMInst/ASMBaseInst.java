@@ -1,5 +1,7 @@
 package ASM.ASMInst;
 
-public abstract class ASMBaseInst {
+import Share.Visitors.ASMInstVisitor;
 
+public abstract class ASMBaseInst {
+    public abstract void accept(ASMInstVisitor visitor);
 }

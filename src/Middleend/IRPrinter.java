@@ -12,9 +12,9 @@ import IR.IRValue.IRUser.ConsValue.ConsData.StrConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.IRBaseInst;
-import Share.Pass.IRBlockPass;
-import Share.Pass.IRFnPass;
-import Share.Pass.IRModulePass;
+import Share.Pass.IRPass.IRBlockPass;
+import Share.Pass.IRPass.IRFnPass;
+import Share.Pass.IRPass.IRModulePass;
 
 public class IRPrinter implements IRModulePass, IRFnPass, IRBlockPass {
     String fileName;
@@ -54,15 +54,15 @@ public class IRPrinter implements IRModulePass, IRFnPass, IRBlockPass {
         System.out.print(fn.defToString());
         System.out.print("{\n");
         fn.blockList.forEach(block -> {
-            runOnBlock(block);
+            runOnIRBlock(block);
             System.out.print('\n');
         });
-        runOnBlock(fn.retBlock);
+        runOnIRBlock(fn.retBlock);
         System.out.print("}\n\n");
     }
 
     @Override
-    public void runOnBlock(IRBasicBlock block) {
+    public void runOnIRBlock(IRBasicBlock block) {
         System.out.print(block.defToString() + '\n');
         block.instList.forEach(this::printInst);
         printInst(block.getTerminal());

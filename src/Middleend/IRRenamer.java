@@ -5,9 +5,9 @@ import IR.IRType.IRType.IRTypeId;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.IRBaseInst;
-import Share.Pass.IRBlockPass;
-import Share.Pass.IRFnPass;
-import Share.Pass.IRModulePass;
+import Share.Pass.IRPass.IRBlockPass;
+import Share.Pass.IRPass.IRFnPass;
+import Share.Pass.IRPass.IRModulePass;
 
 public class IRRenamer implements IRModulePass, IRFnPass, IRBlockPass {
     private class Allocator {
@@ -30,12 +30,12 @@ public class IRRenamer implements IRModulePass, IRFnPass, IRBlockPass {
     public void runOnIRFn(IRFn fn) {
         allocator = new Allocator();
         fn.paraList.forEach(para -> para.setName(allocator.getNewName()));
-        fn.blockList.forEach(this::runOnBlock);
-        runOnBlock(fn.retBlock);
+        fn.blockList.forEach(this::runOnIRBlock);
+        runOnIRBlock(fn.retBlock);
     }
 
     @Override
-    public void runOnBlock(IRBasicBlock block) {
+    public void runOnIRBlock(IRBasicBlock block) {
         if (!block.isNamed())
             block.setName(allocator.getNewName());
         block.instList.forEach(this::renameInst);
