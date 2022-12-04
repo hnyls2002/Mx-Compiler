@@ -3,8 +3,9 @@ package ASM;
 import java.util.ArrayList;
 
 import ASM.ASMInst.ASMBaseInst;
+import ASM.ASMOprand.BaseOprand;
 
-public class ASMBlock {
+public class ASMBlock extends BaseOprand {
     public int blockId;
     public ArrayList<ASMBaseInst> instList = new ArrayList<>();
 
