@@ -14,6 +14,7 @@ import ASM.ASMInst.ASMStoreInst;
 import ASM.ASMInst.ASMCalcInst.ASMBIOP;
 import ASM.ASMInst.ASMCalcInst.ASMBOP;
 import ASM.ASMInst.ASMCalcInst.ASMBZOP;
+import ASM.ASMOprand.BaseOprand;
 import ASM.ASMOprand.Immediate;
 import ASM.ASMOprand.PhysicalReg;
 import ASM.ASMOprand.RegOffset;
@@ -28,11 +29,11 @@ import IR.IRModule;
 import IR.IRType.IRArrayType;
 import IR.IRType.IRPtType;
 import IR.IRType.IRStructType;
+import IR.IRType.IRVoidType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
 import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
-import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.AllocaInst;
 import IR.IRValue.IRUser.IRInst.BinaryInst;
@@ -66,7 +67,6 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     @Override
     public void runOnIRModule(IRModule irModule) {
-        // TODO Auto-generated method stub
         irModule.constStrList.forEach(constStr -> {
             ASMConstStr t = new ASMConstStr(constStr);
             asmModule.constStrList.add(t);
@@ -83,7 +83,6 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     @Override
     public void runOnIRFn(IRFn irfn) {
-        // TODO Auto-generated method stub
         ASMFn asmFn = new ASMFn(irfn);
         asmModule.fnList.add(asmFn);
         cur.fn = asmFn;
@@ -103,21 +102,16 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     @Override
     public void runOnBlock(IRBasicBlock block) {
-        // TODO Auto-generated method stub
-
         block.instList.forEach(inst -> inst.accept(this));
     }
 
     @Override
     public void visit(AllocaInst inst) {
-        // TODO Auto-generated method stub
         inst.asOprand = new StackOffset(cur.fn.allocaCnt++);
     }
 
     @Override
     public void visit(BinaryInst inst) {
-        // TODO Auto-generated method stub
-
         ASMBOP op = switch (inst.opCode) {
             case irADD -> ASMBOP.add;
             case irSUB -> ASMBOP.sub;
@@ -145,8 +139,6 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     @Override
     public void visit(CallInst inst) {
-        // TODO Auto-generated method stub
-
         // all imm should be in register to pass arguments
         inst.argList.forEach(this::ifConstThenLoad);
 
@@ -165,19 +157,32 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         }
 
         new ASMCallInst(inst.calledFnType.fnNameString, cur.block);
+
+        // get ret value
+        if (!(inst.calledFnType.retType instanceof IRVoidType)) {
+            PhysicalReg rs = new PhysicalReg(ABIType.arg, 0);
+            Register rd = new VirtualReg();
+            new ASMMoveInst(rd, rs, cur.block);
+            inst.asOprand = rd;
+        }
     }
 
     @Override
     public void visit(CastInst inst) {
-        // TODO Auto-generated method stub
-
+        inst.asOprand = inst.srcValue.asOprand;
     }
 
     @Override
     public void visit(GEPInst inst) {
+        Register startAddr = ifGlobalThenLoad(inst.startPtr.asOprand);
+        inst.indices.forEach(this::ifConstThenLoad);
         if (inst.startType instanceof IRArrayType) {
+            inst.asOprand = startAddr;
         } else if (inst.startType instanceof IRPtType) {
-            System.err.println("array index");
+            Register rd = new VirtualReg();
+            Register rs2 = (Register) inst.indices.get(0).asOprand;
+            inst.asOprand = rd;
+            new ASMCalcInst(ASMBOP.add, rd, startAddr, rs2, cur.block);
         } else if (inst.startType instanceof IRStructType) {
             System.err.println("struct member");
         } else
@@ -238,12 +243,41 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     @Override
     public void visit(StoreInst inst) {
-        // TODO Auto-generated method stub
-
+        System.err.println(inst.defToString());
+        ifConstThenLoad(inst.storedValue);
+        RegOffset addr = getAddrOffset(inst.destAddr.asOprand);
+        Register rs = (Register) inst.storedValue.asOprand;
+        new ASMStoreInst(addr, rs, RV32.BitWidth.W, cur.block);
     }
 
+    // when the addr is a global, in IR we directly use it address
+    private Register ifGlobalThenLoad(BaseOprand oprand) {
+        if (oprand instanceof ASMGlobalData) {
+            Register rd = new VirtualReg();
+            new ASMLaInst(rd, (ASMGlobalData) oprand, cur.block);
+            return rd;
+        } else if (oprand instanceof Register t)
+            return t;
+        else
+            throw new MyException("if global then load wrong");
+    }
+
+    // When IRPtType, just set the register, no offset
+    private RegOffset getAddrOffset(BaseOprand oprand) {
+        if (oprand instanceof RegOffset t)
+            return t;
+        else if (oprand instanceof Register t)
+            return new RegOffset(t, new Immediate(0));
+        else if (oprand instanceof ASMGlobalData) {
+            Register rd = new VirtualReg();
+            new ASMLaInst(rd, (ASMGlobalData) oprand, cur.block);
+            return new RegOffset(rd, new Immediate(0));
+        } else
+            throw new MyException("address should be RegOffset or GlobalVar");
+    }
+
+    // when val could be intConst, null
     private void ifConstThenLoad(IRBaseValue val) {
-        // when val could be intConst, null, GlobalVar...
         if (val.asOprand == null) {
             if (val instanceof IntConst t) {
                 Register rd = new VirtualReg();
@@ -253,9 +287,6 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
                 Register rd = new VirtualReg();
                 new ASMLiInst(rd, 0, cur.block);
                 val.asOprand = rd;
-            } else if (val instanceof GlobalVariable t) {
-                Register rd = new VirtualReg();
-                new ASMLaInst(rd, (ASMGlobalData) t.asOprand, cur.block);
             } else
                 throw new MyException("Unknow value (no oprand)");
         }

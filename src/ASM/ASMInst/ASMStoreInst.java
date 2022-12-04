@@ -16,4 +16,5 @@ public class ASMStoreInst extends ASMBaseInst {
         this.rs = rs;
         block.addInst(this);
     }
+
 }

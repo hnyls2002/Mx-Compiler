@@ -23,9 +23,9 @@ public class CastInst extends IRBaseInst {
         }
     };
 
-    IRBaseValue srcValue = null;
-    IRType targetType = null;
-    castType opCode = null;
+    public IRBaseValue srcValue = null;
+    public IRType targetType = null;
+    public castType opCode = null;
 
     public static IRBaseValue tryBoolCast(IRBaseValue srcValue, IRType targetType, castType opCode,
             IRBasicBlock block) {
