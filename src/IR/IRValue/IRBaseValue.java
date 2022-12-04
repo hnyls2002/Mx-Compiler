@@ -9,7 +9,7 @@ public abstract class IRBaseValue {
     protected String nameString;
 
     // for assembly
-    public BaseOprand oprand;
+    public BaseOprand asOprand;
 
     public IRBaseValue(IRType valueType) {
         this.valueType = valueType;

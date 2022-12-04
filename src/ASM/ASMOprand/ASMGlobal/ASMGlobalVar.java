@@ -1,4 +1,4 @@
-package ASM.ASMGlobal;
+package ASM.ASMOprand.ASMGlobal;
 
 import IR.IRType.IRPtType;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
@@ -6,17 +6,12 @@ import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
 import Share.MyException;
 
-public class ASMGlobalVar {
-    public String name;
-    public int data, size;
-    public boolean isPtr = false;
+public class ASMGlobalVar extends ASMGlobalData {
+    public int data;
 
     public ASMGlobalVar(GlobalVariable gVar) {
-        this.name = gVar.getName();
-        this.isPtr = gVar.derefType instanceof IRPtType;
-
         // global ? int, bool, struct, [] ----> all four bytes
-        this.size = 4;
+        super(gVar.getName(), 4, gVar.derefType instanceof IRPtType);
 
         if (gVar.initValue instanceof NullConst)
             this.data = 0;

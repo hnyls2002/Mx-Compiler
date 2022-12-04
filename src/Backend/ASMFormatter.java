@@ -1,8 +1,8 @@
 package Backend;
 
 import ASM.ASMFn;
-import ASM.ASMGlobal.ASMConstStr;
-import ASM.ASMGlobal.ASMGlobalVar;
+import ASM.ASMOprand.ASMGlobal.ASMConstStr;
+import ASM.ASMOprand.ASMGlobal.ASMGlobalVar;
 
 public class ASMFormatter {
     public static String format(ASMConstStr str) {
@@ -20,7 +20,7 @@ public class ASMFormatter {
     public static String format(ASMGlobalVar gvar) {
         var ret = "";
         ret += String.format("\t.type\t%s,@object\n", gvar.name);
-        ret += "\t.section\t" + (gvar.isPtr ? ".sbss,\"aw\",@nobits\n" : ".sdata,\"aw\",@progbits\n");
+        ret += "\t.section\t" + (gvar.isContainsPtr ? ".sbss,\"aw\",@nobits\n" : ".sdata,\"aw\",@progbits\n");
         ret += String.format("\t.globl\t%s\n", gvar.name);
         ret += gvar.name + ":\n";
         ret += String.format("\t.word\t%s\n", gvar.data);
