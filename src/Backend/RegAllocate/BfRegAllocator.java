@@ -32,8 +32,8 @@ import Share.Visitors.ASMInstVisitor;
 public class BfRegAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass, ASMInstVisitor {
 
     public ASMCurrent cur = new ASMCurrent();
-    public final PhysicalReg a0 = new PhysicalReg(ABIType.arg, 0);
-    public final PhysicalReg a1 = new PhysicalReg(ABIType.arg, 1);
+    public final PhysicalReg tmp0 = new PhysicalReg(ABIType.tmp, 0);
+    public final PhysicalReg tmp1 = new PhysicalReg(ABIType.tmp, 1);
 
     private PhysicalReg regAllocateRead(Register reg, PhysicalReg a) {
         if (reg instanceof VirtualReg t) {
@@ -76,49 +76,49 @@ public class BfRegAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass, A
 
     @Override
     public void visit(ASMBrInst inst) {
-        inst.condition = regAllocateRead(inst.condition, a0);
+        inst.condition = regAllocateRead(inst.condition, tmp0);
         cur.block.addInst(inst);
     }
 
     @Override
     public void visit(ASMCalcInst inst) {
-        inst.rs1 = regAllocateRead(inst.rs1, a0);
-        inst.rs2 = regAllocateRead(inst.rs2, a1);
+        inst.rs1 = regAllocateRead(inst.rs1, tmp0);
+        inst.rs2 = regAllocateRead(inst.rs2, tmp1);
         cur.block.addInst(inst);
-        inst.rd = regAllocateWrite(inst.rd, a0);
+        inst.rd = regAllocateWrite(inst.rd, tmp0);
     }
 
     @Override
     public void visit(ASMLaInst inst) {
         cur.block.addInst(inst);
-        inst.rd = regAllocateWrite(inst.rd, a0);
+        inst.rd = regAllocateWrite(inst.rd, tmp0);
     }
 
     @Override
     public void visit(ASMLiInst inst) {
         cur.block.addInst(inst);
-        inst.rd = regAllocateWrite(inst.rd, a0);
+        inst.rd = regAllocateWrite(inst.rd, tmp0);
     }
 
     @Override
     public void visit(ASMLoadInst inst) {
-        inst.addr.reg = regAllocateRead(inst.addr.reg, a0);
+        inst.addr.reg = regAllocateRead(inst.addr.reg, tmp0);
         cur.block.addInst(inst);
-        inst.rd = regAllocateWrite(inst.rd, a0);
+        inst.rd = regAllocateWrite(inst.rd, tmp0);
     }
 
     @Override
     public void visit(ASMStoreInst inst) {
-        inst.rs = regAllocateRead(inst.rs, a0);
-        inst.addr.reg = regAllocateRead(inst.addr.reg, a1);
+        inst.rs = regAllocateRead(inst.rs, tmp0);
+        inst.addr.reg = regAllocateRead(inst.addr.reg, tmp1);
         cur.block.addInst(inst);
     }
 
     @Override
     public void visit(ASMMoveInst inst) {
-        inst.rs = regAllocateRead(inst.rs, a0);
+        inst.rs = regAllocateRead(inst.rs, tmp0);
         cur.block.addInst(inst);
-        inst.rd = regAllocateWrite(inst.rd, a0);
+        inst.rd = regAllocateWrite(inst.rd, tmp0);
     }
 
     @Override
