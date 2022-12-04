@@ -26,17 +26,22 @@ import org.antlr.v4.runtime.CharStreams;
 
 import Parser.MxStarLexer;
 import Parser.MxStarParser;
+import Share.Builtin.BuiltinPrinter;
 
 public class Compiler {
     public static void main(String[] args) throws Exception {
         try {
-            boolean testIR = true;
+            boolean testIR = false;
+            boolean testOJ = true;
+
             String filePath = testIR ? "./irtestspace/" : "./debug/";
             File testCode = new File(filePath + "test.mx");
 
-            InputStream testCodeStream = new FileInputStream(testCode);
-
-            // InputStream testCodeStream = System.in;
+            InputStream testCodeStream;
+            if (testOJ)
+                testCodeStream = System.in;
+            else
+                testCodeStream = new FileInputStream(testCode);
 
             // get lexer
             MxStarLexer lexer = new MxStarLexer(CharStreams.fromStream(testCodeStream));
@@ -69,16 +74,23 @@ public class Compiler {
             IRModule irModule = irBuilder.buildIR();
             IRRenamer irRenamer = new IRRenamer();
             irRenamer.runOnIRModule(irModule);
-            IRPrinter irPrinter = new IRPrinter(filePath + "test.ll");
-            irPrinter.runOnIRModule(irModule);
+            if (!testOJ) {
+                IRPrinter irPrinter = new IRPrinter(filePath + "test.ll");
+                irPrinter.runOnIRModule(irModule);
+            }
 
             // -------------------------------------------------------
 
             ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
-            //new ASMPrinter().printASM(filePath + "test_debug.s", asmModule);
+            // new ASMPrinter().printASM(filePath + "test_debug.s", asmModule);
             new BfRegAllocator().runOnASMModule(asmModule);
             new StackAllocator().runOnASMModule(asmModule);
-            new ASMPrinter().printASM(filePath + "test.s", asmModule);
+
+            if (testOJ) {
+                new ASMPrinter().printASM("output.s", asmModule);
+                new BuiltinPrinter().printBuiltin();
+            } else
+                new ASMPrinter().printASM(filePath + "test.s", asmModule);
 
         } catch (BaseError e) {
             System.err.println(e.toString());

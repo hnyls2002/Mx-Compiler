@@ -14,33 +14,35 @@ import Share.Pass.ASMPass.ASMModulePass;
 public class ASMPrinter implements ASMModulePass, ASMBlockPass, ASMFnPass {
     private static int fnCnt = 0;
 
+    public File asm;
+    public PrintStream ps;
+
     public void printASM(String fileName, ASMModule asmModule) throws FileNotFoundException {
-        File asm = new File(fileName);
-        PrintStream ps = new PrintStream(asm);
-        System.setOut(ps);
+        asm = new File(fileName);
+        ps = new PrintStream(asm);
         runOnASMModule(asmModule);
     }
 
     @Override
     public void runOnASMModule(ASMModule asmModule) {
-        System.out.print("\t.text\n");
-        System.out.print("\t.file\t\"test.ll\"\n\n");
+        ps.print("\t.text\n");
+        ps.print("\t.file\t\"test.ll\"\n\n");
 
         asmModule.fnList.forEach(this::runOnASMFn);
-        asmModule.constStrList.forEach(str -> System.out.print(ASMFormatter.format(str)));
-        asmModule.globalVarList.forEach(gvar -> System.out.print(ASMFormatter.format(gvar)));
+        asmModule.constStrList.forEach(str -> ps.print(ASMFormatter.format(str)));
+        asmModule.globalVarList.forEach(gvar -> ps.print(ASMFormatter.format(gvar)));
     }
 
     @Override
     public void runOnASMFn(ASMFn asmFn) {
-        System.out.print(ASMFormatter.prefixFormat(asmFn));
+        ps.print(ASMFormatter.prefixFormat(asmFn));
         asmFn.blockList.forEach(this::runOnASMBlock);
-        System.out.print(ASMFormatter.suffixFormat(asmFn, fnCnt++));
+        ps.print(ASMFormatter.suffixFormat(asmFn, fnCnt++));
     }
 
     @Override
     public void runOnASMBlock(ASMBlock asmBlock) {
-        System.out.print(asmBlock.format() + ":\n");
-        asmBlock.instList.forEach(inst -> System.out.print(inst.format()));
+        ps.print(asmBlock.format() + ":\n");
+        asmBlock.instList.forEach(inst -> ps.print(inst.format()));
     }
 }
