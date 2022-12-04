@@ -13,17 +13,7 @@ public class BuiltinPrinter {
 				.type	__malloc,@function
 			__malloc:                               # @__malloc
 			# %bb.0:
-				addi	sp, sp, -16
-				sw	ra, 12(sp)
-				sw	s0, 8(sp)
-				addi	s0, sp, 16
-				sw	a0, -12(s0)
-				lw	a0, -12(s0)
-				call	malloc
-				lw	s0, 8(sp)
-				lw	ra, 12(sp)
-				addi	sp, sp, 16
-				ret
+				tail	malloc
 			.Lfunc_end0:
 				.size	__malloc, .Lfunc_end0-__malloc
 			                                        # -- End function
@@ -32,39 +22,31 @@ public class BuiltinPrinter {
 				.type	__str_plus,@function
 			__str_plus:                             # @__str_plus
 			# %bb.0:
-				addi	sp, sp, -32
-				sw	ra, 28(sp)
-				sw	s0, 24(sp)
-				addi	s0, sp, 32
-				sw	a0, -12(s0)
-				sw	a1, -16(s0)
-				lw	a0, -12(s0)
+				addi	sp, sp, -16
+				sw	ra, 12(sp)
+				sw	s0, 8(sp)
+				sw	s1, 4(sp)
+				sw	s2, 0(sp)
+				mv	s2, a1
+				mv	s1, a0
 				call	strlen
-				lw	a1, -16(s0)
-				sw	a0, -24(s0)
-				mv	a0, a1
+				mv	s0, a0
+				mv	a0, s2
 				call	strlen
-				lw	a1, -24(s0)
-				add	a0, a1, a0
+				add	a0, s0, a0
 				addi	a0, a0, 1
 				call	malloc
-				sw	a0, -20(s0)
-				lw	a0, -20(s0)
-				lw	a1, -12(s0)
+				mv	s0, a0
+				mv	a1, s1
 				call	strcpy
-				lw	a1, -20(s0)
-				lw	a2, -16(s0)
-				sw	a0, -28(s0)
-				mv	a0, a1
-				mv	a1, a2
-				call	strcat
-				lw	a1, -20(s0)
-				sw	a0, -32(s0)
-				mv	a0, a1
-				lw	s0, 24(sp)
-				lw	ra, 28(sp)
-				addi	sp, sp, 32
-				ret
+				mv	a0, s0
+				mv	a1, s2
+				lw	s2, 0(sp)
+				lw	s1, 4(sp)
+				lw	s0, 8(sp)
+				lw	ra, 12(sp)
+				addi	sp, sp, 16
+				tail	strcat
 			.Lfunc_end1:
 				.size	__str_plus, .Lfunc_end1-__str_plus
 			                                        # -- End function
@@ -75,15 +57,8 @@ public class BuiltinPrinter {
 			# %bb.0:
 				addi	sp, sp, -16
 				sw	ra, 12(sp)
-				sw	s0, 8(sp)
-				addi	s0, sp, 16
-				sw	a0, -12(s0)
-				sw	a1, -16(s0)
-				lw	a0, -12(s0)
-				lw	a1, -16(s0)
 				call	strcmp
 				seqz	a0, a0
-				lw	s0, 8(sp)
 				lw	ra, 12(sp)
 				addi	sp, sp, 16
 				ret
@@ -97,15 +72,8 @@ public class BuiltinPrinter {
 			# %bb.0:
 				addi	sp, sp, -16
 				sw	ra, 12(sp)
-				sw	s0, 8(sp)
-				addi	s0, sp, 16
-				sw	a0, -12(s0)
-				sw	a1, -16(s0)
-				lw	a0, -12(s0)
-				lw	a1, -16(s0)
 				call	strcmp
 				snez	a0, a0
-				lw	s0, 8(sp)
 				lw	ra, 12(sp)
 				addi	sp, sp, 16
 				ret
@@ -119,15 +87,8 @@ public class BuiltinPrinter {
 			# %bb.0:
 				addi	sp, sp, -16
 				sw	ra, 12(sp)
-				sw	s0, 8(sp)
-				addi	s0, sp, 16
-				sw	a0, -12(s0)
-				sw	a1, -16(s0)
-				lw	a0, -12(s0)
-				lw	a1, -16(s0)
 				call	strcmp
 				srli	a0, a0, 31
-				lw	s0, 8(sp)
 				lw	ra, 12(sp)
 				addi	sp, sp, 16
 				ret
@@ -141,15 +102,8 @@ public class BuiltinPrinter {
 			# %bb.0:
 				addi	sp, sp, -16
 				sw	ra, 12(sp)
-				sw	s0, 8(sp)
-				addi	s0, sp, 16
-				sw	a0, -12(s0)
-				sw	a1, -16(s0)
-				lw	a0, -12(s0)
-				lw	a1, -16(s0)
 				call	strcmp
 				slti	a0, a0, 1
-				lw	s0, 8(sp)
 				lw	ra, 12(sp)
 				addi	sp, sp, 16
 				ret
@@ -163,16 +117,8 @@ public class BuiltinPrinter {
 			# %bb.0:
 				addi	sp, sp, -16
 				sw	ra, 12(sp)
-				sw	s0, 8(sp)
-				addi	s0, sp, 16
-				sw	a0, -12(s0)
-				sw	a1, -16(s0)
-				lw	a0, -12(s0)
-				lw	a1, -16(s0)
 				call	strcmp
-				mv	a1, zero
-				slt	a0, a1, a0
-				lw	s0, 8(sp)
+				sgtz	a0, a0
 				lw	ra, 12(sp)
 				addi	sp, sp, 16
 				ret
@@ -186,16 +132,9 @@ public class BuiltinPrinter {
 			# %bb.0:
 				addi	sp, sp, -16
 				sw	ra, 12(sp)
-				sw	s0, 8(sp)
-				addi	s0, sp, 16
-				sw	a0, -12(s0)
-				sw	a1, -16(s0)
-				lw	a0, -12(s0)
-				lw	a1, -16(s0)
 				call	strcmp
 				not	a0, a0
 				srli	a0, a0, 31
-				lw	s0, 8(sp)
 				lw	ra, 12(sp)
 				addi	sp, sp, 16
 				ret
@@ -207,17 +146,7 @@ public class BuiltinPrinter {
 				.type	__str_length,@function
 			__str_length:                           # @__str_length
 			# %bb.0:
-				addi	sp, sp, -16
-				sw	ra, 12(sp)
-				sw	s0, 8(sp)
-				addi	s0, sp, 16
-				sw	a0, -12(s0)
-				lw	a0, -12(s0)
-				call	strlen
-				lw	s0, 8(sp)
-				lw	ra, 12(sp)
-				addi	sp, sp, 16
-				ret
+				tail	strlen
 			.Lfunc_end8:
 				.size	__str_length, .Lfunc_end8-__str_length
 			                                        # -- End function
@@ -229,33 +158,24 @@ public class BuiltinPrinter {
 				addi	sp, sp, -32
 				sw	ra, 28(sp)
 				sw	s0, 24(sp)
-				addi	s0, sp, 32
-				sw	a0, -12(s0)
-				sw	a1, -16(s0)
-				sw	a2, -20(s0)
-				lw	a0, -20(s0)
-				lw	a1, -16(s0)
-				sub	a0, a0, a1
-				addi	a0, a0, 1
+				sw	s1, 20(sp)
+				sw	s2, 16(sp)
+				sw	s3, 12(sp)
+				mv	s3, a1
+				mv	s2, a0
+				sub	s1, a2, a1
+				addi	a0, s1, 1
 				call	malloc
-				sw	a0, -24(s0)
-				lw	a0, -24(s0)
-				lw	a1, -12(s0)
-				lw	a2, -16(s0)
-				add	a1, a1, a2
-				lw	a3, -20(s0)
-				sub	a2, a3, a2
+				mv	s0, a0
+				add	a1, s2, s3
+				mv	a2, s1
 				call	memcpy
-				lw	a1, -24(s0)
-				lw	a2, -20(s0)
-				lw	a3, -16(s0)
-				sub	a2, a2, a3
-				add	a1, a1, a2
-				mv	a2, zero
-				sb	a2, 0(a1)
-				lw	a1, -24(s0)
-				sw	a0, -28(s0)
-				mv	a0, a1
+				add	a0, s0, s1
+				sb	zero, 0(a0)
+				mv	a0, s0
+				lw	s3, 12(sp)
+				lw	s2, 16(sp)
+				lw	s1, 20(sp)
 				lw	s0, 24(sp)
 				lw	ra, 28(sp)
 				addi	sp, sp, 32
@@ -268,22 +188,15 @@ public class BuiltinPrinter {
 				.type	__str_parseInt,@function
 			__str_parseInt:                         # @__str_parseInt
 			# %bb.0:
-				addi	sp, sp, -32
-				sw	ra, 28(sp)
-				sw	s0, 24(sp)
-				addi	s0, sp, 32
-				sw	a0, -12(s0)
-				lw	a0, -12(s0)
+				addi	sp, sp, -16
+				sw	ra, 12(sp)
 				lui	a1, %hi(.L.str)
 				addi	a1, a1, %lo(.L.str)
-				addi	a2, s0, -16
+				addi	a2, sp, 8
 				call	sscanf
-				lw	a1, -16(s0)
-				sw	a0, -20(s0)
-				mv	a0, a1
-				lw	s0, 24(sp)
-				lw	ra, 28(sp)
-				addi	sp, sp, 32
+				lw	a0, 8(sp)
+				lw	ra, 12(sp)
+				addi	sp, sp, 16
 				ret
 			.Lfunc_end10:
 				.size	__str_parseInt, .Lfunc_end10-__str_parseInt
@@ -293,19 +206,8 @@ public class BuiltinPrinter {
 				.type	__str_ord,@function
 			__str_ord:                              # @__str_ord
 			# %bb.0:
-				addi	sp, sp, -16
-				sw	ra, 12(sp)
-				sw	s0, 8(sp)
-				addi	s0, sp, 16
-				sw	a0, -12(s0)
-				sw	a1, -16(s0)
-				lw	a0, -12(s0)
-				lw	a1, -16(s0)
 				add	a0, a0, a1
 				lbu	a0, 0(a0)
-				lw	s0, 8(sp)
-				lw	ra, 12(sp)
-				addi	sp, sp, 16
 				ret
 			.Lfunc_end11:
 				.size	__str_ord, .Lfunc_end11-__str_ord
@@ -315,19 +217,12 @@ public class BuiltinPrinter {
 				.type	print,@function
 			print:                                  # @print
 			# %bb.0:
-				addi	sp, sp, -16
-				sw	ra, 12(sp)
-				sw	s0, 8(sp)
-				addi	s0, sp, 16
-				sw	a0, -12(s0)
-				lw	a1, -12(s0)
-				lui	a0, %hi(.L.str.1)
-				addi	a0, a0, %lo(.L.str.1)
-				call	printf
-				lw	s0, 8(sp)
-				lw	ra, 12(sp)
-				addi	sp, sp, 16
-				ret
+				lui	a1, %hi(.L.str.1)
+				addi	a1, a1, %lo(.L.str.1)
+				mv	a2, a0
+				mv	a0, a1
+				mv	a1, a2
+				tail	printf
 			.Lfunc_end12:
 				.size	print, .Lfunc_end12-print
 			                                        # -- End function
@@ -336,19 +231,7 @@ public class BuiltinPrinter {
 				.type	println,@function
 			println:                                # @println
 			# %bb.0:
-				addi	sp, sp, -16
-				sw	ra, 12(sp)
-				sw	s0, 8(sp)
-				addi	s0, sp, 16
-				sw	a0, -12(s0)
-				lw	a1, -12(s0)
-				lui	a0, %hi(.L.str.2)
-				addi	a0, a0, %lo(.L.str.2)
-				call	printf
-				lw	s0, 8(sp)
-				lw	ra, 12(sp)
-				addi	sp, sp, 16
-				ret
+				tail	puts
 			.Lfunc_end13:
 				.size	println, .Lfunc_end13-println
 			                                        # -- End function
@@ -357,19 +240,12 @@ public class BuiltinPrinter {
 				.type	printInt,@function
 			printInt:                               # @printInt
 			# %bb.0:
-				addi	sp, sp, -16
-				sw	ra, 12(sp)
-				sw	s0, 8(sp)
-				addi	s0, sp, 16
-				sw	a0, -12(s0)
-				lw	a1, -12(s0)
-				lui	a0, %hi(.L.str)
-				addi	a0, a0, %lo(.L.str)
-				call	printf
-				lw	s0, 8(sp)
-				lw	ra, 12(sp)
-				addi	sp, sp, 16
-				ret
+				lui	a1, %hi(.L.str)
+				addi	a1, a1, %lo(.L.str)
+				mv	a2, a0
+				mv	a0, a1
+				mv	a1, a2
+				tail	printf
 			.Lfunc_end14:
 				.size	printInt, .Lfunc_end14-printInt
 			                                        # -- End function
@@ -378,19 +254,12 @@ public class BuiltinPrinter {
 				.type	printlnInt,@function
 			printlnInt:                             # @printlnInt
 			# %bb.0:
-				addi	sp, sp, -16
-				sw	ra, 12(sp)
-				sw	s0, 8(sp)
-				addi	s0, sp, 16
-				sw	a0, -12(s0)
-				lw	a1, -12(s0)
-				lui	a0, %hi(.L.str.3)
-				addi	a0, a0, %lo(.L.str.3)
-				call	printf
-				lw	s0, 8(sp)
-				lw	ra, 12(sp)
-				addi	sp, sp, 16
-				ret
+				lui	a1, %hi(.L.str.3)
+				addi	a1, a1, %lo(.L.str.3)
+				mv	a2, a0
+				mv	a0, a1
+				mv	a1, a2
+				tail	printf
 			.Lfunc_end15:
 				.size	printlnInt, .Lfunc_end15-printlnInt
 			                                        # -- End function
@@ -402,17 +271,14 @@ public class BuiltinPrinter {
 				addi	sp, sp, -16
 				sw	ra, 12(sp)
 				sw	s0, 8(sp)
-				addi	s0, sp, 16
 				addi	a0, zero, 256
 				call	malloc
-				sw	a0, -12(s0)
-				lw	a1, -12(s0)
+				mv	s0, a0
 				lui	a0, %hi(.L.str.1)
 				addi	a0, a0, %lo(.L.str.1)
+				mv	a1, s0
 				call	scanf
-				lw	a1, -12(s0)
-				sw	a0, -16(s0)
-				mv	a0, a1
+				mv	a0, s0
 				lw	s0, 8(sp)
 				lw	ra, 12(sp)
 				addi	sp, sp, 16
@@ -427,16 +293,11 @@ public class BuiltinPrinter {
 			# %bb.0:
 				addi	sp, sp, -16
 				sw	ra, 12(sp)
-				sw	s0, 8(sp)
-				addi	s0, sp, 16
 				lui	a0, %hi(.L.str)
 				addi	a0, a0, %lo(.L.str)
-				addi	a1, s0, -12
+				addi	a1, sp, 8
 				call	scanf
-				lw	a1, -12(s0)
-				sw	a0, -16(s0)
-				mv	a0, a1
-				lw	s0, 8(sp)
+				lw	a0, 8(sp)
 				lw	ra, 12(sp)
 				addi	sp, sp, 16
 				ret
@@ -448,25 +309,24 @@ public class BuiltinPrinter {
 				.type	toString,@function
 			toString:                               # @toString
 			# %bb.0:
-				addi	sp, sp, -32
-				sw	ra, 28(sp)
-				sw	s0, 24(sp)
-				addi	s0, sp, 32
-				sw	a0, -12(s0)
+				addi	sp, sp, -16
+				sw	ra, 12(sp)
+				sw	s0, 8(sp)
+				sw	s1, 4(sp)
+				mv	s0, a0
 				addi	a0, zero, 12
 				call	malloc
-				sw	a0, -16(s0)
-				lw	a0, -16(s0)
-				lw	a2, -12(s0)
-				lui	a1, %hi(.L.str)
-				addi	a1, a1, %lo(.L.str)
+				mv	s1, a0
+				lui	a0, %hi(.L.str)
+				addi	a1, a0, %lo(.L.str)
+				mv	a0, s1
+				mv	a2, s0
 				call	sprintf
-				lw	a1, -16(s0)
-				sw	a0, -20(s0)
-				mv	a0, a1
-				lw	s0, 24(sp)
-				lw	ra, 28(sp)
-				addi	sp, sp, 32
+				mv	a0, s1
+				lw	s1, 4(sp)
+				lw	s0, 8(sp)
+				lw	ra, 12(sp)
+				addi	sp, sp, 16
 				ret
 			.Lfunc_end18:
 				.size	toString, .Lfunc_end18-toString
@@ -497,11 +357,6 @@ public class BuiltinPrinter {
 				.asciz	"%s"
 				.size	.L.str.1, 3
 
-				.type	.L.str.2,@object        # @.str.2
-			.L.str.2:
-				.asciz	"%s\\n"
-				.size	.L.str.2, 4
-
 				.type	.L.str.3,@object        # @.str.3
 			.L.str.3:
 				.asciz	"%d\\n"
@@ -510,17 +365,8 @@ public class BuiltinPrinter {
 				.ident	"clang version 10.0.0-4ubuntu1 "
 				.section	".note.GNU-stack","",@progbits
 				.addrsig
-				.addrsig_sym malloc
-				.addrsig_sym strlen
-				.addrsig_sym strcpy
-				.addrsig_sym strcat
-				.addrsig_sym strcmp
-				.addrsig_sym sscanf
-				.addrsig_sym printf
-				.addrsig_sym scanf
-				.addrsig_sym sprintf
 
-									            """;
+												            """;
 
 	public void printBuiltin() throws FileNotFoundException {
 		File builtin = new File("builtin.s");
