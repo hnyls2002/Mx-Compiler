@@ -30,7 +30,7 @@ import Parser.MxStarParser;
 public class Compiler {
     public static void main(String[] args) throws Exception {
         try {
-            boolean testIR = false;
+            boolean testIR = true;
             String filePath = testIR ? "./irtestspace/" : "./debug/";
             File testCode = new File(filePath + "test.mx");
 

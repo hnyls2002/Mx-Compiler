@@ -21,7 +21,11 @@ char* __str_substring(char* s, int start, int end) {
     sub[end - start] = '\0';
     return sub;
 }
-int __str_parseInt(char* s) { return sprintf(s, "%d", s); }
+int __str_parseInt(char* s) { 
+    int i;
+    sscanf(s, "%d", &i);
+    return i;
+}
 int __str_ord(char* s, int i) { return s[i]; }
 
 void print(char* str) { printf("%s", str); }

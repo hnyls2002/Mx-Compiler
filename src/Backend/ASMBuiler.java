@@ -105,8 +105,6 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         asmModule.fnList.add(asmFn);
         cur.fn = asmFn;
 
-        System.err.println(irfn.getName());
-
         // block preload : set oprand for every IRBasicBlock
         for (int i = 0; i < irfn.blockList.size(); ++i)
             irfn.blockList.get(i).asOprand = new ASMBlock(i, fnCnt);
