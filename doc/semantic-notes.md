@@ -1,4 +1,6 @@
-### **Stupid Mistakes**
+[TOC]
+
+### Stupid Mistakes
 
 - Using `vscode starter` to learn how to compile java codes.
     - `src/` folder is default folder for java codes.
@@ -11,6 +13,7 @@
   }
   ```
   `return null` is not the true code!
+
 ### Visitor Pattern
 
 - visitor 
@@ -41,7 +44,7 @@
     So when you call `visit()` method, an instance of `SomeContext` will call the `visitA()` method.
 
 
-### `ASTBuilder`
+### ASTBuilder
 
 - using visitor pattern.
   - Extended from `BaseVisitor`, which has `visitChildren` method.
@@ -61,17 +64,19 @@
   - Some fields of the context I don't know...
 - **Build the `AST`**.
 
-### **Build The `AST`**
+##### Build The AST
+
 - Interface `ASTVisitor` for `AST` visitor pattern.
 - Abstract class `ASTNode` for `AST` base and derived classes.
 - AST nodes design
   - `Expr` : all expressions
   - `Stmt` : all statements
 
-### `ASTVisitor`
+##### ASTVisitor
+
 - It's a interface to traverse the `AST`, generate the `IR` and so on.
 
-### `Semantic Checker`
+### Semantic Checker
 
 - Traverse the `AST` and check the semantic. Require a class which is extended from `ASTVisitor` and implement the `visit` method for every type of node.
 - `Scope` handling
@@ -80,14 +85,16 @@
 - `Control flow` handling : `break` and `continue`.
 - `Return` handling : `return`'s location and type.
 
-**Scopes Handling**
+##### Scopes Handling
+
 - `GlobalScope` : collect the func def, global var def and class def(as well as var and func in class).
 - `Scope` : Scope is a `tree` or `stack` structure, which stores the var local var defs during program execution.
   - `ClassDeclare` : when checking the body of **a function in specific class**, the checker should know the **local** `variables` and `functions` defined in this class. 
   - Further more, the vars and funcs can support `back-reference`.
   - To solve this, checker should add all the `vars` and `funcs` upon entering the declaration of a class.
 
-**Types Handling**
+##### Types Handling
+
 - Semantic checker should check the type of every `expression` and `expression's match`.
   - All `expression` checks : using `TypeName`.
   - `TypeName` : only stores the literal `typeNameString` , `dimension` , `isLeftValue`.
@@ -97,7 +104,8 @@
   - The infos were collected during `SymbolCollector` in GlobalScope.
   - `FuncInfo` stores the **inner function's signature**.
 
-**Members Handling**
+##### Members Handling
+
 - The implementation of `member` was not so good now.
 - A global flag `isMember` to indicate whether the current `expression` is a `member` or not.
 - A global reference `curMaster` to link to the spefic `class`.
@@ -106,10 +114,12 @@
   - `function` : find the `func` in **only** `curMaster`.
 - Ugly code : `function call`'s arguments are not members, so quit `isMember` mode when visiting `arguments`.
 
-**Control Flow Handling**
+##### control Flow Handling
+
 - A trick in semantic : `++inLoop` and `--inLoop` to indicate whether the current `statement` is in a `loop`.
 
-**Return Handling**
+##### Return Handling
+
 - A good ideal.
 - Similar to every `expression` has a `TypeName`, every `statement` has a `retStmtType`.
 - It's a tree-shape collection of `return` statements and `return` type **in a single function**.
