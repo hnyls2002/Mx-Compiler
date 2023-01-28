@@ -5,4 +5,4 @@ testcases/
 bin/
 bugs.txt
 debug/
-src/irtestspace
+src/autotestspace

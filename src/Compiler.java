@@ -31,14 +31,14 @@ import Share.Builtin.BuiltinPrinter;
 public class Compiler {
     public static void main(String[] args) throws Exception {
         try {
-            boolean testIR = false;
-            boolean testOJ = true;
+            boolean testManual = false;
+            boolean testOnline = false;
 
-            String filePath = testIR ? "./irtestspace/" : "./debug/";
+            String filePath = testManual ? "./debug/" : "./autotestspace/";
             File testCode = new File(filePath + "test.mx");
 
             InputStream testCodeStream;
-            if (testOJ)
+            if (testOnline)
                 testCodeStream = System.in;
             else
                 testCodeStream = new FileInputStream(testCode);
@@ -63,8 +63,6 @@ public class Compiler {
             ProgInit progInit = new ProgInit(gScope);
             progInit.visit(ast);
 
-            // gScope.showShowWay();
-
             SemanticChecker semanticChecker = new SemanticChecker(gScope);
             semanticChecker.visit(ast);
 
@@ -74,7 +72,7 @@ public class Compiler {
             IRModule irModule = irBuilder.buildIR();
             IRRenamer irRenamer = new IRRenamer();
             irRenamer.runOnIRModule(irModule);
-            if (!testOJ) {
+            if (!testOnline) {
                 IRPrinter irPrinter = new IRPrinter(filePath + "test.ll");
                 irPrinter.runOnIRModule(irModule);
             }
@@ -86,7 +84,7 @@ public class Compiler {
             new BfRegAllocator().runOnASMModule(asmModule);
             new StackAllocator().runOnASMModule(asmModule);
 
-            if (testOJ) {
+            if (testOnline) {
                 new ASMPrinter().printASM("output.s", asmModule);
                 new BuiltinPrinter().printBuiltin();
             } else

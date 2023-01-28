@@ -1,7 +1,7 @@
 import os
 import time
 
-command = "cp {code_file} ./src/irtestspace/test.mx && sh ir-auto-test.sh < {input_file} > {output_file}"
+command = "cp {code_file} ./src/autotestspace/test.mx && sh ir-auto-test.sh < {input_file} > {output_file}"
 
 judge_list = open("testcases/codegen/judgelist.txt").readlines()
 
@@ -15,9 +15,9 @@ for judge in judge_list:
     cnt += 1
 
     code_file = judge.replace("\n", "").replace("./", "testcases/codegen/")
-    input_file = "./src/irtestspace/input.txt"
-    output_file = "./src/irtestspace/output.txt"
-    std_file = "./src/irtestspace/std.txt"
+    input_file = "./src/autotestspace/input.txt"
+    output_file = "./src/autotestspace/output.txt"
+    std_file = "./src/autotestspace/std.txt"
 
     input_fp = open(input_file, "w")
     output_fp = open(output_file, "w")

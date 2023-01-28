@@ -21,7 +21,7 @@ updated on 2022/12/5
 - `sh ir-test.sh`
 - `sh ir-draw.sh`
 
-##### IR auto test in `src/irtestspace`.
+##### IR auto test in `src/autotestspace`.
 The `testIR` flag in `Compiler.java` should be set to `true`.
 - `python3 ir-auto-test.py`
 
