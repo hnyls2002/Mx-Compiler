@@ -30,7 +30,6 @@ import ASM.ASMOprand.VirtualReg;
 import ASM.ASMOprand.ASMGlobal.ASMConstStr;
 import ASM.ASMOprand.ASMGlobal.ASMGlobalData;
 import ASM.ASMOprand.ASMGlobal.ASMGlobalVar;
-import ASM.ASMOprand.PhysicalReg.ABIType;
 import ASM.ASMOprand.StackOffset.stackDataKind;
 import IR.IRModule;
 import IR.IRType.IRArrayType;
@@ -116,15 +115,15 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
         // first block, lower sp, store ra
         cur.block = (ASMBlock) irfn.blockList.get(0).asOprand;
-        PhysicalReg sp = new PhysicalReg(ABIType.sp, 0);
-        PhysicalReg ra = new PhysicalReg(ABIType.ra, 0);
+        PhysicalReg sp = PhysicalReg.getPhyReg("sp");
+        PhysicalReg ra = PhysicalReg.getPhyReg("ra");
         new ASMCalcInst(ASMBIOP.addi, sp, sp, new Immediate(0), cur.block);
         new ASMStoreInst(new StackOffset(0, stackDataKind.ra), ra, BitWidth.w, cur.block);
 
         // first block, handle the parameters
         for (int i = 0; i < Math.min(irfn.paraList.size(), RV32.MAX_ARG_NUM); ++i) {
             Register rd = new VirtualReg();
-            new ASMMoveInst(rd, new PhysicalReg(ABIType.arg, i), cur.block);
+            new ASMMoveInst(rd, PhysicalReg.getPhyReg("a" + i), cur.block);
             irfn.paraList.get(i).asOprand = rd;
         }
         for (int i = RV32.MAX_ARG_NUM; i < irfn.paraList.size(); ++i) {
@@ -147,7 +146,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         cur.block.instList.remove(siz - 1);
         if (!(((IRFnType) irfn.valueType).retType instanceof IRVoidType)) {
             ASMLoadInst ld = (ASMLoadInst) cur.block.instList.get(siz - 2);
-            new ASMMoveInst(new PhysicalReg(ABIType.arg, 0), ld.rd, cur.block);
+            new ASMMoveInst(PhysicalReg.getPhyReg("a0"), ld.rd, cur.block);
         }
 
         new ASMLoadInst(new StackOffset(0, stackDataKind.ra), ra, BitWidth.w, cur.block);
@@ -209,7 +208,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
         // a0 - a7
         for (int i = 0; i < Math.min(inst.argList.size(), RV32.MAX_ARG_NUM); ++i) {
-            var rd = new PhysicalReg(ABIType.arg, i);
+            var rd = PhysicalReg.getPhyReg("a" + i);
             var rs = (Register) inst.argList.get(i).asOprand;
             new ASMMoveInst(rd, rs, cur.block);
         }
@@ -226,7 +225,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
         // get ret value
         if (!(inst.calledFnType.retType instanceof IRVoidType)) {
-            PhysicalReg rs = new PhysicalReg(ABIType.arg, 0);
+            PhysicalReg rs = PhysicalReg.getPhyReg("a0");
             Register rd = new VirtualReg();
             new ASMMoveInst(rd, rs, cur.block);
             inst.asOprand = rd;
