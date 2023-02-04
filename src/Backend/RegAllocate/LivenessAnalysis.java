@@ -34,13 +34,15 @@ public class LivenessAnalysis implements ASMFnPass {
             inList.remove(curBlock);
 
             HashSet<Register> nLiveIn = new HashSet<>(), nLiveOut = new HashSet<>();
-            // in[n] = use[n] U (out[n] - def[n])
-            nLiveIn.addAll(curBlock.liveOut);
-            nLiveIn.removeAll(curBlock.defSet);
-            nLiveIn.addAll(curBlock.useSet);
 
             // out[n] = U (s is suc) in[s]
             curBlock.sucList.forEach(sucBlock -> nLiveOut.addAll(sucBlock.liveIn));
+
+            // in[n] = use[n] U (out[n] - def[n])
+            // use the new liveOut !!!
+            nLiveIn.addAll(nLiveOut);
+            nLiveIn.removeAll(curBlock.defSet);
+            nLiveIn.addAll(curBlock.useSet);
 
             // can update
             if (!nLiveIn.equals(curBlock.liveIn) || !nLiveOut.equals(curBlock.liveOut)) {

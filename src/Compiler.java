@@ -31,8 +31,12 @@ import Share.Builtin.BuiltinPrinter;
 public class Compiler {
     public static void main(String[] args) throws Exception {
         try {
-            boolean testManual = true;
-            boolean testOnline = false;
+            boolean testManual = false;
+            boolean testOnline = true;
+
+            // File bugs = new File("debug/debug.txt");
+            // PrintStream ps = new PrintStream(bugs);
+            // System.setErr(ps);
 
             String filePath = testManual ? "./debug/" : "./autotestspace/";
             File testCode = new File(filePath + "test.mx");
@@ -82,6 +86,7 @@ public class Compiler {
             ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
             new RegisterColoring().runOnASMModule(asmModule);
             // new BfRegAllocator().runOnASMModule(asmModule);
+
             new StackAllocator().runOnASMModule(asmModule);
 
             if (testOnline) {

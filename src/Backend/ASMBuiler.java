@@ -135,6 +135,14 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
             new ASMLoadInst(stackPos, rd, RV32.BitWidth.w, cur.block);
         }
 
+        // save callee-saved register
+        ArrayList<Register> backupReg = new ArrayList<>();
+        for (var toSave : PhysicalReg.calleeSavedReg) {
+            var savePos = new VirtualReg(asmFn);
+            backupReg.add(savePos);
+            new ASMMoveInst(savePos, toSave, cur.block);
+        }
+
         // phi preload
         irfn.blockList.forEach(this::phiPreload);
         phiPreload(irfn.retBlock);
@@ -150,6 +158,10 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
             ASMLoadInst ld = (ASMLoadInst) cur.block.instList.get(siz - 2);
             new ASMMoveInst(PhysicalReg.getPhyReg("a0"), ld.rd, cur.block);
         }
+
+        // backup callee saved register
+        for (int i = 0; i < backupReg.size(); ++i)
+            new ASMMoveInst(PhysicalReg.calleeSavedReg.get(i), backupReg.get(i), cur.block);
 
         new ASMLoadInst(new StackOffset(0, stackDataKind.ra), ra, BitWidth.w, cur.block);
         new ASMCalcInst(ASMBIOP.addi, sp, sp, new Immediate(0), cur.block);
@@ -223,7 +235,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         }
         cur.fn.spilledArgMax = Math.max(cur.fn.spilledArgMax, Math.max(inst.argList.size() - RV32.MAX_ARG_NUM, 0));
 
-        new ASMCallInst(inst.calledFnType.fnNameString, cur.block);
+        new ASMCallInst(inst.calledFnType.fnNameString, inst.argList.size(), cur.block);
 
         // get ret value
         if (!(inst.calledFnType.retType instanceof IRVoidType)) {

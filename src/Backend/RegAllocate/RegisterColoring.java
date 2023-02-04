@@ -165,6 +165,16 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
     private void build(ASMFn asmFn) {
         for (var curBlock : asmFn.blockList) {
             // get the liveOut of the last instruction in this block
+            // System.err.println("block id = " + curBlock.blockId);
+            // System.err.println("useSet");
+            // curBlock.useSet.forEach(reg -> System.err.println(reg.format()));
+            // System.err.println("defSet");
+            // curBlock.defSet.forEach(reg -> System.err.println(reg.format()));
+            // System.err.println("liveIn");
+            // curBlock.liveIn.forEach(reg -> System.err.println(reg.format()));
+            // System.err.println("liveOut");
+            // curBlock.liveOut.forEach(reg -> System.err.println(reg.format()));
+            // System.err.println("\n--------------------------------------");
             var live = curBlock.liveOut;
             for (int i = curBlock.instList.size() - 1; i >= 0; --i) {
                 var curInst = curBlock.instList.get(i);
@@ -177,6 +187,9 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
                     workListMoves.add(mvInst);
                 }
                 live.addAll(curInst.getDef());
+                // System.err.println(curInst.format());
+                // live.forEach(reg -> System.err.print(reg.format() + ","));
+                // System.err.println("\n--------------------------------------------");
                 for (var d : curInst.getDef())
                     for (var l : live)
                         addEdge(l, d);

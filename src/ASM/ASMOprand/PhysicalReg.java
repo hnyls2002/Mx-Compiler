@@ -1,6 +1,7 @@
 package ASM.ASMOprand;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import Share.Lang.RV32;
@@ -13,7 +14,9 @@ public class PhysicalReg extends Register {
     }
 
     public static HashMap<String, PhysicalReg> phyRegMap = new HashMap<>();
-    public static LinkedList<PhysicalReg> assignableSet = new LinkedList<>();
+    public static HashSet<PhysicalReg> assignableSet = new HashSet<>();
+    public static HashSet<PhysicalReg> callerSavedReg = new HashSet<>();
+    public static LinkedList<PhysicalReg> calleeSavedReg = new LinkedList<>();
 
     static {
         for (var regName : RV32.regName)
@@ -25,13 +28,12 @@ public class PhysicalReg extends Register {
         assignableSet.remove(phyRegMap.get("gp"));
         assignableSet.remove(phyRegMap.get("tp"));
 
-        // fortest
-        // for (int i = 0; i <= 11; ++i)
-        // assignableSet.remove(phyRegMap.get("s" + i));
-        // for (int i = 0; i <= 6; ++i)
-        // assignableSet.remove(phyRegMap.get("t" + i));
-        // for (int i = 2; i <= 7; ++i)
-        // assignableSet.remove(phyRegMap.get("a" + i));
+        for (int i = 0; i <= 11; ++i)
+            calleeSavedReg.add(phyRegMap.get("s" + i));
+        for (int i = 0; i <= 6; ++i)
+            callerSavedReg.add(phyRegMap.get("t" + i));
+        for (int i = 0; i <= 7; ++i)
+            callerSavedReg.add(phyRegMap.get("a" + i));
     }
 
     public static PhysicalReg getPhyReg(String name) {
