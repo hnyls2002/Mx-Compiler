@@ -10,7 +10,7 @@ import AST.ProgramNode;
 import AST.Scopes.GlobalScope;
 import Backend.ASMBuiler;
 import Backend.ASMPrinter;
-import Backend.RegAllocate.BfRegAllocator;
+import Backend.RegAllocate.RegisterColoring;
 import Backend.RegAllocate.StackAllocator;
 import Frontend.ASTBuilder;
 import Frontend.ProgInit;
@@ -31,7 +31,7 @@ import Share.Builtin.BuiltinPrinter;
 public class Compiler {
     public static void main(String[] args) throws Exception {
         try {
-            boolean testManual = false;
+            boolean testManual = true;
             boolean testOnline = false;
 
             String filePath = testManual ? "./debug/" : "./autotestspace/";
@@ -80,8 +80,8 @@ public class Compiler {
             // -------------------------------------------------------
 
             ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
-            // new ASMPrinter().printASM(filePath + "test_debug.s", asmModule);
-            new BfRegAllocator().runOnASMModule(asmModule);
+            new RegisterColoring().runOnASMModule(asmModule);
+            // new BfRegAllocator().runOnASMModule(asmModule);
             new StackAllocator().runOnASMModule(asmModule);
 
             if (testOnline) {

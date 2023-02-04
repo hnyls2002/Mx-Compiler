@@ -94,7 +94,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
     private void phiPreload(IRBasicBlock irblock) {
         irblock.instList.forEach(inst -> {
             if (inst instanceof PhiInst t)
-                t.asOprand = new VirtualReg();
+                t.asOprand = new VirtualReg(cur.fn);
         });
     }
 
@@ -105,13 +105,15 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         cur.fn = asmFn;
 
         // block preload : set oprand for every IRBasicBlock
-        for (int i = 0; i < irfn.blockList.size(); ++i)
-            irfn.blockList.get(i).asOprand = new ASMBlock(i, fnCnt);
-        irfn.retBlock.asOprand = new ASMBlock(irfn.blockList.size(), fnCnt);
+        for (int i = 0; i < irfn.blockList.size(); ++i) {
+            var irBlock = irfn.blockList.get(i);
+            irBlock.asOprand = new ASMBlock(i, fnCnt, irBlock.loopNum);
+        }
+        irfn.retBlock.asOprand = new ASMBlock(irfn.blockList.size(), fnCnt, irfn.retBlock.loopNum);
         ++fnCnt;
 
         // reset the virtual register counter
-        VirtualReg.virtualRegCnt = 0;
+        // VirtualReg.virtualRegCnt = 0;
 
         // first block, lower sp, store ra
         cur.block = (ASMBlock) irfn.blockList.get(0).asOprand;
@@ -122,13 +124,13 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
         // first block, handle the parameters
         for (int i = 0; i < Math.min(irfn.paraList.size(), RV32.MAX_ARG_NUM); ++i) {
-            Register rd = new VirtualReg();
+            Register rd = new VirtualReg(cur.fn);
             new ASMMoveInst(rd, PhysicalReg.getPhyReg("a" + i), cur.block);
             irfn.paraList.get(i).asOprand = rd;
         }
         for (int i = RV32.MAX_ARG_NUM; i < irfn.paraList.size(); ++i) {
             StackOffset stackPos = new StackOffset(i - RV32.MAX_ARG_NUM, stackDataKind.getArg);
-            Register rd = new VirtualReg();
+            Register rd = new VirtualReg(cur.fn);
             irfn.paraList.get(i).asOprand = rd;
             new ASMLoadInst(stackPos, rd, RV32.BitWidth.w, cur.block);
         }
@@ -184,7 +186,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         };
         ifConstThenLoad(inst.lhs, cur.block);
         ifConstThenLoad(inst.rhs, cur.block);
-        inst.asOprand = new VirtualReg();
+        inst.asOprand = new VirtualReg(cur.fn);
         Register rd = (Register) inst.asOprand, rs1 = (Register) inst.lhs.asOprand, rs2 = (Register) inst.rhs.asOprand;
         new ASMCalcInst(op, rd, rs1, rs2, cur.block);
     }
@@ -226,7 +228,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         // get ret value
         if (!(inst.calledFnType.retType instanceof IRVoidType)) {
             PhysicalReg rs = PhysicalReg.getPhyReg("a0");
-            Register rd = new VirtualReg();
+            Register rd = new VirtualReg(cur.fn);
             new ASMMoveInst(rd, rs, cur.block);
             inst.asOprand = rd;
         }
@@ -244,12 +246,12 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         if (inst.startType instanceof IRArrayType) { // string
             inst.asOprand = startAddr;
         } else if (inst.startType instanceof IRStructType) { // struct
-            Register rd = new VirtualReg(), rs2 = new VirtualReg();
+            Register rd = new VirtualReg(cur.fn), rs2 = new VirtualReg(cur.fn);
             new ASMLiInst(rs2, ((IntConst) inst.indices.get(1)).constValue * 4, cur.block);
             new ASMCalcInst(ASMBOP.add, rd, startAddr, rs2, cur.block);
             inst.asOprand = rd;
         } else { // array
-            Register rd = new VirtualReg(), rs2 = new VirtualReg();
+            Register rd = new VirtualReg(cur.fn), rs2 = new VirtualReg(cur.fn);
             ifConstThenLoad(inst.indices.get(0), cur.block);
             Register id = (Register) inst.indices.get(0).asOprand;
             // ----------------- add twice = mul * 4 --------------------
@@ -268,7 +270,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         ifConstThenLoad(inst.rhs, cur.block);
         Register rs1 = (Register) inst.lhs.asOprand;
         Register rs2 = (Register) inst.rhs.asOprand;
-        inst.asOprand = new VirtualReg();
+        inst.asOprand = new VirtualReg(cur.fn);
         Register rd = (Register) inst.asOprand;
 
         switch (inst.opCode) {
@@ -297,7 +299,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
     @Override
     public void visit(LoadInst inst) {
         RegOffset addr = getAddrOffset(inst.srcAddr.asOprand);
-        Register rd = new VirtualReg();
+        Register rd = new VirtualReg(cur.fn);
         inst.asOprand = rd;
         new ASMLoadInst(addr, rd, RV32.BitWidth.w, cur.block);
     }
@@ -371,7 +373,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
     // when the addr is a global, in IR we directly use it address
     private Register ifGlobalThenLoad(BaseOprand oprand) {
         if (oprand instanceof ASMGlobalData) {
-            Register rd = new VirtualReg();
+            Register rd = new VirtualReg(cur.fn);
             new ASMLaInst(rd, (ASMGlobalData) oprand, cur.block);
             return rd;
         } else if (oprand instanceof Register t)
@@ -387,7 +389,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         else if (oprand instanceof Register t)
             return new RegOffset(t, new Immediate(0));
         else if (oprand instanceof ASMGlobalData) {
-            Register rd = new VirtualReg();
+            Register rd = new VirtualReg(cur.fn);
             new ASMLaInst(rd, (ASMGlobalData) oprand, cur.block);
             return new RegOffset(rd, new Immediate(0));
         } else
@@ -398,11 +400,11 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
     private void ifConstThenLoad(IRBaseValue val, ASMBlock loadBlock) {
         if (val.asOprand == null) {
             if (val instanceof IntConst t) {
-                Register rd = new VirtualReg();
+                Register rd = new VirtualReg(cur.fn);
                 new ASMLiInst(rd, t.constValue, loadBlock);
                 val.asOprand = rd;
             } else if (val instanceof NullConst) {
-                Register rd = new VirtualReg();
+                Register rd = new VirtualReg(cur.fn);
                 new ASMLiInst(rd, 0, loadBlock);
                 val.asOprand = rd;
             } else

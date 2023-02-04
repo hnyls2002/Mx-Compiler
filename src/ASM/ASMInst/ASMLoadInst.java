@@ -1,5 +1,7 @@
 package ASM.ASMInst;
 
+import java.util.HashSet;
+
 import ASM.ASMBlock;
 import ASM.ASMOprand.RegOffset;
 import ASM.ASMOprand.Register;
@@ -26,5 +28,30 @@ public class ASMLoadInst extends ASMBaseInst {
     @Override
     public String format() {
         return String.format("\tl%s\t%s, %s\n", bitWidth, rd.format(), addr.format());
+    }
+
+    public HashSet<Register> getDef() {
+        HashSet<Register> ret = new HashSet<>();
+        ret.add(rd);
+        return ret;
+    }
+
+    @Override
+    public HashSet<Register> getUse() {
+        HashSet<Register> ret = new HashSet<>();
+        ret.add(addr.reg);
+        return ret;
+    }
+
+    @Override
+    public void replaceDef(Register oldDef, Register newDef) {
+        if (rd == oldDef)
+            rd = newDef;
+    }
+
+    @Override
+    public void replaceUse(Register oldUse, Register newUse) {
+        if (addr.reg == oldUse)
+            addr.reg = newUse;
     }
 }

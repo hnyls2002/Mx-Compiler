@@ -36,7 +36,6 @@ public class BfRegAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass, A
 
     private PhysicalReg regAllocateRead(Register reg, PhysicalReg a) {
         if (reg instanceof VirtualReg t) {
-            cur.fn.stackRegCnt = Math.max(cur.fn.stackRegCnt, t.id + 1);
             StackOffset mem = new StackOffset(t.id, stackDataKind.vReg);
             new ASMLoadInst(mem, a, RV32.BitWidth.w, cur.block);
             return a;
@@ -46,7 +45,6 @@ public class BfRegAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass, A
 
     private PhysicalReg regAllocateWrite(Register reg, PhysicalReg a) {
         if (reg instanceof VirtualReg t) {
-            cur.fn.stackRegCnt = Math.max(cur.fn.stackRegCnt, t.id + 1);
             StackOffset mem = new StackOffset(t.id, stackDataKind.vReg);
             new ASMStoreInst(mem, a, RV32.BitWidth.w, cur.block);
             return a;
@@ -62,6 +60,8 @@ public class BfRegAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass, A
     @Override
     public void runOnASMFn(ASMFn asmFn) {
         cur.fn = asmFn;
+        // all virtual register are spilled
+        cur.fn.spilledRegCnt = cur.fn.virRegCnt;
         asmFn.blockList.forEach(this::runOnASMBlock);
     }
 

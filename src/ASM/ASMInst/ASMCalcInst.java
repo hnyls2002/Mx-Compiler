@@ -1,5 +1,7 @@
 package ASM.ASMInst;
 
+import java.util.HashSet;
+
 import ASM.ASMBlock;
 import ASM.ASMOprand.Immediate;
 import ASM.ASMOprand.Register;
@@ -65,6 +67,36 @@ public class ASMCalcInst extends ASMBaseInst {
             return String.format("\t%s\t%s, %s\n", bzop, rd.format(), rs1.format());
         } else
             throw new MyException("calc have no operator");
+    }
+
+    @Override
+    public HashSet<Register> getDef() {
+        HashSet<Register> ret = new HashSet<>();
+        ret.add(rd);
+        return ret;
+    }
+
+    @Override
+    public HashSet<Register> getUse() {
+        HashSet<Register> ret = new HashSet<>();
+        ret.add(rs1);
+        if (rs2 != null)
+            ret.add(rs2);
+        return ret;
+    }
+
+    @Override
+    public void replaceDef(Register oldDef, Register newDef) {
+        if (rd == oldDef)
+            rd = newDef;
+    }
+
+    @Override
+    public void replaceUse(Register oldUse, Register newUse) {
+        if (rs1 == oldUse)
+            rs1 = newUse;
+        if (rs2 == oldUse)
+            rs2 = newUse;
     }
 
 }
