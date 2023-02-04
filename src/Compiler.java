@@ -10,6 +10,7 @@ import AST.ProgramNode;
 import AST.Scopes.GlobalScope;
 import Backend.ASMBuiler;
 import Backend.ASMPrinter;
+import Backend.RegAllocate.MyOpt;
 import Backend.RegAllocate.RegisterColoring;
 import Backend.RegAllocate.StackAllocator;
 import Frontend.ASTBuilder;
@@ -86,6 +87,8 @@ public class Compiler {
             ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
             new RegisterColoring().runOnASMModule(asmModule);
             // new BfRegAllocator().runOnASMModule(asmModule);
+
+            new MyOpt().runOnASMModule(asmModule);
 
             new StackAllocator().runOnASMModule(asmModule);
 
