@@ -50,4 +50,10 @@ public class BrInst extends IRBaseInst {
     public void accept(IRInstVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public void replaceUse(IRBaseValue oldUse, IRBaseValue newUse) {
+        if (condition == oldUse)
+            condition = newUse;
+    }
 }

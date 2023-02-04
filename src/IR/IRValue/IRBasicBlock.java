@@ -1,11 +1,13 @@
 package IR.IRValue;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import IR.IRType.IRType;
 import IR.IRType.IRType.IRTypeId;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.IRBaseInst;
+import Middleend.IROptimize.DominateTree.DTreeNode;
 
 public class IRBasicBlock extends IRBaseValue {
     private IRBaseInst terminal = null;
@@ -14,6 +16,12 @@ public class IRBasicBlock extends IRBaseValue {
 
     // for spill
     public int loopNum = 0;
+
+    // CFG
+    public LinkedList<IRBasicBlock> preList = new LinkedList<>(), sucList = new LinkedList<>();
+
+    // DominateTree
+    public DTreeNode dtNode = new DTreeNode();
 
     public IRBasicBlock(IRFn fn, int loopNum) {
         super(new IRType(IRTypeId.LabelTypeId));

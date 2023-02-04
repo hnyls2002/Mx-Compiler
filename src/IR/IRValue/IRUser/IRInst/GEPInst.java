@@ -43,4 +43,18 @@ public class GEPInst extends IRBaseInst {
         visitor.visit(this);
     }
 
+    @Override
+    public void replaceUse(IRBaseValue oldUse, IRBaseValue newUse) {
+        if (startPtr == oldUse)
+            startPtr = newUse;
+        ArrayList<IRBaseValue> tmp = new ArrayList<>();
+        for (var val : indices) {
+            if (val == oldUse)
+                tmp.add(newUse);
+            else
+                tmp.add(val);
+        }
+        indices = tmp;
+    }
+
 }

@@ -2,6 +2,7 @@ package IR.IRValue.IRUser.IRInst;
 
 import IR.IRType.IRPtType;
 import IR.IRType.IRType;
+import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import Share.Visitors.IRInstVisitor;
 
@@ -28,5 +29,9 @@ public class AllocaInst extends IRBaseInst {
     @Override
     public void accept(IRInstVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public void replaceUse(IRBaseValue oldUse, IRBaseValue newUse) {
     }
 }

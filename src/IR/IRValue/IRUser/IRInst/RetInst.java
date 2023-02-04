@@ -37,4 +37,10 @@ public class RetInst extends IRBaseInst {
         visitor.visit(this);
     }
 
+    @Override
+    public void replaceUse(IRBaseValue oldUse, IRBaseValue newUse) {
+        if (retValue == oldUse)
+            retValue = newUse;
+    }
+
 }

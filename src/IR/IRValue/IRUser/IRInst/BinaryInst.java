@@ -50,4 +50,12 @@ public class BinaryInst extends IRBaseInst {
         visitor.visit(this);
     }
 
+    @Override
+    public void replaceUse(IRBaseValue oldUse, IRBaseValue newUse) {
+        if (lhs == oldUse)
+            lhs = newUse;
+        if (rhs == oldUse)
+            rhs = newUse;
+    }
+
 }
