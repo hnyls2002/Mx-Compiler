@@ -13,7 +13,8 @@ public class ASMLiInst extends ASMBaseInst {
     public ASMLiInst(Register rd, int imm, ASMBlock block) {
         this.rd = rd;
         this.imm = imm;
-        block.addInst(this);
+        if (block != null)
+            block.addInst(this);
     }
 
     @Override

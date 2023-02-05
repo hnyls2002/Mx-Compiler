@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import ASM.ASMInst.ASMBaseInst;
+import ASM.ASMInst.ASMBrInst;
+import ASM.ASMInst.ASMJInst;
+import ASM.ASMInst.ASMRetInst;
 import ASM.ASMOprand.BaseOprand;
 import ASM.ASMOprand.Register;
 
@@ -27,6 +30,17 @@ public class ASMBlock extends BaseOprand {
 
     public void addInst(ASMBaseInst inst) {
         instList.add(inst);
+    }
+
+    public void insertBack(ASMBaseInst inst) {
+        int i = 0;
+        while (i < instList.size()) {
+            var t = instList.get(i);
+            if (t instanceof ASMJInst || t instanceof ASMBrInst || t instanceof ASMRetInst)
+                break;
+            ++i;
+        }
+        instList.add(i, inst);
     }
 
     @Override

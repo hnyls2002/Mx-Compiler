@@ -12,7 +12,8 @@ public class ASMMoveInst extends ASMBaseInst {
     public ASMMoveInst(Register rd, Register rs, ASMBlock block) {
         this.rd = rd;
         this.rs = rs;
-        block.addInst(this);
+        if (block != null)
+            block.addInst(this);
     }
 
     @Override

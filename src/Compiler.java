@@ -10,6 +10,8 @@ import AST.ProgramNode;
 import AST.Scopes.GlobalScope;
 import Backend.ASMBuiler;
 import Backend.ASMPrinter;
+import Backend.PhiElimination;
+import Backend.RegAllocate.BfRegAllocator;
 import Backend.RegAllocate.MyOpt;
 import Backend.RegAllocate.RegisterColoring;
 import Backend.RegAllocate.StackAllocator;
@@ -33,8 +35,8 @@ import Share.Builtin.BuiltinPrinter;
 public class Compiler {
     public static void main(String[] args) throws Exception {
         try {
-            boolean testManual = true;
-            boolean testOnline = false;
+            boolean testManual = false;
+            boolean testOnline = true;
 
             // File bugs = new File("debug/debug.txt");
             // PrintStream ps = new PrintStream(bugs);
@@ -89,6 +91,8 @@ public class Compiler {
             // -------------------------------------------------------
 
             ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
+            new PhiElimination().runOnIRModule(irModule);
+
             new RegisterColoring().runOnASMModule(asmModule);
             // new BfRegAllocator().runOnASMModule(asmModule);
 

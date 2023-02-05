@@ -2,6 +2,7 @@ package IR.IRValue.IRUser.ConsValue.GlobalValue;
 
 import java.util.ArrayList;
 
+import ASM.ASMFn;
 import AST.Info.FuncInfo;
 import IR.IRType.IRFnType;
 import IR.IRValue.IRParameter;
@@ -15,6 +16,7 @@ public class IRFn extends BaseGlobalValue {
     public ArrayList<IRBasicBlock> blockList = new ArrayList<>();
     public IRBaseValue retValueAddr = null;
     public IRBasicBlock retBlock = null;
+    public ASMFn asmFn = null;
 
     public IRFn(FuncInfo fnInfo) {
         // 1. build the IRFn

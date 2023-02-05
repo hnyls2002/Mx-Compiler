@@ -1,12 +1,10 @@
 package Backend;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import ASM.ASMBlock;
 import ASM.ASMFn;
 import ASM.ASMModule;
-import ASM.ASMInst.ASMBaseInst;
 import ASM.ASMInst.ASMBrInst;
 import ASM.ASMInst.ASMCalcInst;
 import ASM.ASMInst.ASMCallInst;
@@ -89,19 +87,14 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         irModule.globalFnList.forEach(this::runOnIRFn);
     }
 
-    // all phi node's register should be preload
-    private void phiPreload(IRBasicBlock irblock) {
-        irblock.instList.forEach(inst -> {
-            if (inst instanceof PhiInst t)
-                t.asOprand = new VirtualReg(cur.fn);
-        });
-    }
-
     @Override
     public void runOnIRFn(IRFn irfn) {
         ASMFn asmFn = new ASMFn(irfn);
         asmModule.fnList.add(asmFn);
         cur.fn = asmFn;
+
+        // link irFn and asmFn
+        irfn.asmFn = asmFn;
 
         // block preload : set oprand for every IRBasicBlock
         for (int i = 0; i < irfn.blockList.size(); ++i) {
@@ -141,10 +134,6 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
             backupReg.add(savePos);
             new ASMMoveInst(savePos, toSave, cur.block);
         }
-
-        // phi preload
-        irfn.blockList.forEach(this::phiPreload);
-        phiPreload(irfn.retBlock);
 
         // runOnBlock
         irfn.blockList.forEach(this::runOnIRBlock);
@@ -316,77 +305,9 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         }
     }
 
-    private boolean judgeBJ(ASMBaseInst inst) {
-        return inst instanceof ASMJInst || inst instanceof ASMBrInst;
-    }
-
-    private ASMBaseInst popBJ(ArrayList<ASMBaseInst> list) {
-        if (list.isEmpty())
-            return null;
-        ASMBaseInst last = list.get(list.size() - 1);
-        if (judgeBJ(last)) {
-            list.remove(list.size() - 1);
-            return last;
-        }
-        return null;
-    }
-
     @Override
     public void visit(PhiInst inst) {
-        StackOffset phiResult = new StackOffset(cur.fn.phiStackCnt++, stackDataKind.phi);
-
-        for (int i = 0; i < inst.blockList.size(); ++i) {
-            ASMBlock block1 = (ASMBlock) inst.blockList.get(i).asOprand;
-            ArrayList<ASMBaseInst> t1 = new ArrayList<>();
-            while (true) {
-                ASMBaseInst i1 = popBJ(block1.instList);
-                if (i1 == null)
-                    break;
-                t1.add(i1);
-            }
-            ifConstThenLoad(inst.valueList.get(i), block1);
-            Register res1 = (Register) inst.valueList.get(i).asOprand;
-
-            new ASMStoreInst(phiResult, res1, RV32.BitWidth.w, block1);
-
-            Collections.reverse(t1);
-            block1.instList.addAll(t1);
-        }
-
-        /*
-         * ASMBlock block1 = (ASMBlock) inst.blockList.get(0).asOprand;
-         * ASMBlock block2 = (ASMBlock) inst.blockList.get(1).asOprand;
-         * ArrayList<ASMBaseInst> t1 = new ArrayList<>();
-         * ArrayList<ASMBaseInst> t2 = new ArrayList<>();
-         * while (true) {
-         * ASMBaseInst i1 = popBJ(block1.instList);
-         * if (i1 == null)
-         * break;
-         * t1.add(i1);
-         * }
-         * while (true) {
-         * ASMBaseInst i2 = popBJ(block2.instList);
-         * if (i2 == null)
-         * break;
-         * t2.add(i2);
-         * }
-         * 
-         * ifConstThenLoad(inst.valueList.get(0), block1);
-         * ifConstThenLoad(inst.valueList.get(1), block2);
-         * Register res1 = (Register) inst.valueList.get(0).asOprand;
-         * Register res2 = (Register) inst.valueList.get(1).asOprand;
-         * 
-         * new ASMStoreInst(phiResult, res1, RV32.BitWidth.w, block1);
-         * new ASMStoreInst(phiResult, res2, RV32.BitWidth.w, block2);
-         * 
-         * Collections.reverse(t1);
-         * Collections.reverse(t2);
-         * block1.instList.addAll(t1);
-         * block2.instList.addAll(t2);
-         */
-
-        Register res = (Register) inst.asOprand;
-        new ASMLoadInst(phiResult, res, RV32.BitWidth.w, cur.block);
+        inst.asOprand = new VirtualReg(cur.fn);
     }
 
     @Override
