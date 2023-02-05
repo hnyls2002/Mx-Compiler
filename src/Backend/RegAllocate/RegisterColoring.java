@@ -32,7 +32,6 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
     @Override
     public void runOnASMFn(ASMFn asmFn) {
         // init
-        preColored.clear();
         initial.clear();
         simplifyWorkList.clear();
         freezeWorkList.clear();
@@ -51,9 +50,9 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
         for (var curBlock : asmFn.blockList)
             for (var curInst : curBlock.instList) {
                 for (var reg : curInst.getDef())
-                    reg.coloringInit();
+                    reg.coloringInit(reg instanceof PhysicalReg);
                 for (var reg : curInst.getUse())
-                    reg.coloringInit();
+                    reg.coloringInit(reg instanceof PhysicalReg);
             }
 
         for (var curBlock : asmFn.blockList) {
@@ -74,8 +73,6 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
                 for (var reg : regSet) {
                     if (reg instanceof VirtualReg)
                         initial.add(reg);
-                    else
-                        preColored.add(reg);
                 }
 
                 // calculate the loop index
@@ -110,7 +107,7 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
     };
 
     // register's data structure
-    HashSet<Register> preColored = new HashSet<>(); // physical register
+    HashSet<Register> preColored = new HashSet<>(PhysicalReg.phyRegMap.values()); // physical register
     HashSet<Register> initial = new HashSet<>(); // unhandled register
     LinkedList<Register> simplifyWorkList = new LinkedList<>(); // not move related and low-degree
     LinkedList<Register> freezeWorkList = new LinkedList<>(); // move related and low-degree
@@ -132,7 +129,11 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
 
     static final int K = PhysicalReg.assignableSet.size();
 
+    void init() {
+    }
+
     private void work(ASMFn asmFn) {
+        init();
         new LivenessAnalysis().runOnASMFn(asmFn);
         build(asmFn);
         makeWorkList();
@@ -430,7 +431,10 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
             u.color = getAlias(u).color;
     }
 
+    public int cnt = 0;
+
     private void rewriteProgram(HashSet<Register> spilledNodes, ASMFn asmFn) {
+        // System.err.println(++cnt);
         // System.err.println("spilled Reg : ");
         // for (var spillReg : spilledNodes) {
         // System.err.println(spillReg.format());
@@ -471,7 +475,25 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
         initial = newTemps;
         initial.addAll(coloredNodes);
         initial.addAll(coalescedNodes);
+
         coloredNodes.clear();
+        simplifyWorkList.clear();
+        freezeWorkList.clear();
+        spillWorkList.clear();
         coalescedNodes.clear();
+        coalescedMoves.clear();
+        constrainedMoves.clear();
+        frozenMoves.clear();
+        workListMoves.clear();
+        activeMoves.clear();
+        adjSet.clear();
+
+        for (var reg : initial)
+            reg.coloringInit(false);
+
+        initial.removeAll(preColored);
+
+        for (var reg : preColored)
+            reg.coloringInit(true);
     }
 }

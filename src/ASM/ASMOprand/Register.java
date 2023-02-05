@@ -14,9 +14,12 @@ public abstract class Register extends BaseOprand {
 
     public int loopIndex = 0;
 
-    public void coloringInit() {
+    public void coloringInit(Boolean ispreColored) {
         adjList.clear();
-        degree = 0;
+        if (ispreColored)
+            degree = 1000000000;
+        else
+            degree = 0;
         moveList.clear();
         alias = this;
         if (this instanceof PhysicalReg p)
