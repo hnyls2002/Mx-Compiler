@@ -1,7 +1,6 @@
 package IR.IRValue.IRUser.IRInst;
 
 import IR.IRType.IRType;
-import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRUser.IRBaseUser;
 import Share.Visitors.IRInstVisitor;
 
@@ -18,8 +17,6 @@ public abstract class IRBaseInst extends IRBaseUser {
     public String useToString() {
         return '%' + getName();
     }
-
-    public abstract void replaceUse(IRBaseValue oldUse, IRBaseValue newUse);
 
     public abstract void accept(IRInstVisitor visitor);
 }

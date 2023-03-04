@@ -42,16 +42,4 @@ public class CallInst extends IRBaseInst {
     public void accept(IRInstVisitor visitor) {
         visitor.visit(this);
     }
-
-    @Override
-    public void replaceUse(IRBaseValue oldUse, IRBaseValue newUse) {
-        ArrayList<IRBaseValue> tmp = new ArrayList<>();
-        for (var val : argList) {
-            if (val == oldUse)
-                tmp.add(newUse);
-            else
-                tmp.add(val);
-        }
-        argList = tmp;
-    }
 }

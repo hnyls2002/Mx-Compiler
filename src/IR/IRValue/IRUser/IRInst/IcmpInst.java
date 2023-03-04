@@ -49,12 +49,4 @@ public class IcmpInst extends IRBaseInst {
     public void accept(IRInstVisitor visitor) {
         visitor.visit(this);
     }
-
-    @Override
-    public void replaceUse(IRBaseValue oldUse, IRBaseValue newUse) {
-        if (lhs == oldUse)
-            lhs = newUse;
-        if (rhs == oldUse)
-            rhs = newUse;
-    }
 }

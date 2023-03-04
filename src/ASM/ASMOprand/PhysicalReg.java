@@ -1,47 +1,26 @@
 package ASM.ASMOprand;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-
-import Share.Lang.RV32;
-
 public class PhysicalReg extends Register {
-    public String regName;
-
-    private PhysicalReg(String regName) {
-        this.regName = regName;
+    public enum ABIType {
+        arg, sp, ra, tmp, saved
     }
 
-    public static HashMap<String, PhysicalReg> phyRegMap = new HashMap<>();
-    public static HashSet<PhysicalReg> assignableSet = new HashSet<>();
-    public static HashSet<PhysicalReg> callerSavedReg = new HashSet<>();
-    public static LinkedList<PhysicalReg> calleeSavedReg = new LinkedList<>();
+    public ABIType regType;
+    public int retId;
 
-    static {
-        for (var regName : RV32.regName)
-            phyRegMap.put(regName, new PhysicalReg(regName));
-        phyRegMap.forEach((name, reg) -> assignableSet.add(reg));
-        assignableSet.remove(phyRegMap.get("zero"));
-        assignableSet.remove(phyRegMap.get("sp"));
-        assignableSet.remove(phyRegMap.get("ra"));
-        assignableSet.remove(phyRegMap.get("gp"));
-        assignableSet.remove(phyRegMap.get("tp"));
-
-        for (int i = 0; i <= 11; ++i)
-            calleeSavedReg.add(phyRegMap.get("s" + i));
-        for (int i = 0; i <= 6; ++i)
-            callerSavedReg.add(phyRegMap.get("t" + i));
-        for (int i = 0; i <= 7; ++i)
-            callerSavedReg.add(phyRegMap.get("a" + i));
-    }
-
-    public static PhysicalReg getPhyReg(String name) {
-        return phyRegMap.get(name);
+    public PhysicalReg(ABIType regType, int regId) {
+        this.regType = regType;
+        this.retId = regId;
     }
 
     @Override
     public String format() {
-        return regName;
+        return switch (regType) {
+            case arg -> "a" + retId;
+            case ra -> "ra";
+            case saved -> "s" + retId;
+            case sp -> "sp";
+            case tmp -> "t" + retId;
+        };
     }
 }

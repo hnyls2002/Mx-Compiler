@@ -10,10 +10,7 @@ import AST.ProgramNode;
 import AST.Scopes.GlobalScope;
 import Backend.ASMBuiler;
 import Backend.ASMPrinter;
-import Backend.PhiElimination;
 import Backend.RegAllocate.BfRegAllocator;
-import Backend.RegAllocate.MyOpt;
-import Backend.RegAllocate.RegisterColoring;
 import Backend.RegAllocate.StackAllocator;
 import Frontend.ASTBuilder;
 import Frontend.ProgInit;
@@ -24,7 +21,6 @@ import IR.IRModule;
 import Middleend.IRBuilder;
 import Middleend.IRPrinter;
 import Middleend.IRRenamer;
-import Middleend.IROptimize.Mem2Reg;
 
 import org.antlr.v4.runtime.CharStreams;
 
@@ -36,11 +32,7 @@ public class Compiler {
     public static void main(String[] args) throws Exception {
         try {
             boolean testManual = false;
-            boolean testOnline = true;
-
-            // File bugs = new File("debug/debug.txt");
-            // PrintStream ps = new PrintStream(bugs);
-            // System.setErr(ps);
+            boolean testOnline = false;
 
             String filePath = testManual ? "./debug/" : "./autotestspace/";
             File testCode = new File(filePath + "test.mx");
@@ -78,11 +70,8 @@ public class Compiler {
 
             IRBuilder irBuilder = new IRBuilder(ast, gScope);
             IRModule irModule = irBuilder.buildIR();
-            // mem2reg pass
-            new Mem2Reg().runOnIRModule(irModule);
-
-            new IRRenamer().runOnIRModule(irModule);
-
+            IRRenamer irRenamer = new IRRenamer();
+            irRenamer.runOnIRModule(irModule);
             if (!testOnline) {
                 IRPrinter irPrinter = new IRPrinter(filePath + "test.ll");
                 irPrinter.runOnIRModule(irModule);
@@ -91,13 +80,8 @@ public class Compiler {
             // -------------------------------------------------------
 
             ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
-            new PhiElimination().runOnIRModule(irModule);
-
-            new RegisterColoring().runOnASMModule(asmModule);
-            // new BfRegAllocator().runOnASMModule(asmModule);
-
-            new MyOpt().runOnASMModule(asmModule);
-
+            // new ASMPrinter().printASM(filePath + "test_debug.s", asmModule);
+            new BfRegAllocator().runOnASMModule(asmModule);
             new StackAllocator().runOnASMModule(asmModule);
 
             if (testOnline) {

@@ -27,10 +27,4 @@ public class LoadInst extends IRBaseInst {
         visitor.visit(this);
     }
 
-    @Override
-    public void replaceUse(IRBaseValue oldUse, IRBaseValue newUse) {
-        if (srcAddr == oldUse)
-            srcAddr = newUse;
-    }
-
 }

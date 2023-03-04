@@ -59,12 +59,4 @@ public class StoreInst extends IRBaseInst {
         visitor.visit(this);
     }
 
-    @Override
-    public void replaceUse(IRBaseValue oldUse, IRBaseValue newUse) {
-        if (storedValue == oldUse)
-            storedValue = newUse;
-        if (destAddr == oldUse)
-            destAddr = newUse;
-    }
-
 }

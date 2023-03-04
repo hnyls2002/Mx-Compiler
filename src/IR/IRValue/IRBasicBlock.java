@@ -1,43 +1,30 @@
 package IR.IRValue;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 import IR.IRType.IRType;
 import IR.IRType.IRType.IRTypeId;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.IRBaseInst;
-import Middleend.IROptimize.DominateTree.DTreeNode;
 
 public class IRBasicBlock extends IRBaseValue {
     private IRBaseInst terminal = null;
     public ArrayList<IRBaseInst> instList = new ArrayList<>();
     public IRBasicBlock tailBlock;
 
-    // for spill
-    public int loopNum = 0;
-
-    // CFG
-    public LinkedList<IRBasicBlock> preList = new LinkedList<>(), sucList = new LinkedList<>();
-
-    // DominateTree
-    public DTreeNode dtNode = new DTreeNode();
-
-    public IRBasicBlock(IRFn fn, int loopNum) {
+    public IRBasicBlock(IRFn fn) {
         super(new IRType(IRTypeId.LabelTypeId));
         this.tailBlock = this;
-        this.loopNum = loopNum;
         fn.addBlock(this);
     }
 
-    public IRBasicBlock(int loopNum) {
+    public IRBasicBlock() {
         super(new IRType(IRTypeId.LabelTypeId));
         this.tailBlock = this;
-        this.loopNum = loopNum;
     }
 
     public static void addRetBlock(IRFn fn) {
-        var retBlock = new IRBasicBlock(0);
+        var retBlock = new IRBasicBlock();
         fn.retBlock = retBlock;
     }
 

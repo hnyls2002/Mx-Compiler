@@ -1,5 +1,7 @@
 package ASM.ASMOprand;
 
+import ASM.ASMOprand.PhysicalReg.ABIType;
+
 public class StackOffset extends RegOffset {
     // offset + sp
     public enum stackDataKind {
@@ -10,12 +12,12 @@ public class StackOffset extends RegOffset {
     public stackDataKind kind;
 
     public StackOffset(int id, stackDataKind kind) {
-        super(PhysicalReg.getPhyReg("sp"), null);
+        super(new PhysicalReg(ABIType.sp, 0), null);
         this.id = id;
         this.kind = kind;
 
         // ----------- for debug -----------
-        this.offset = new Immediate(-1);
+        this.offset = new Immediate(0);
         // ----------- for debug -----------
     }
 }

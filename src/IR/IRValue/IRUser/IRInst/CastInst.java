@@ -56,10 +56,4 @@ public class CastInst extends IRBaseInst {
         visitor.visit(this);
     }
 
-    @Override
-    public void replaceUse(IRBaseValue oldUse, IRBaseValue newUse) {
-        if (srcValue == oldUse)
-            srcValue = newUse;
-    }
-
 }

@@ -20,6 +20,7 @@ import ASM.ASMOprand.PhysicalReg;
 import ASM.ASMOprand.Register;
 import ASM.ASMOprand.StackOffset;
 import ASM.ASMOprand.VirtualReg;
+import ASM.ASMOprand.PhysicalReg.ABIType;
 import ASM.ASMOprand.StackOffset.stackDataKind;
 import Backend.ASMCurrent;
 import Share.Lang.RV32;
@@ -31,11 +32,12 @@ import Share.Visitors.ASMInstVisitor;
 public class BfRegAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass, ASMInstVisitor {
 
     public ASMCurrent cur = new ASMCurrent();
-    public final PhysicalReg tmp0 = PhysicalReg.getPhyReg("t0");
-    public final PhysicalReg tmp1 = PhysicalReg.getPhyReg("t1");
+    public final PhysicalReg tmp0 = new PhysicalReg(ABIType.tmp, 0);
+    public final PhysicalReg tmp1 = new PhysicalReg(ABIType.tmp, 1);
 
     private PhysicalReg regAllocateRead(Register reg, PhysicalReg a) {
         if (reg instanceof VirtualReg t) {
+            cur.fn.stackRegCnt = Math.max(cur.fn.stackRegCnt, t.id + 1);
             StackOffset mem = new StackOffset(t.id, stackDataKind.vReg);
             new ASMLoadInst(mem, a, RV32.BitWidth.w, cur.block);
             return a;
@@ -45,6 +47,7 @@ public class BfRegAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass, A
 
     private PhysicalReg regAllocateWrite(Register reg, PhysicalReg a) {
         if (reg instanceof VirtualReg t) {
+            cur.fn.stackRegCnt = Math.max(cur.fn.stackRegCnt, t.id + 1);
             StackOffset mem = new StackOffset(t.id, stackDataKind.vReg);
             new ASMStoreInst(mem, a, RV32.BitWidth.w, cur.block);
             return a;
@@ -60,8 +63,6 @@ public class BfRegAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass, A
     @Override
     public void runOnASMFn(ASMFn asmFn) {
         cur.fn = asmFn;
-        // all virtual register are spilled
-        cur.fn.spilledRegCnt = cur.fn.virRegCnt;
         asmFn.blockList.forEach(this::runOnASMBlock);
     }
 
