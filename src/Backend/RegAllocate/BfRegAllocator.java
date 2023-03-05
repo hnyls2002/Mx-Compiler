@@ -20,7 +20,6 @@ import ASM.ASMOprand.PhysicalReg;
 import ASM.ASMOprand.Register;
 import ASM.ASMOprand.StackOffset;
 import ASM.ASMOprand.VirtualReg;
-import ASM.ASMOprand.PhysicalReg.ABIType;
 import ASM.ASMOprand.StackOffset.stackDataKind;
 import Backend.ASMCurrent;
 import Share.Lang.RV32;
@@ -32,8 +31,8 @@ import Share.Visitors.ASMInstVisitor;
 public class BfRegAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass, ASMInstVisitor {
 
     public ASMCurrent cur = new ASMCurrent();
-    public final PhysicalReg tmp0 = new PhysicalReg(ABIType.tmp, 0);
-    public final PhysicalReg tmp1 = new PhysicalReg(ABIType.tmp, 1);
+    public final PhysicalReg tmp0 = PhysicalReg.getPhyReg("t0");
+    public final PhysicalReg tmp1 = PhysicalReg.getPhyReg("t1");
 
     private PhysicalReg regAllocateRead(Register reg, PhysicalReg a) {
         if (reg instanceof VirtualReg t) {
