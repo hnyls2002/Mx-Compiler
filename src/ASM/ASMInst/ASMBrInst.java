@@ -5,13 +5,13 @@ import ASM.ASMOprand.Register;
 import Share.Visitors.ASMInstVisitor;
 
 public class ASMBrInst extends ASMBaseInst {
-    public Register condition;
+    // the condition is rs1
     public ASMBlock trueBlock;
 
     public ASMBrInst(Register condition, ASMBlock trueBlock, ASMBlock curBlock) {
-        this.condition = condition;
+        this.rs1 = condition;
         this.trueBlock = trueBlock;
-        curBlock.addInst(this);
+        curBlock.instList.add(this);
     }
 
     @Override
@@ -21,7 +21,6 @@ public class ASMBrInst extends ASMBaseInst {
 
     @Override
     public String format() {
-        return String.format("\tbnez\t%s, %s\n", condition.format(), trueBlock.format());
+        return String.format("\tbnez\t%s, %s\n", rs1.format(), trueBlock.format());
     }
-
 }

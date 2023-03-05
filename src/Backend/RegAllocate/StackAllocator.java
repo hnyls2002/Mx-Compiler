@@ -1,27 +1,16 @@
 package Backend.RegAllocate;
 
-import ASM.ASMBlock;
 import ASM.ASMFn;
 import ASM.ASMModule;
-import ASM.ASMInst.ASMBrInst;
 import ASM.ASMInst.ASMCalcInst;
-import ASM.ASMInst.ASMCallInst;
-import ASM.ASMInst.ASMJInst;
-import ASM.ASMInst.ASMLaInst;
-import ASM.ASMInst.ASMLiInst;
 import ASM.ASMInst.ASMLoadInst;
-import ASM.ASMInst.ASMMoveInst;
-import ASM.ASMInst.ASMRetInst;
 import ASM.ASMInst.ASMStoreInst;
 import ASM.ASMOprand.Immediate;
-import ASM.ASMOprand.RegOffset;
-import ASM.ASMOprand.StackOffset;
-import Share.Pass.ASMPass.ASMBlockPass;
+import ASM.ASMOprand.VirtualOffset;
 import Share.Pass.ASMPass.ASMFnPass;
 import Share.Pass.ASMPass.ASMModulePass;
-import Share.Visitors.ASMInstVisitor;
 
-public class StackAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass, ASMInstVisitor {
+public class StackAllocator implements ASMModulePass, ASMFnPass {
 
     /*
      * --------
@@ -40,18 +29,19 @@ public class StackAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass, A
     private ASMFn curFn;
     int totStackUse = 0;
 
-    private void stackAllocate(RegOffset regOffset) {
-        if (regOffset instanceof StackOffset stackOff) {
-            int immInt = switch (stackOff.kind) {
-                case alloca -> curFn.spilledArgMax + curFn.stackRegCnt + stackOff.id;
-                case getArg -> totStackUse + stackOff.id;
-                case putArg -> stackOff.id;
-                case phi -> curFn.spilledArgMax + curFn.stackRegCnt + curFn.allocaCnt + stackOff.id;
-                case vReg -> curFn.spilledArgMax + stackOff.id;
+    private int stackAllocate(Immediate imm) {
+        if (imm instanceof VirtualOffset vOffset) {
+            int immInt = switch (vOffset.label) {
+                case alloca -> curFn.spilledArgMax + curFn.stackRegCnt + vOffset.rank;
+                case getSpilledArg -> totStackUse + vOffset.rank;
+                case putSpilledArg -> vOffset.rank;
+                case phi -> curFn.spilledArgMax + curFn.stackRegCnt + curFn.allocaCnt + vOffset.rank;
+                case virtualReg -> curFn.spilledArgMax + vOffset.rank;
                 case ra -> totStackUse - 1;
             };
-            stackOff.offset = new Immediate(immInt * 4);
+            return immInt * 4;
         }
+        return imm.immInt;
     }
 
     @Override
@@ -72,54 +62,15 @@ public class StackAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass, A
 
         loSP.imm = new Immediate(-totStackUse * 4);
         upSP.imm = new Immediate(totStackUse * 4);
-        asmFn.blockList.forEach(this::runOnASMBlock);
-    }
 
-    @Override
-    public void runOnASMBlock(ASMBlock asmBlock) {
-        asmBlock.instList.forEach(inst -> inst.accept(this));
+        asmFn.blockList.forEach(asmBlock -> {
+            asmBlock.instList.forEach(inst -> {
+                // after stack allocation, all virtual offset will be replaced by immediate
+                if (inst instanceof ASMLoadInst ldInst && ldInst.imm instanceof VirtualOffset) {
+                    ldInst.imm = new Immediate(stackAllocate(ldInst.imm));
+                } else if (inst instanceof ASMStoreInst stInst && stInst.imm instanceof VirtualOffset)
+                    stInst.imm = new Immediate(stackAllocate(stInst.imm));
+            });
+        });
     }
-
-    @Override
-    public void visit(ASMLoadInst inst) {
-        stackAllocate(inst.addr);
-    }
-
-    @Override
-    public void visit(ASMStoreInst inst) {
-        stackAllocate(inst.addr);
-    }
-
-    @Override
-    public void visit(ASMBrInst inst) {
-    }
-
-    @Override
-    public void visit(ASMCalcInst inst) {
-    }
-
-    @Override
-    public void visit(ASMCallInst inst) {
-    }
-
-    @Override
-    public void visit(ASMJInst inst) {
-    }
-
-    @Override
-    public void visit(ASMLaInst inst) {
-    }
-
-    @Override
-    public void visit(ASMLiInst inst) {
-    }
-
-    @Override
-    public void visit(ASMMoveInst inst) {
-    }
-
-    @Override
-    public void visit(ASMRetInst inst) {
-    }
-
 }

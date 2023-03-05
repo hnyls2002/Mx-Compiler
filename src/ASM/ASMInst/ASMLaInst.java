@@ -6,13 +6,12 @@ import ASM.ASMOprand.ASMGlobal.ASMGlobalData;
 import Share.Visitors.ASMInstVisitor;
 
 public class ASMLaInst extends ASMBaseInst {
-    public Register rd;
     public ASMGlobalData symbol;
 
     public ASMLaInst(Register rd, ASMGlobalData symbol, ASMBlock block) {
         this.rd = rd;
         this.symbol = symbol;
-        block.addInst(this);
+        block.instList.add(this);
     }
 
     @Override

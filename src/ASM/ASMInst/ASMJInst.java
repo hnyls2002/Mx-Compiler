@@ -6,9 +6,9 @@ import Share.Visitors.ASMInstVisitor;
 public class ASMJInst extends ASMBaseInst {
     ASMBlock jumpBlock;
 
-    public ASMJInst(ASMBlock jumpBlock, ASMBlock curBlock) {
+    public ASMJInst(ASMBlock jumpBlock, ASMBlock block) {
         this.jumpBlock = jumpBlock;
-        curBlock.addInst(this);
+        block.instList.add(this);
     }
 
     @Override

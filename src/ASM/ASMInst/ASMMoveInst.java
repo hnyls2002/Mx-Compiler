@@ -5,12 +5,10 @@ import ASM.ASMOprand.Register;
 import Share.Visitors.ASMInstVisitor;
 
 public class ASMMoveInst extends ASMBaseInst {
-    public Register rd, rs;
-
-    public ASMMoveInst(Register rd, Register rs, ASMBlock block) {
+    public ASMMoveInst(Register rd, Register rs1, ASMBlock block) {
         this.rd = rd;
-        this.rs = rs;
-        block.addInst(this);
+        this.rs1 = rs1;
+        block.instList.add(this);
     }
 
     @Override
@@ -20,6 +18,6 @@ public class ASMMoveInst extends ASMBaseInst {
 
     @Override
     public String format() {
-        return String.format("\tmv\t%s, %s\n", rd.format(), rs.format());
+        return String.format("\tmv\t%s, %s\n", rd.format(), rs1.format());
     }
 }

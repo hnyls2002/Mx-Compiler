@@ -1,17 +1,15 @@
 package ASM.ASMInst;
 
 import ASM.ASMBlock;
+import ASM.ASMOprand.Immediate;
 import ASM.ASMOprand.Register;
 import Share.Visitors.ASMInstVisitor;
 
 public class ASMLiInst extends ASMBaseInst {
-    public Register rd;
-    public int imm;
-
-    public ASMLiInst(Register rd, int imm, ASMBlock block) {
+    public ASMLiInst(Register rd, Immediate imm, ASMBlock block) {
         this.rd = rd;
         this.imm = imm;
-        block.addInst(this);
+        block.instList.add(this);
     }
 
     @Override
@@ -21,6 +19,6 @@ public class ASMLiInst extends ASMBaseInst {
 
     @Override
     public String format() {
-        return String.format("\tli\t%s, %d\n", rd.format(), imm);
+        return String.format("\tli\t%s, %s\n", rd.format(), imm.format());
     }
 }

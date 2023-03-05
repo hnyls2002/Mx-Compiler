@@ -1,21 +1,20 @@
 package ASM.ASMInst;
 
 import ASM.ASMBlock;
-import ASM.ASMOprand.RegOffset;
+import ASM.ASMOprand.Immediate;
 import ASM.ASMOprand.Register;
 import Share.Lang.RV32;
 import Share.Visitors.ASMInstVisitor;
 
 public class ASMLoadInst extends ASMBaseInst {
     public RV32.BitWidth bitWidth;
-    public RegOffset addr;
-    public Register rd;
 
-    public ASMLoadInst(RegOffset addr, Register rd, RV32.BitWidth bitWidth, ASMBlock block) {
-        this.bitWidth = bitWidth;
-        this.addr = addr;
+    public ASMLoadInst(Register rd, Register rs1, Immediate imm, RV32.BitWidth bitWidth, ASMBlock block) {
         this.rd = rd;
-        block.addInst(this);
+        this.rs1 = rs1;
+        this.imm = imm;
+        this.bitWidth = bitWidth;
+        block.instList.add(this);
     }
 
     @Override
@@ -25,6 +24,6 @@ public class ASMLoadInst extends ASMBaseInst {
 
     @Override
     public String format() {
-        return String.format("\tl%s\t%s, %s\n", bitWidth, rd.format(), addr.format());
+        return String.format("\tl%s\t%s, %s(%s)\n", bitWidth, rd.format(), imm.format(), rs1.format());
     }
 }

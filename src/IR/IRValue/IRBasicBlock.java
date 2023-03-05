@@ -12,19 +12,24 @@ public class IRBasicBlock extends IRBaseValue {
     public ArrayList<IRBaseInst> instList = new ArrayList<>();
     public IRBasicBlock tailBlock;
 
-    public IRBasicBlock(IRFn fn) {
+    // a loop counter : for spill
+    public int loopDepth = 0;
+
+    public IRBasicBlock(IRFn fn, int loopDepth) {
         super(new IRType(IRTypeId.LabelTypeId));
         this.tailBlock = this;
+        this.loopDepth = loopDepth;
         fn.addBlock(this);
     }
 
-    public IRBasicBlock() {
+    public IRBasicBlock(int loopDepth) {
         super(new IRType(IRTypeId.LabelTypeId));
         this.tailBlock = this;
+        this.loopDepth = loopDepth;
     }
 
     public static void addRetBlock(IRFn fn) {
-        var retBlock = new IRBasicBlock();
+        var retBlock = new IRBasicBlock(0);
         fn.retBlock = retBlock;
     }
 

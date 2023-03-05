@@ -5,7 +5,7 @@ import Share.Visitors.ASMInstVisitor;
 
 public class ASMRetInst extends ASMBaseInst {
     public ASMRetInst(ASMBlock block) {
-        block.addInst(this);
+        block.instList.add(this);
     }
 
     @Override
