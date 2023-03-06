@@ -9,7 +9,7 @@ import ASM.ASMModule;
 import AST.ProgramNode;
 import AST.Scopes.GlobalScope;
 import Backend.ASMBuiler;
-import Backend.ASMPrinter;
+import Backend.ASMFormatter;
 import Backend.RegAllocate.BfRegAllocator;
 import Backend.RegAllocate.StackAllocator;
 import Frontend.ASTBuilder;
@@ -80,15 +80,14 @@ public class Compiler {
             // -------------------------------------------------------
 
             ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
-            // new ASMPrinter().printASM(filePath + "test_debug.s", asmModule);
             new BfRegAllocator().runOnASMModule(asmModule);
             new StackAllocator().runOnASMModule(asmModule);
 
             if (testOnline) {
-                new ASMPrinter().printASM("output.s", asmModule);
+                new ASMFormatter().printASM("output.s", asmModule);
                 new BuiltinPrinter().printBuiltin();
             } else
-                new ASMPrinter().printASM(filePath + "test.s", asmModule);
+                new ASMFormatter().printASM(filePath + "test.s", asmModule);
 
         } catch (BaseError e) {
             System.err.println(e.toString());
