@@ -6,7 +6,7 @@ import Share.MyException;
 
 public abstract class IRBaseValue {
     public IRType valueType;
-    protected String nameString;
+    public String nameString;
 
     // for assembly
     public BaseOprand asOprand;

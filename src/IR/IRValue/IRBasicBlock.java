@@ -5,21 +5,30 @@ import java.util.ArrayList;
 import IR.IRType.IRType;
 import IR.IRType.IRType.IRTypeId;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
+import IR.IRValue.IRUser.IRInst.BrInst;
 import IR.IRValue.IRUser.IRInst.IRBaseInst;
+import IR.IRValue.IRUser.IRInst.JumpInst;
+import IR.IRValue.IRUser.IRInst.PhiInst;
+import IR.IRValue.IRUser.IRInst.RetInst;
+import Share.MyException;
 
 public class IRBasicBlock extends IRBaseValue {
-    private IRBaseInst terminal = null;
+    public IRBaseInst terminal = null; // terminal instruction and also contained in instList
     public ArrayList<IRBaseInst> instList = new ArrayList<>();
+    public ArrayList<PhiInst> phiList = new ArrayList<>();
     public IRBasicBlock tailBlock;
 
     // a loop counter : for spill
     public int loopDepth = 0;
 
+    // for CFG
+    public ArrayList<IRBasicBlock> sucList = new ArrayList<>(), preList = new ArrayList<>();
+
     public IRBasicBlock(IRFn fn, int loopDepth) {
         super(new IRType(IRTypeId.LabelTypeId));
         this.tailBlock = this;
         this.loopDepth = loopDepth;
-        fn.addBlock(this);
+        fn.blockList.add(this);
     }
 
     public IRBasicBlock(int loopDepth) {
@@ -28,23 +37,26 @@ public class IRBasicBlock extends IRBaseValue {
         this.loopDepth = loopDepth;
     }
 
-    public static void addRetBlock(IRFn fn) {
-        var retBlock = new IRBasicBlock(0);
-        fn.retBlock = retBlock;
-    }
-
-    public boolean isNamed() {
-        return nameString != null;
-    }
-
     // always set at the end of a block
     public void setTerminal(IRBaseInst terminal) {
-        if (this.terminal == null) // if not terminated...
+        if (this.terminal == null) { // if not terminated...
             this.terminal = terminal;
-    }
+            instList.add(terminal);
 
-    public IRBaseInst getTerminal() {
-        return this.terminal;
+            if (terminal instanceof JumpInst) {
+                var targetBlock = (IRBasicBlock) terminal.getOprand(0);
+                sucList.add(targetBlock);
+                targetBlock.preList.add(this);
+            } else if (terminal instanceof BrInst) {
+                var targetBlock1 = (IRBasicBlock) terminal.getOprand(1);
+                var targetBlock2 = (IRBasicBlock) terminal.getOprand(2);
+                sucList.add(targetBlock1);
+                targetBlock1.preList.add(this);
+                sucList.add(targetBlock2);
+                targetBlock2.preList.add(this);
+            } else if (!(terminal instanceof RetInst))
+                throw new MyException("Wrong terminal instruction");
+        }
     }
 
     public void addInst(IRBaseInst inst) {

@@ -13,6 +13,7 @@ public class AllocaInst extends IRBaseInst {
         super(new IRPtType(elemenType, 1));
         this.elementType = elemenType;
         var block = curFn.blockList.get(0);
+        // insert allocaInst at the beginning of the first block
         for (int i = 0; i <= block.instList.size(); ++i)
             if (i == block.instList.size() || !(block.instList.get(i) instanceof AllocaInst)) {
                 block.instList.add(i, this);

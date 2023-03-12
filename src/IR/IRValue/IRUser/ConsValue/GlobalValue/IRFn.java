@@ -38,10 +38,6 @@ public class IRFn extends BaseGlobalValue {
         return ret;
     }
 
-    public void addBlock(IRBasicBlock block) {
-        blockList.add(block);
-    }
-
     @Override
     public String defToString() {
         if (valueType instanceof IRFnType fnType) {

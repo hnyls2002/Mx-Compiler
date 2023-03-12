@@ -154,7 +154,7 @@ public class IRBuilder implements ASTVisitor {
 
     private void terminalToRet(IRFn fn) {
         fn.blockList.forEach(block -> {
-            if (block.getTerminal() == null)
+            if (block.terminal == null)
                 new JumpInst(fn.retBlock, block);
         });
     }
@@ -197,7 +197,7 @@ public class IRBuilder implements ASTVisitor {
             topModule.varInitFnList.forEach(initFn -> new CallInst((IRFnType) initFn.valueType, cur.block));
 
         // 2.1 add retBlock and retAddr
-        IRBasicBlock.addRetBlock(nowFn);
+        nowFn.retBlock = new IRBasicBlock(0);
         IRType retType = ((IRFnType) nowFn.valueType).retType;
         if (!(retType instanceof IRVoidType))
             nowFn.retValueAddr = new AllocaInst(retType, cur.fn);
@@ -253,7 +253,7 @@ public class IRBuilder implements ASTVisitor {
             IRBaseValue endPtr = new GEPInst(startPtr, startPtr.valueType, cur.block, dimList.get(k).irValue);
 
             // IRBaseValue curPtr = new PhiInst(cur.block, startPtr, null, null, null);
-            IRBaseValue curPtr = new PhiInst(startPtr.valueType);
+            IRBaseValue curPtr = new PhiInst(startPtr.valueType, conditionBlock);
             ((PhiInst) curPtr).addBranch(cur.block, startPtr);
 
             IRBaseValue nexPtr = new GEPInst(curPtr, curPtr.valueType, null, new IntConst(1, 32));
@@ -264,7 +264,7 @@ public class IRBuilder implements ASTVisitor {
             // var conditionExpr = new IcmpInst(icmpOperator.irNE, curPtr, endPtr,
             // cur.block);
 
-            cur.fn.addBlock(bodyBlock);
+            cur.fn.blockList.add(bodyBlock);
             cur.block = bodyBlock;
             new StoreInst(arrMalloc((IRPtType) addrType.derefType(), dimList, k + 1), curPtr, cur.block);
             cur.block.addInst((IRBaseInst) nexPtr);
@@ -273,12 +273,11 @@ public class IRBuilder implements ASTVisitor {
             // ((PhiInst) curPtr).res2 = nexPtr;
             ((PhiInst) curPtr).addBranch(cur.block, nexPtr);
 
-            cur.fn.addBlock(conditionBlock);
+            cur.fn.blockList.add(conditionBlock);
             cur.block = conditionBlock;
-            conditionBlock.addInst((IRBaseInst) curPtr);
             var conditionExpr = new IcmpInst(ICMPOP.ne, curPtr, endPtr, cur.block);
 
-            cur.fn.addBlock(afterBlock);
+            cur.fn.blockList.add(afterBlock);
             cur.block = afterBlock;
 
             beforeBlock.tailBlock = afterBlock;
@@ -350,13 +349,13 @@ public class IRBuilder implements ASTVisitor {
             IRBasicBlock endBlock = new IRBasicBlock(beforeBlock.loopDepth);
             boolean isOr = (it.opcode == binaryOp.LOGIC_OR);
 
-            cur.fn.addBlock(rhsBlock);
+            cur.fn.blockList.add(rhsBlock);
             cur.block = rhsBlock;
             it.rhs.accept(this);
             if (it.rhs.irValue.valueType instanceof IRIntType t && t.intLen != 1)
                 it.rhs.irValue = new CastInst(it.rhs.irValue, new IRIntType(1), CastType.trunc, cur.block);
 
-            cur.fn.addBlock(endBlock);
+            cur.fn.blockList.add(endBlock);
             cur.block = endBlock;
             beforeBlock.tailBlock = endBlock.getTail();
 
@@ -513,7 +512,7 @@ public class IRBuilder implements ASTVisitor {
         cur.scope = new Scope(cur.scope);
 
         // 2.1 add retBlock and retAddr
-        IRBasicBlock.addRetBlock(constructor);
+        constructor.retBlock = new IRBasicBlock(0);
         IRType retType = constructType.retType;
         constructor.retValueAddr = new AllocaInst(retType, cur.fn);
 
@@ -594,7 +593,7 @@ public class IRBuilder implements ASTVisitor {
         it.body.accept(this);
         cur.popInfo();
 
-        cur.fn.addBlock(afterWhileBlock);
+        cur.fn.blockList.add(afterWhileBlock);
         cur.block = afterWhileBlock;
         beforeBlock.tailBlock = afterWhileBlock.getTail();
 
@@ -628,12 +627,12 @@ public class IRBuilder implements ASTVisitor {
         it.body.accept(this);
         cur.popInfo();
 
-        cur.fn.addBlock(stepBlock);
+        cur.fn.blockList.add(stepBlock);
         cur.block = stepBlock;
         if (it.incExpr != null)
             it.incExpr.accept(this);
 
-        cur.fn.addBlock(afterForBlock);
+        cur.fn.blockList.add(afterForBlock);
         cur.block = afterForBlock;
         beforeBlock.tailBlock = afterForBlock.getTail();
 
@@ -813,7 +812,7 @@ public class IRBuilder implements ASTVisitor {
             cur.fn = gVar.initFn;
             var block = new IRBasicBlock(cur.fn, 0);
             cur.block = block;
-            IRBasicBlock.addRetBlock(gVar.initFn);
+            gVar.initFn.retBlock = new IRBasicBlock(0);
 
             gVar.isInit = true;
             gVar.initValue = gVar.derefType.defaultValue();

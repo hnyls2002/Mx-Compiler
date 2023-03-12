@@ -48,6 +48,7 @@ import IR.IRValue.IRUser.IRInst.GEPInst;
 import IR.IRValue.IRUser.IRInst.IcmpInst;
 import IR.IRValue.IRUser.IRInst.JumpInst;
 import IR.IRValue.IRUser.IRInst.LoadInst;
+import IR.IRValue.IRUser.IRInst.MoveInst;
 import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
@@ -95,10 +96,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     // all phi node's register should be preload
     private void phiPreload(IRBasicBlock irblock) {
-        irblock.instList.forEach(inst -> {
-            if (inst instanceof PhiInst t)
-                t.asOprand = new VirtualReg();
-        });
+        irblock.phiList.forEach(inst -> inst.asOprand = new VirtualReg());
     }
 
     @Override
@@ -180,8 +178,8 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         cur.block = (ASMBlock) irBlock.asOprand;
         cur.fn.blockList.add(cur.block);
 
+        irBlock.phiList.forEach(inst -> inst.accept(this));
         irBlock.instList.forEach(inst -> inst.accept(this));
-        irBlock.getTerminal().accept(this);
     }
 
     @Override
@@ -437,4 +435,9 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
             throw new MyException("trans to address error");
     }
 
+    @Override
+    public void visit(MoveInst inst) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'visit'");
+    }
 }

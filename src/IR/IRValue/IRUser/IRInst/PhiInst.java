@@ -7,13 +7,9 @@ import Share.Visitors.IRInstVisitor;
 
 public class PhiInst extends IRBaseInst {
 
-    public PhiInst(IRType valuType) {
-        super(valuType);
-    }
-
     public PhiInst(IRType valuType, IRBasicBlock curBlock) {
         super(valuType);
-        curBlock.addInst(this);
+        curBlock.phiList.add(this);
     }
 
     public void addBranch(IRBasicBlock block, IRBaseValue res) {

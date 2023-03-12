@@ -64,8 +64,8 @@ public class IRPrinter implements IRModulePass, IRFnPass, IRBlockPass {
     @Override
     public void runOnIRBlock(IRBasicBlock block) {
         System.out.print(block.defToString() + '\n');
+        block.phiList.forEach(this::printInst);
         block.instList.forEach(this::printInst);
-        printInst(block.getTerminal());
     }
 
     private void printClassDef(IRStructType classDef) {

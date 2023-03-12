@@ -36,8 +36,9 @@ public class IRRenamer implements IRModulePass, IRFnPass, IRBlockPass {
 
     @Override
     public void runOnIRBlock(IRBasicBlock block) {
-        if (!block.isNamed())
+        if (block.nameString == null)
             block.setName(allocator.getNewName());
+        block.phiList.forEach(this::renameInst);
         block.instList.forEach(this::renameInst);
     }
 
