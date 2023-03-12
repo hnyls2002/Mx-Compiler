@@ -8,12 +8,11 @@ import IR.IRValue.IRBasicBlock;
 import Share.Visitors.IRInstVisitor;
 
 public class CallInst extends IRBaseInst {
-    public ArrayList<IRBaseValue> argList = new ArrayList<>();
     public IRFnType calledFnType = null;
 
     public CallInst(IRFnType calledFnType, ArrayList<IRBaseValue> argList, IRBasicBlock block) {
         super(calledFnType.retType);
-        this.argList = argList;
+        this.oprandList = argList;
         this.calledFnType = calledFnType;
         block.addInst(this);
     }
@@ -22,7 +21,7 @@ public class CallInst extends IRBaseInst {
         super(calledFnType.retType);
         this.calledFnType = calledFnType;
         for (var arg : argList)
-            this.argList.add(arg);
+            this.oprandList.add(arg);
         block.addInst(this);
     }
 
@@ -30,9 +29,9 @@ public class CallInst extends IRBaseInst {
     public String defToString() {
         var ret = "call " + valueType.toString() + ' ';
         ret += calledFnType.getFnName() + "(";
-        for (var arg : argList)
+        for (var arg : oprandList)
             ret += arg.useToStringWithType() + ", ";
-        if (!argList.isEmpty())
+        if (!oprandList.isEmpty())
             ret = ret.substring(0, ret.length() - 2);
         ret += ")";
         return ret;

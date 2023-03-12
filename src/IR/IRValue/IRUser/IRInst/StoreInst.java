@@ -6,8 +6,8 @@ import IR.IRType.IRVoidType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
-import IR.IRValue.IRUser.IRInst.CastInst.castType;
 import Share.MyException;
+import Share.Lang.LLVMIR.CastType;
 import Share.Visitors.IRInstVisitor;
 
 public class StoreInst extends IRBaseInst {
@@ -22,14 +22,14 @@ public class StoreInst extends IRBaseInst {
         var storedType = storedValue.valueType;
         var derefType = ((IRPtType) destAddr.valueType).derefType();
         if (!(storedValue instanceof NullConst) && !storedType.equals(derefType)) {
-            castType opCode = null;
+            CastType opCode = null;
             if (storedType instanceof IRPtType && derefType instanceof IRPtType) // bitcast
-                opCode = castType.BIT;
+                opCode = CastType.bitcast;
             else if (storedType instanceof IRIntType i1 && derefType instanceof IRIntType i2) {
                 if (i1.intLen > i2.intLen)
-                    opCode = castType.TRUNC;
+                    opCode = CastType.trunc;
                 else // zero extend or signal extend ?
-                    opCode = castType.ZEXT;
+                    opCode = CastType.zext;
             } else
                 throw new MyException("Cast Instruction unknown error");
             this.storedValue = new CastInst(storedValue, derefType, opCode, block);

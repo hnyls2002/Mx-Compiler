@@ -17,10 +17,8 @@ import Frontend.ProgInit;
 import Frontend.SemanticChecker;
 import Frontend.MxStar.MxStarErrorListener;
 import Frontend.MxStar.MxStarErrors.BaseError;
-import IR.IRModule;
-import Middleend.IRBuilder;
 import Middleend.IRPrinter;
-import Middleend.IRRenamer;
+import Middleend.Middleender;
 
 import org.antlr.v4.runtime.CharStreams;
 
@@ -54,7 +52,6 @@ public class Compiler {
             parser.addErrorListener(new MxStarErrorListener());
 
             // -------------------------------------------------------
-
             ParseTree treeRoot = parser.program();
             ASTBuilder astBuilder = new ASTBuilder(false);
             ProgramNode ast = (ProgramNode) astBuilder.visit(treeRoot);
@@ -68,17 +65,13 @@ public class Compiler {
 
             // -------------------------------------------------------
 
-            IRBuilder irBuilder = new IRBuilder(ast, gScope);
-            IRModule irModule = irBuilder.buildIR();
-            IRRenamer irRenamer = new IRRenamer();
-            irRenamer.runOnIRModule(irModule);
+            var irModule = new Middleender().run(ast, gScope);
             if (!testOnline) {
                 IRPrinter irPrinter = new IRPrinter(filePath + "test.ll");
                 irPrinter.runOnIRModule(irModule);
             }
 
             // -------------------------------------------------------
-
             ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
             new BfRegAllocator().runOnASMModule(asmModule);
             new StackAllocator().runOnASMModule(asmModule);
@@ -88,7 +81,6 @@ public class Compiler {
                 new BuiltinPrinter().printBuiltin();
             } else
                 new ASMFormatter().printASM(filePath + "test.s", asmModule);
-
         } catch (BaseError e) {
             System.err.println(e.toString());
             throw new RuntimeException();

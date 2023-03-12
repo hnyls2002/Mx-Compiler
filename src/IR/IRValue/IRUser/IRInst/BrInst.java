@@ -4,10 +4,11 @@ import IR.IRType.IRIntType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
-import IR.IRValue.IRUser.IRInst.CastInst.castType;
+import Share.Lang.LLVMIR.CastType;
 import Share.Visitors.IRInstVisitor;
 
 public class BrInst extends IRBaseInst {
+    // conditional jump
     public IRBaseValue condition;
     public IRBasicBlock trueBlock, falseBlock;
 
@@ -16,7 +17,7 @@ public class BrInst extends IRBaseInst {
 
         assert condition.valueType instanceof IRIntType;
         if (condition.valueType instanceof IRIntType t && t.intLen != 1)
-            condition = new CastInst(condition, new IRIntType(1), castType.TRUNC, curBlock);
+            condition = new CastInst(condition, new IRIntType(1), CastType.trunc, curBlock);
 
         this.condition = condition;
         this.trueBlock = trueBlock;

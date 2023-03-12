@@ -4,30 +4,16 @@ import IR.IRType.IRIntType;
 import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
+import Share.Lang.LLVMIR.CastType;
 import Share.Visitors.IRInstVisitor;
 
 public class CastInst extends IRBaseInst {
 
-    public enum castType {
-        BIT("bitcast"), SEXT("sext"), ZEXT("zext"), TRUNC("trunc");
-
-        String insStr;
-
-        private castType(String insStr) {
-            this.insStr = insStr;
-        }
-
-        @Override
-        public String toString() {
-            return insStr;
-        }
-    };
-
     public IRBaseValue srcValue = null;
     public IRType targetType = null;
-    public castType opCode = null;
+    public CastType opCode = null;
 
-    public static IRBaseValue tryBoolCast(IRBaseValue srcValue, IRType targetType, castType opCode,
+    public static IRBaseValue tryBoolCast(IRBaseValue srcValue, IRType targetType, CastType opCode,
             IRBasicBlock block) {
         if (srcValue.valueType instanceof IRIntType int1 && targetType instanceof IRIntType int2 && int1.intLen == 1
                 && int2.intLen == 1)
@@ -36,7 +22,7 @@ public class CastInst extends IRBaseInst {
             return new CastInst(srcValue, targetType, opCode, block);
     }
 
-    public CastInst(IRBaseValue srcValue, IRType targetType, castType opCode, IRBasicBlock block) {
+    public CastInst(IRBaseValue srcValue, IRType targetType, CastType opCode, IRBasicBlock block) {
         super(targetType);
         this.srcValue = srcValue;
         this.targetType = targetType;

@@ -12,9 +12,10 @@ import IR.IRType.IRStructType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
 import IR.IRValue.IRUser.ConsValue.ConsData.StrConst;
-import IR.IRValue.IRUser.IRInst.BinaryInst.binaryOperator;
-import IR.IRValue.IRUser.IRInst.IcmpInst.icmpOperator;
 import Share.MyException;
+import Share.Lang.LLVMIR;
+import Share.Lang.LLVMIR.BOP;
+import Share.Lang.LLVMIR.ICMPOP;
 
 public class Transfer {
     private static IRType typeTransferNoRef(TypeName astTypeName) {
@@ -93,31 +94,31 @@ public class Transfer {
         return ret;
     }
 
-    public static binaryOperator binaryArthTransfer(binaryOp astOpCode) {
-        binaryOperator binaryOpCode = switch (astOpCode) {
-            case ADD -> binaryOperator.irADD;
-            case SUB -> binaryOperator.irSUB;
-            case BIT_AND -> binaryOperator.irAND;
-            case BIT_OR -> binaryOperator.irOR;
-            case DIV -> binaryOperator.irSDIV;
-            case MOD -> binaryOperator.irSREM;
-            case MUL -> binaryOperator.irMUL;
-            case SHIFT_LEFT -> binaryOperator.irSHL;
-            case SHIFT_RIGHT -> binaryOperator.irASHR;
-            case BIT_XOR -> binaryOperator.irXOR;
+    public static LLVMIR.BOP binaryArthTransfer(binaryOp astOpCode) {
+        LLVMIR.BOP binaryOpCode = switch (astOpCode) {
+            case ADD -> BOP.add;
+            case SUB -> BOP.sub;
+            case BIT_AND -> BOP.and;
+            case BIT_OR -> BOP.or;
+            case DIV -> BOP.sdiv;
+            case MOD -> BOP.srem;
+            case MUL -> BOP.mul;
+            case SHIFT_LEFT -> BOP.shl;
+            case SHIFT_RIGHT -> BOP.ashr;
+            case BIT_XOR -> BOP.xor;
             default -> null;
         };
         return binaryOpCode;
     }
 
-    public static icmpOperator binaryCmpTransfer(binaryOp astOpCode) {
-        icmpOperator icmpOpCode = switch (astOpCode) {
-            case EQUAL -> icmpOperator.irEQ;
-            case NOT_EQUAL -> icmpOperator.irNE;
-            case GREATER -> icmpOperator.irSGT;
-            case GREATER_EQUAL -> icmpOperator.irSGE;
-            case LESS -> icmpOperator.irSLT;
-            case LESS_EQUAL -> icmpOperator.irSLE;
+    public static ICMPOP binaryCmpTransfer(binaryOp astOpCode) {
+        ICMPOP icmpOpCode = switch (astOpCode) {
+            case EQUAL -> ICMPOP.eq;
+            case NOT_EQUAL -> ICMPOP.ne;
+            case GREATER -> ICMPOP.sgt;
+            case GREATER_EQUAL -> ICMPOP.sge;
+            case LESS -> ICMPOP.slt;
+            case LESS_EQUAL -> ICMPOP.sle;
             default -> null;
         };
         return icmpOpCode;

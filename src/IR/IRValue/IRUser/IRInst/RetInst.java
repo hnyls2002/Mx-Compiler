@@ -6,7 +6,6 @@ import IR.IRValue.IRBasicBlock;
 import Share.Visitors.IRInstVisitor;
 
 public class RetInst extends IRBaseInst {
-    public IRBaseValue retValue;
     private boolean isVoid = false;
 
     public boolean isVoid() {
@@ -16,7 +15,7 @@ public class RetInst extends IRBaseInst {
     // "ret %3" is void type ?
     public RetInst(IRBaseValue retValue, IRBasicBlock block) {
         super(new IRVoidType());
-        this.retValue = retValue;
+        appendOprand(retValue);
         block.setTerminal(this);
     }
 
@@ -29,7 +28,7 @@ public class RetInst extends IRBaseInst {
     public String defToString() {
         if (isVoid())
             return "ret void";
-        return "ret" + ' ' + retValue.useToStringWithType();
+        return "ret" + ' ' + getOprand(0).useToStringWithType();
     }
 
     @Override

@@ -64,11 +64,11 @@ import IR.IRValue.IRUser.IRInst.LoadInst;
 import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
-import IR.IRValue.IRUser.IRInst.BinaryInst.binaryOperator;
-import IR.IRValue.IRUser.IRInst.CastInst.castType;
-import IR.IRValue.IRUser.IRInst.IcmpInst.icmpOperator;
 import IR.Util.Transfer;
 import Share.MyException;
+import Share.Lang.LLVMIR.BOP;
+import Share.Lang.LLVMIR.CastType;
+import Share.Lang.LLVMIR.ICMPOP;
 import Share.Visitors.ASTVisitor;
 
 public class IRBuilder implements ASTVisitor {
@@ -228,17 +228,17 @@ public class IRBuilder implements ASTVisitor {
         IRFnType fnType = getFnType("__malloc");
 
         dimList.get(k).accept(this);
-        IRBaseValue arrLength = new BinaryInst(binaryOperator.irADD, dimList.get(k).irValue, new IntConst(1, 32),
+        IRBaseValue arrLength = new BinaryInst(BOP.add, dimList.get(k).irValue, new IntConst(1, 32),
                 cur.block);
-        IRBaseValue arrSize = new BinaryInst(binaryOperator.irMUL, arrLength,
+        IRBaseValue arrSize = new BinaryInst(BOP.mul, arrLength,
                 new IntConst(addrType.derefType().getSize(topModule), 32), cur.block);
 
         var i8Ptr = new CallInst(fnType, cur.block, arrSize);
 
-        var i32Ptr = new CastInst(i8Ptr, new IRPtType(new IRIntType(32), 1), castType.BIT, cur.block);
+        var i32Ptr = new CastInst(i8Ptr, new IRPtType(new IRIntType(32), 1), CastType.bitcast, cur.block);
         new StoreInst(dimList.get(k).irValue, i32Ptr, cur.block);
 
-        var elePtr = new CastInst(i8Ptr, addrType, castType.BIT, cur.block);
+        var elePtr = new CastInst(i8Ptr, addrType, CastType.bitcast, cur.block);
 
         if (k < dimList.size() - 1) {
             // curPtr = [startPtr, nexPtr];
@@ -269,7 +269,7 @@ public class IRBuilder implements ASTVisitor {
             cur.fn.addBlock(conditionBlock);
             cur.block = conditionBlock;
             conditionBlock.addInst((IRBaseInst) curPtr);
-            var conditionExpr = new IcmpInst(icmpOperator.irNE, curPtr, endPtr, cur.block);
+            var conditionExpr = new IcmpInst(ICMPOP.ne, curPtr, endPtr, cur.block);
 
             cur.fn.addBlock(afterBlock);
             cur.block = afterBlock;
@@ -295,7 +295,7 @@ public class IRBuilder implements ASTVisitor {
             var classInfo = (ClassType) gScope.typeMap.get(it.typeName.typeNameString);
             if (classInfo.haveConst) {
                 IRFnType constructorType = classInfo.structType.constructFnType;
-                it.irValue = new CastInst(it.irValue, pt, castType.BIT, cur.block);
+                it.irValue = new CastInst(it.irValue, pt, CastType.bitcast, cur.block);
                 it.irValue = new CallInst(constructorType, cur.block, it.irValue);
             }
         } else {
@@ -316,19 +316,19 @@ public class IRBuilder implements ASTVisitor {
         it.rhs.accept(this);
         var binaryOpCode = Transfer.binaryArthTransfer(it.opcode);
         var icmpOpCode = Transfer.binaryCmpTransfer(it.opcode);
-        if (binaryOpCode == binaryOperator.irADD)
+        if (binaryOpCode == BOP.add)
             it.irValue = new CallInst(getFnType("__str_plus"), cur.block, it.lhs.irValue, it.rhs.irValue);
-        if (icmpOpCode == icmpOperator.irEQ)
+        if (icmpOpCode == ICMPOP.eq)
             it.irValue = new CallInst(getFnType("__str_eq"), cur.block, it.lhs.irValue, it.rhs.irValue);
-        if (icmpOpCode == icmpOperator.irNE)
+        if (icmpOpCode == ICMPOP.ne)
             it.irValue = new CallInst(getFnType("__str_ne"), cur.block, it.lhs.irValue, it.rhs.irValue);
-        if (icmpOpCode == icmpOperator.irSLT)
+        if (icmpOpCode == ICMPOP.slt)
             it.irValue = new CallInst(getFnType("__str_lt"), cur.block, it.lhs.irValue, it.rhs.irValue);
-        if (icmpOpCode == icmpOperator.irSLE)
+        if (icmpOpCode == ICMPOP.sle)
             it.irValue = new CallInst(getFnType("__str_le"), cur.block, it.lhs.irValue, it.rhs.irValue);
-        if (icmpOpCode == icmpOperator.irSGT)
+        if (icmpOpCode == ICMPOP.sgt)
             it.irValue = new CallInst(getFnType("__str_gt"), cur.block, it.lhs.irValue, it.rhs.irValue);
-        if (icmpOpCode == icmpOperator.irSGE)
+        if (icmpOpCode == ICMPOP.sge)
             it.irValue = new CallInst(getFnType("__str_ge"), cur.block, it.lhs.irValue, it.rhs.irValue);
     }
 
@@ -347,7 +347,7 @@ public class IRBuilder implements ASTVisitor {
             cur.block = rhsBlock;
             it.rhs.accept(this);
             if (it.rhs.irValue.valueType instanceof IRIntType t && t.intLen != 1)
-                it.rhs.irValue = new CastInst(it.rhs.irValue, new IRIntType(1), castType.TRUNC, cur.block);
+                it.rhs.irValue = new CastInst(it.rhs.irValue, new IRIntType(1), CastType.trunc, cur.block);
 
             cur.fn.addBlock(endBlock);
             cur.block = endBlock;
@@ -370,8 +370,8 @@ public class IRBuilder implements ASTVisitor {
             it.lhs.accept(this);
             it.rhs.accept(this);
             if (it.lhs.typeName.equals(gScope.boolName)) {
-                it.lhs.irValue = CastInst.tryBoolCast(it.lhs.irValue, new IRIntType(1), castType.TRUNC, cur.block);
-                it.rhs.irValue = CastInst.tryBoolCast(it.rhs.irValue, new IRIntType(1), castType.TRUNC, cur.block);
+                it.lhs.irValue = CastInst.tryBoolCast(it.lhs.irValue, new IRIntType(1), CastType.trunc, cur.block);
+                it.rhs.irValue = CastInst.tryBoolCast(it.rhs.irValue, new IRIntType(1), CastType.trunc, cur.block);
             }
             IRBaseValue irValue = null;
             var binaryOpCode = Transfer.binaryArthTransfer(it.opcode);
@@ -391,38 +391,38 @@ public class IRBuilder implements ASTVisitor {
         it.expr.accept(this);
         switch (it.opCode) {
             case BIT_NOT -> {
-                it.irValue = new BinaryInst(binaryOperator.irXOR, it.expr.irValue, new IntConst(-1, 32), cur.block);
+                it.irValue = new BinaryInst(BOP.xor, it.expr.irValue, new IntConst(-1, 32), cur.block);
             }
             case LOGIC_NOT -> { // bool type : transfer to i1 first
                 IRBaseValue i1Value = it.expr.irValue;
-                i1Value = CastInst.tryBoolCast(i1Value, new IRIntType(1), castType.TRUNC, cur.block);
-                it.irValue = new BinaryInst(binaryOperator.irXOR, i1Value, new IntConst(1, 1), cur.block);
+                i1Value = CastInst.tryBoolCast(i1Value, new IRIntType(1), CastType.trunc, cur.block);
+                it.irValue = new BinaryInst(BOP.xor, i1Value, new IntConst(1, 1), cur.block);
             }
             case PRE_ADD -> {
                 it.irValue = it.expr.irValue;
             }
             case PRE_SUB -> {
-                it.irValue = new BinaryInst(binaryOperator.irSUB, new IntConst(0, 32), it.expr.irValue, cur.block);
+                it.irValue = new BinaryInst(BOP.sub, new IntConst(0, 32), it.expr.irValue, cur.block);
             }
             case PRE_INC -> {
-                it.irValue = new BinaryInst(binaryOperator.irADD, it.expr.irValue, new IntConst(1, 32), cur.block);
+                it.irValue = new BinaryInst(BOP.add, it.expr.irValue, new IntConst(1, 32), cur.block);
                 new StoreInst(it.irValue, it.expr.irAddr, cur.block);
                 it.irAddr = it.expr.irAddr;
             }
             case PRE_DEC -> {
-                it.irValue = new BinaryInst(binaryOperator.irSUB, it.expr.irValue, new IntConst(1, 32), cur.block);
+                it.irValue = new BinaryInst(BOP.sub, it.expr.irValue, new IntConst(1, 32), cur.block);
                 new StoreInst(it.irValue, it.expr.irAddr, cur.block);
                 it.irAddr = it.expr.irAddr;
             }
             case SUF_INC -> {
                 it.irValue = it.expr.irValue;
-                var updatedValue = new BinaryInst(binaryOperator.irADD, it.expr.irValue, new IntConst(1, 32),
+                var updatedValue = new BinaryInst(BOP.add, it.expr.irValue, new IntConst(1, 32),
                         cur.block);
                 new StoreInst(updatedValue, it.expr.irAddr, cur.block);
             }
             case SUF_DEC -> {
                 it.irValue = it.expr.irValue;
-                var updatedValue = new BinaryInst(binaryOperator.irSUB, it.expr.irValue, new IntConst(1, 32),
+                var updatedValue = new BinaryInst(BOP.sub, it.expr.irValue, new IntConst(1, 32),
                         cur.block);
                 new StoreInst(updatedValue, it.expr.irAddr, cur.block);
             }
@@ -451,7 +451,7 @@ public class IRBuilder implements ASTVisitor {
         // castType.BIT, cur.block);
         // var tmp1 = new LoadInst(tmp, cur.block);
         // new CallInst(getFnType("printlnInt"), cur.block, tmp1);
-        subExpr = new BinaryInst(binaryOperator.irADD, subExpr, new IntConst(1, 32), cur.block);
+        subExpr = new BinaryInst(BOP.add, subExpr, new IntConst(1, 32), cur.block);
 
         it.irAddr = new GEPInst(arrAddr, arrAddr.valueType, cur.block, subExpr);
         it.irValue = new LoadInst(it.irAddr, cur.block);
@@ -647,7 +647,7 @@ public class IRBuilder implements ASTVisitor {
         else {
             it.expr.accept(this);
             if (it.expr.irValue.valueType instanceof IRIntType b && b.intLen == 1)
-                it.expr.irValue = new CastInst(it.expr.irValue, new IRIntType(8), castType.ZEXT, cur.block);
+                it.expr.irValue = new CastInst(it.expr.irValue, new IRIntType(8), CastType.zext, cur.block);
             new StoreInst(it.expr.irValue, cur.fn.retValueAddr, cur.block);
             new BrInst(cur.fn.retBlock, cur.block);
         }
@@ -698,14 +698,14 @@ public class IRBuilder implements ASTVisitor {
                 it.irValue = new LoadInst(gep, cur.block);
         } else if (it.funcCall != null) {
             if (it.funcCall.FuncNameString.equals("size") && it.expr.typeName.dimen > 0) {
-                var sizeAddr = new CastInst(it.expr.irValue, new IRPtType(new IRIntType(32), 1), castType.BIT,
+                var sizeAddr = new CastInst(it.expr.irValue, new IRPtType(new IRIntType(32), 1), CastType.bitcast,
                         cur.block);
                 it.irValue = new LoadInst(sizeAddr, cur.block);
             } else {
                 Boolean isMemberFunction = cur.whoseMember != null;
                 it.funcCall.accept(this);
                 if (isMemberFunction)
-                    ((CallInst) it.funcCall.irValue).argList.add(0, it.expr.irValue);
+                    ((CallInst) it.funcCall.irValue).oprandList.add(0, it.expr.irValue);
                 it.irValue = it.funcCall.irValue;
             }
         }

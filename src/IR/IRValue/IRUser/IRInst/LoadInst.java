@@ -6,19 +6,17 @@ import IR.IRValue.IRBasicBlock;
 import Share.Visitors.IRInstVisitor;
 
 public class LoadInst extends IRBaseInst {
-    public IRBaseValue srcAddr;
-
     public LoadInst(IRBaseValue srcAddr, IRBasicBlock block) {
         super(null);
         valueType = ((IRPtType) (srcAddr.valueType)).derefType();
-        this.srcAddr = srcAddr;
+        appendOprand(srcAddr);
         block.addInst(this);
     }
 
     @Override
     public String defToString() {
         var ret = "load " + valueType.toString() + ", ";
-        ret += srcAddr.useToStringWithType();
+        ret += getOprand(0).useToStringWithType();
         return ret;
     }
 
