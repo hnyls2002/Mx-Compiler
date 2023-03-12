@@ -15,6 +15,11 @@ public class JumpInst extends IRBaseInst {
         curBlock.setTerminal(this);
     }
 
+    public JumpInst(IRBasicBlock targetBlock) {
+        super(new IRVoidType());
+        appendOprand(targetBlock);
+    }
+
     @Override
     public void accept(IRInstVisitor visitor) {
         visitor.visit(this);
