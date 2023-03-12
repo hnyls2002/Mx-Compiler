@@ -351,8 +351,8 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
     public void visit(PhiInst inst) {
         VirtualOffset phiResult = new VirtualOffset(SPLabel.phi, cur.fn.phiStackCnt++);
 
-        ASMBlock block1 = (ASMBlock) inst.block1.asOprand;
-        ASMBlock block2 = (ASMBlock) inst.block2.asOprand;
+        ASMBlock block1 = (ASMBlock) inst.getOprand(0).asOprand;
+        ASMBlock block2 = (ASMBlock) inst.getOprand(2).asOprand;
         ArrayList<ASMBaseInst> t1 = new ArrayList<>();
         ArrayList<ASMBaseInst> t2 = new ArrayList<>();
         while (true) {
@@ -368,10 +368,10 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
             t2.add(i2);
         }
 
-        ifConstThenLoad(inst.res1, block1);
-        ifConstThenLoad(inst.res2, block2);
-        Register res1 = (Register) inst.res1.asOprand;
-        Register res2 = (Register) inst.res2.asOprand;
+        ifConstThenLoad(inst.getOprand(1), block1);
+        ifConstThenLoad(inst.getOprand(3), block2);
+        Register res1 = (Register) inst.getOprand(1).asOprand;
+        Register res2 = (Register) inst.getOprand(3).asOprand;
 
         var sp = PhysicalReg.getPhyReg("sp");
 

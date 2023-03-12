@@ -251,7 +251,11 @@ public class IRBuilder implements ASTVisitor {
 
             var startPtr = new GEPInst(elePtr, elePtr.valueType, cur.block, new IntConst(1, 32));
             IRBaseValue endPtr = new GEPInst(startPtr, startPtr.valueType, cur.block, dimList.get(k).irValue);
-            IRBaseValue curPtr = new PhiInst(cur.block, startPtr, null, null, null);
+
+            // IRBaseValue curPtr = new PhiInst(cur.block, startPtr, null, null, null);
+            IRBaseValue curPtr = new PhiInst(startPtr.valueType);
+            ((PhiInst) curPtr).addBranch(cur.block, startPtr);
+
             IRBaseValue nexPtr = new GEPInst(curPtr, curPtr.valueType, null, new IntConst(1, 32));
 
             // cur.fn.addBlock(conditionBlock);
@@ -264,8 +268,10 @@ public class IRBuilder implements ASTVisitor {
             cur.block = bodyBlock;
             new StoreInst(arrMalloc((IRPtType) addrType.derefType(), dimList, k + 1), curPtr, cur.block);
             cur.block.addInst((IRBaseInst) nexPtr);
-            ((PhiInst) curPtr).block2 = cur.block;
-            ((PhiInst) curPtr).res2 = nexPtr;
+
+            // ((PhiInst) curPtr).block2 = cur.block;
+            // ((PhiInst) curPtr).res2 = nexPtr;
+            ((PhiInst) curPtr).addBranch(cur.block, nexPtr);
 
             cur.fn.addBlock(conditionBlock);
             cur.block = conditionBlock;
@@ -357,15 +363,20 @@ public class IRBuilder implements ASTVisitor {
             if (isOr) {
                 new BrInst(it.lhs.irValue, endBlock, rhsBlock, beforeBlock);
                 new JumpInst(endBlock, rhsBlock.getTail());
-                it.irValue = new PhiInst(beforeBlock, new IntConst(isOr ? 1 : 0, 1), rhsBlock.getTail(),
-                        it.rhs.irValue,
-                        endBlock);
+                // it.irValue = new PhiInst(beforeBlock, new IntConst(isOr ? 1 : 0, 1),
+                // rhsBlock.getTail(), it.rhs.irValue, endBlock);
+                it.irValue = new PhiInst(new IRIntType(1), endBlock);
+                ((PhiInst) it.irValue).addBranch(beforeBlock, new IntConst(isOr ? 1 : 0, 1));
+                ((PhiInst) it.irValue).addBranch(rhsBlock.getTail(), it.rhs.irValue);
+
             } else {
                 new BrInst(it.lhs.irValue, rhsBlock, endBlock, beforeBlock);
                 new JumpInst(endBlock, rhsBlock.getTail());
-                it.irValue = new PhiInst(beforeBlock, new IntConst(isOr ? 1 : 0, 1), rhsBlock.getTail(),
-                        it.rhs.irValue,
-                        endBlock);
+                // it.irValue = new PhiInst(beforeBlock, new IntConst(isOr ? 1 : 0, 1),
+                // rhsBlock.getTail(), it.rhs.irValue, endBlock);
+                it.irValue = new PhiInst(new IRIntType(1), endBlock);
+                ((PhiInst) it.irValue).addBranch(beforeBlock, new IntConst(isOr ? 1 : 0, 1));
+                ((PhiInst) it.irValue).addBranch(rhsBlock.getTail(), it.rhs.irValue);
             }
         } else {
             it.lhs.accept(this);
