@@ -60,6 +60,7 @@ import IR.IRValue.IRUser.IRInst.CastInst;
 import IR.IRValue.IRUser.IRInst.GEPInst;
 import IR.IRValue.IRUser.IRInst.IRBaseInst;
 import IR.IRValue.IRUser.IRInst.IcmpInst;
+import IR.IRValue.IRUser.IRInst.JumpInst;
 import IR.IRValue.IRUser.IRInst.LoadInst;
 import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
@@ -154,7 +155,7 @@ public class IRBuilder implements ASTVisitor {
     private void terminalToRet(IRFn fn) {
         fn.blockList.forEach(block -> {
             if (block.getTerminal() == null)
-                new BrInst(fn.retBlock, block);
+                new JumpInst(fn.retBlock, block);
         });
     }
 
@@ -276,9 +277,9 @@ public class IRBuilder implements ASTVisitor {
 
             beforeBlock.tailBlock = afterBlock;
 
-            new BrInst(conditionBlock, beforeBlock);
+            new JumpInst(conditionBlock, beforeBlock);
             new BrInst(conditionExpr, bodyBlock, afterBlock, conditionBlock.getTail());
-            new BrInst(conditionBlock, bodyBlock.getTail());
+            new JumpInst(conditionBlock, bodyBlock.getTail());
         }
 
         return elePtr;
@@ -355,13 +356,13 @@ public class IRBuilder implements ASTVisitor {
 
             if (isOr) {
                 new BrInst(it.lhs.irValue, endBlock, rhsBlock, beforeBlock);
-                new BrInst(endBlock, rhsBlock.getTail());
+                new JumpInst(endBlock, rhsBlock.getTail());
                 it.irValue = new PhiInst(beforeBlock, new IntConst(isOr ? 1 : 0, 1), rhsBlock.getTail(),
                         it.rhs.irValue,
                         endBlock);
             } else {
                 new BrInst(it.lhs.irValue, rhsBlock, endBlock, beforeBlock);
-                new BrInst(endBlock, rhsBlock.getTail());
+                new JumpInst(endBlock, rhsBlock.getTail());
                 it.irValue = new PhiInst(beforeBlock, new IntConst(isOr ? 1 : 0, 1), rhsBlock.getTail(),
                         it.rhs.irValue,
                         endBlock);
@@ -558,11 +559,11 @@ public class IRBuilder implements ASTVisitor {
 
         if (elseBlock != null) {
             new BrInst(it.expr.irValue, thenBlock, elseBlock, beforeIfBlock);
-            new BrInst(afterIfBlock, thenBlock.getTail());
-            new BrInst(afterIfBlock, elseBlock.getTail());
+            new JumpInst(afterIfBlock, thenBlock.getTail());
+            new JumpInst(afterIfBlock, elseBlock.getTail());
         } else {
             new BrInst(it.expr.irValue, thenBlock, afterIfBlock, beforeIfBlock);
-            new BrInst(afterIfBlock, thenBlock.getTail());
+            new JumpInst(afterIfBlock, thenBlock.getTail());
         }
     }
 
@@ -586,9 +587,9 @@ public class IRBuilder implements ASTVisitor {
         cur.block = afterWhileBlock;
         beforeBlock.tailBlock = afterWhileBlock.getTail();
 
-        new BrInst(conditionBlock, beforeBlock);
+        new JumpInst(conditionBlock, beforeBlock);
         new BrInst(it.expr.irValue, whileBodyBlock, afterWhileBlock, conditionBlock.getTail());
-        new BrInst(conditionBlock, whileBodyBlock.getTail());
+        new JumpInst(conditionBlock, whileBodyBlock.getTail());
 
         cur.scope = cur.scope.parent;
     }
@@ -626,16 +627,16 @@ public class IRBuilder implements ASTVisitor {
         beforeBlock.tailBlock = afterForBlock.getTail();
 
         // before -> condition
-        new BrInst(conditionBlock, beforeBlock);
+        new JumpInst(conditionBlock, beforeBlock);
         // condition -> forbody or afeterFor
         if (it.condExpr != null)
             new BrInst(it.condExpr.irValue, forBodyBlock, afterForBlock, conditionBlock.getTail());
         else // condition -> forbody
-            new BrInst(forBodyBlock, conditionBlock.getTail());
+            new JumpInst(forBodyBlock, conditionBlock.getTail());
         // forbody -> step
-        new BrInst(stepBlock, forBodyBlock.getTail());
+        new JumpInst(stepBlock, forBodyBlock.getTail());
         // step -> condition
-        new BrInst(conditionBlock, stepBlock.getTail());
+        new JumpInst(conditionBlock, stepBlock.getTail());
 
         cur.scope = cur.scope.parent;
     }
@@ -643,24 +644,24 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(ReturnStmtNode it) {
         if (it.expr == null)// return void
-            new BrInst(cur.fn.retBlock, cur.block);
+            new JumpInst(cur.fn.retBlock, cur.block);
         else {
             it.expr.accept(this);
             if (it.expr.irValue.valueType instanceof IRIntType b && b.intLen == 1)
                 it.expr.irValue = new CastInst(it.expr.irValue, new IRIntType(8), CastType.zext, cur.block);
             new StoreInst(it.expr.irValue, cur.fn.retValueAddr, cur.block);
-            new BrInst(cur.fn.retBlock, cur.block);
+            new JumpInst(cur.fn.retBlock, cur.block);
         }
     }
 
     @Override
     public void visit(ContinueStmtNode it) {
-        new BrInst(cur.getCurContinue(), cur.block);
+        new JumpInst(cur.getCurContinue(), cur.block);
     }
 
     @Override
     public void visit(BreakStmtNode it) {
-        new BrInst(cur.getCurBreak(), cur.block);
+        new JumpInst(cur.getCurBreak(), cur.block);
     }
 
     private BaseType getWhoseMember(ExprNode it) {

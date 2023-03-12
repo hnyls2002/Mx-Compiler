@@ -1,7 +1,5 @@
 package IR.IRValue.IRUser.IRInst;
 
-import java.util.ArrayList;
-
 import IR.IRType.IRPtType;
 import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
@@ -11,30 +9,35 @@ import Share.Visitors.IRInstVisitor;
 
 public class GEPInst extends IRBaseInst {
     public IRType startType;
-    public IRBaseValue startPtr;
-    public ArrayList<IRBaseValue> indices = new ArrayList<>();
+
+    // start pointer 0
+    // indices 1 ~ n
 
     public GEPInst(IRBaseValue startPtr, IRType gepInstType, IRBasicBlock block, IRBaseValue... idxList) {
         super(gepInstType);
-        this.startPtr = startPtr;
-        this.startType = ((IRPtType) this.startPtr.valueType).derefType();
+        appendOprand(startPtr);
+        this.startType = ((IRPtType) startPtr.valueType).derefType();
         for (var idx : idxList)
-            this.indices.add(idx);
+            appendOprand(idx);
         if (block != null)
             block.addInst(this);
     }
 
     public void addIdx(int idx) {
         // i64 or i32 ? -> i32
-        indices.add(new IntConst(idx, 32));
+        appendOprand(new IntConst(idx, 32));
+    }
+
+    public IRBaseValue getIdx(int pos) {
+        return getOprand(pos + 1);
     }
 
     @Override
     public String defToString() {
         var ret = "getelementptr " + startType.toString() + ", ";
-        ret += startPtr.valueType.toString() + ' ' + startPtr.useToString();
-        for (var idx : indices)
-            ret += ", " + idx.useToStringWithType();
+        ret += getOprand(0).valueType.toString() + ' ' + getOprand(0).useToString();
+        for (int i = 1; i < getOprandNum(); ++i)
+            ret += ", " + getOprand(i).useToStringWithType();
         return ret;
     }
 

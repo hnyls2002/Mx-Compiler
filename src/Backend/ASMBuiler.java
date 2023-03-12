@@ -46,6 +46,7 @@ import IR.IRValue.IRUser.IRInst.CallInst;
 import IR.IRValue.IRUser.IRInst.CastInst;
 import IR.IRValue.IRUser.IRInst.GEPInst;
 import IR.IRValue.IRUser.IRInst.IcmpInst;
+import IR.IRValue.IRUser.IRInst.JumpInst;
 import IR.IRValue.IRUser.IRInst.LoadInst;
 import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
@@ -212,14 +213,15 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     @Override
     public void visit(BrInst inst) {
-        if (inst.falseBlock == null)
-            new ASMJInst((ASMBlock) inst.trueBlock.asOprand, cur.block);
-        else {
-            assert inst.condition.valueType instanceof IRIntType t && t.intLen == 1;
-            ifConstThenLoad(inst.condition, cur.block);
-            new ASMBrInst((Register) inst.condition.asOprand, (ASMBlock) inst.trueBlock.asOprand, cur.block);
-            new ASMJInst((ASMBlock) inst.falseBlock.asOprand, cur.block);
-        }
+        assert inst.getOprand(0).valueType instanceof IRIntType t && t.intLen == 1;
+        ifConstThenLoad(inst.getOprand(0), cur.block);
+        new ASMBrInst((Register) inst.getOprand(0).asOprand, (ASMBlock) inst.getOprand(1).asOprand, cur.block);
+        new ASMJInst((ASMBlock) inst.getOprand(2).asOprand, cur.block);
+    }
+
+    @Override
+    public void visit(JumpInst inst) {
+        new ASMJInst((ASMBlock) inst.getOprand(0).asOprand, cur.block);
     }
 
     @Override
@@ -228,22 +230,22 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         inst.oprandList.forEach(arg -> ifConstThenLoad(arg, cur.block));
 
         // a0 - a7
-        for (int i = 0; i < Math.min(inst.oprandList.size(), RV32.MAX_ARG_NUM); ++i) {
+        for (int i = 0; i < Math.min(inst.getOprandNum(), RV32.MAX_ARG_NUM); ++i) {
             var rd = PhysicalReg.getPhyReg("a" + i);
-            var rs = (Register) inst.oprandList.get(i).asOprand;
+            var rs = (Register) inst.getOprand(i).asOprand;
             new ASMMoveInst(rd, rs, cur.block);
         }
 
         // on stack
-        for (int i = RV32.MAX_ARG_NUM; i < inst.oprandList.size(); ++i) {
+        for (int i = RV32.MAX_ARG_NUM; i < inst.getOprandNum(); ++i) {
             var vOffset = new VirtualOffset(SPLabel.putSpilledArg, i - RV32.MAX_ARG_NUM);
-            var value = (Register) inst.oprandList.get(i).asOprand;
+            var value = (Register) inst.getOprand(i).asOprand;
             var sp = PhysicalReg.getPhyReg("sp");
             new ASMStoreInst(sp, value, vOffset, BitWidth.w, cur.block);
         }
-        cur.fn.spilledArgMax = Math.max(cur.fn.spilledArgMax, Math.max(inst.oprandList.size() - RV32.MAX_ARG_NUM, 0));
+        cur.fn.spilledArgMax = Math.max(cur.fn.spilledArgMax, Math.max(inst.getOprandNum() - RV32.MAX_ARG_NUM, 0));
 
-        new ASMCallInst(inst.calledFnType.fnNameString, inst.oprandList.size(), cur.block);
+        new ASMCallInst(inst.calledFnType.fnNameString, inst.getOprandNum(), cur.block);
 
         // get ret value
         if (!(inst.calledFnType.retType instanceof IRVoidType)) {
@@ -256,25 +258,25 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     @Override
     public void visit(CastInst inst) {
-        ifConstThenLoad(inst.srcValue, cur.block);
-        inst.asOprand = inst.srcValue.asOprand;
+        ifConstThenLoad(inst.getOprand(0), cur.block);
+        inst.asOprand = inst.getOprand(0).asOprand;
     }
 
     @Override
     public void visit(GEPInst inst) {
-        Register startAddr = ifGlobalThenLoad(inst.startPtr.asOprand);
+        Register startAddr = ifGlobalThenLoad(inst.getOprand(0).asOprand);
         if (inst.startType instanceof IRArrayType) { // string
             inst.asOprand = startAddr;
         } else if (inst.startType instanceof IRStructType) { // struct
             Register rd = new VirtualReg(), rs2 = new VirtualReg();
-            Immediate imm = new Immediate(((IntConst) inst.indices.get(1)).constValue * 4);
+            Immediate imm = new Immediate(((IntConst) inst.getIdx(1)).constValue * 4);
             new ASMLiInst(rs2, imm, cur.block);
             new ASMCalcInst(BinaryRegOp.add, rd, startAddr, rs2, null, cur.block);
             inst.asOprand = rd;
         } else { // array
             Register rd = new VirtualReg(), rs2 = new VirtualReg();
-            ifConstThenLoad(inst.indices.get(0), cur.block);
-            Register id = (Register) inst.indices.get(0).asOprand;
+            ifConstThenLoad(inst.getIdx(0), cur.block);
+            Register id = (Register) inst.getIdx(0).asOprand;
             // ----------------- add twice = mul * 4 --------------------
             new ASMCalcInst(BinaryRegOp.add, rs2, id, id, null, cur.block);
             new ASMCalcInst(BinaryRegOp.add, rs2, rs2, rs2, null, cur.block);
@@ -387,9 +389,9 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     @Override
     public void visit(StoreInst inst) {
-        ifConstThenLoad(inst.storedValue, cur.block);
-        var addr = toAddr(inst.destAddr.asOprand);
-        Register rs = (Register) inst.storedValue.asOprand;
+        ifConstThenLoad(inst.getOprand(0), cur.block);
+        var addr = toAddr(inst.getOprand(1).asOprand);
+        Register rs = (Register) inst.getOprand(0).asOprand;
         new ASMStoreInst(addr.a, rs, addr.b, BitWidth.w, cur.block);
     }
 
@@ -434,4 +436,5 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         } else
             throw new MyException("trans to address error");
     }
+
 }

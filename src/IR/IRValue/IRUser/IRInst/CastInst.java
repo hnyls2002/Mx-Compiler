@@ -9,7 +9,6 @@ import Share.Visitors.IRInstVisitor;
 
 public class CastInst extends IRBaseInst {
 
-    public IRBaseValue srcValue = null;
     public IRType targetType = null;
     public CastType opCode = null;
 
@@ -24,7 +23,7 @@ public class CastInst extends IRBaseInst {
 
     public CastInst(IRBaseValue srcValue, IRType targetType, CastType opCode, IRBasicBlock block) {
         super(targetType);
-        this.srcValue = srcValue;
+        appendOprand(srcValue);
         this.targetType = targetType;
         this.opCode = opCode;
         block.addInst(this);
@@ -32,7 +31,7 @@ public class CastInst extends IRBaseInst {
 
     @Override
     public String defToString() {
-        var ret = opCode.toString() + ' ' + srcValue.useToStringWithType() + " to ";
+        var ret = opCode.toString() + ' ' + getOprand(0).useToStringWithType() + " to ";
         ret += targetType.toString();
         return ret;
     }

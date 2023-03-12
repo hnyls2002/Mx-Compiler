@@ -8,10 +8,8 @@ import Share.Lang.LLVMIR.CastType;
 import Share.Visitors.IRInstVisitor;
 
 public class BrInst extends IRBaseInst {
-    // conditional jump
-    public IRBaseValue condition;
-    public IRBasicBlock trueBlock, falseBlock;
 
+    // conditional jump
     public BrInst(IRBaseValue condition, IRBasicBlock trueBlock, IRBasicBlock falseBlock, IRBasicBlock curBlock) {
         super(new IRVoidType());
 
@@ -19,31 +17,21 @@ public class BrInst extends IRBaseInst {
         if (condition.valueType instanceof IRIntType t && t.intLen != 1)
             condition = new CastInst(condition, new IRIntType(1), CastType.trunc, curBlock);
 
-        this.condition = condition;
-        this.trueBlock = trueBlock;
-        this.falseBlock = falseBlock;
-        curBlock.setTerminal(this);
-    }
+        appendOprand(condition);
+        appendOprand(trueBlock);
+        appendOprand(falseBlock);
 
-    // 1. if retInst inside -> jump to fn's retBlock
-    // 2. if not inside -> jump to target block
-    public BrInst(IRBasicBlock targetBlock, IRBasicBlock curBlock) {
-        super(new IRVoidType());
-        this.condition = null;
-        this.trueBlock = targetBlock;
+        assert trueBlock != null && falseBlock != null;
+
         curBlock.setTerminal(this);
     }
 
     @Override
     public String defToString() {
         var ret = "br ";
-        if (condition == null)
-            ret += trueBlock.useToStringWithType();
-        else {
-            ret += condition.useToStringWithType() + ", ";
-            ret += trueBlock.useToStringWithType() + ", ";
-            ret += falseBlock.useToStringWithType();
-        }
+        ret += getOprand(0).useToStringWithType() + ", ";
+        ret += getOprand(1).useToStringWithType() + ", ";
+        ret += getOprand(2).useToStringWithType();
         return ret;
     }
 

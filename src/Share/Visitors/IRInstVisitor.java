@@ -7,6 +7,7 @@ import IR.IRValue.IRUser.IRInst.CallInst;
 import IR.IRValue.IRUser.IRInst.CastInst;
 import IR.IRValue.IRUser.IRInst.GEPInst;
 import IR.IRValue.IRUser.IRInst.IcmpInst;
+import IR.IRValue.IRUser.IRInst.JumpInst;
 import IR.IRValue.IRUser.IRInst.LoadInst;
 import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
@@ -34,4 +35,6 @@ public interface IRInstVisitor {
     public void visit(PhiInst inst);
 
     public void visit(StoreInst inst);
+
+    public void visit(JumpInst inst);
 }

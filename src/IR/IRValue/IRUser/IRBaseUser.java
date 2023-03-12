@@ -23,4 +23,8 @@ public abstract class IRBaseUser extends IRBaseValue {
     public void setOprand(int idx, IRBaseValue oprand) {
         oprandList.set(idx, oprand);
     }
+
+    public int getOprandNum() {
+        return oprandList.size();
+    }
 }

@@ -11,13 +11,13 @@ import Share.Lang.LLVMIR.CastType;
 import Share.Visitors.IRInstVisitor;
 
 public class StoreInst extends IRBaseInst {
-    public IRBaseValue storedValue, destAddr;
+    // storedValue 0, destAddr 1
 
     public StoreInst(IRBaseValue storedValue, IRBaseValue destAddr, IRBasicBlock block) {
         super(new IRVoidType());
 
-        this.storedValue = storedValue;
-        this.destAddr = destAddr;
+        appendOprand(storedValue);
+        appendOprand(destAddr);
 
         var storedType = storedValue.valueType;
         var derefType = ((IRPtType) destAddr.valueType).derefType();
@@ -32,7 +32,7 @@ public class StoreInst extends IRBaseInst {
                     opCode = CastType.zext;
             } else
                 throw new MyException("Cast Instruction unknown error");
-            this.storedValue = new CastInst(storedValue, derefType, opCode, block);
+            setOprand(0, new CastInst(storedValue, derefType, opCode, block));
         }
 
         block.addInst(this);
@@ -42,15 +42,15 @@ public class StoreInst extends IRBaseInst {
     public String defToString() {
         var ret = "store ";
         // stored value can be null
-        var storedType = storedValue.valueType;
-        var derefType = ((IRPtType) destAddr.valueType).derefType();
-        if (!(storedValue instanceof NullConst) && !storedType.equals(derefType))
+        var storedType = getOprand(0).valueType;
+        var derefType = ((IRPtType) getOprand(1).valueType).derefType();
+        if (!(getOprand(0) instanceof NullConst) && !storedType.equals(derefType))
             throw new MyException(
                     "stored : [" + storedType.toString() + "] and address deref : [" + derefType.toString()
                             + "] not match!");
 
-        ret += ((IRPtType) destAddr.valueType).derefType().toString() + ' ' + storedValue.useToString() + ", ";
-        ret += destAddr.useToStringWithType();
+        ret += ((IRPtType) getOprand(1).valueType).derefType().toString() + ' ' + getOprand(0).useToString() + ", ";
+        ret += getOprand(1).useToStringWithType();
         return ret;
     }
 
