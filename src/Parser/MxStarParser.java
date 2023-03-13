@@ -4,6 +4,7 @@ package Parser;
 
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
@@ -107,8 +108,8 @@ public class MxStarParser extends Parser {
 	@Override
 	public ATN getATN() { return _ATN; }
 
-	public MxStarParser(TokenStream input) {
-		super(input);
+	public MxStarParser(org.antlr.v4.runtime.CommonTokenStream commonTokenStream) {
+		super(commonTokenStream);
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 	public static class ProgramContext extends ParserRuleContext {
