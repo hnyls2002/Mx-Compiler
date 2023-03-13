@@ -64,6 +64,14 @@ public class IRBasicBlock extends IRBaseValue {
             instList.add(inst);
     }
 
+    public void addInstBeforeTerminal(IRBaseInst inst) {
+        for (int i = 0; i <= instList.size(); ++i)
+            if (i == instList.size() || instList.get(i) == terminal) {
+                instList.add(i, inst);
+                return;
+            }
+    }
+
     public IRBasicBlock getTail() {
         return tailBlock == this ? this : (tailBlock = tailBlock.getTail());
     }

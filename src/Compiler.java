@@ -10,6 +10,7 @@ import AST.ProgramNode;
 import AST.Scopes.GlobalScope;
 import Backend.ASMBuiler;
 import Backend.ASMFormatter;
+import Backend.ASMPreHandler;
 import Backend.RegAllocate.BfRegAllocator;
 import Backend.RegAllocate.StackAllocator;
 import Frontend.ASTBuilder;
@@ -17,7 +18,6 @@ import Frontend.ProgInit;
 import Frontend.SemanticChecker;
 import Frontend.MxStar.MxStarErrorListener;
 import Frontend.MxStar.MxStarErrors.BaseError;
-import Middleend.IRPrinter;
 import Middleend.Middleender;
 
 import org.antlr.v4.runtime.CharStreams;
@@ -65,13 +65,11 @@ public class Compiler {
 
             // -------------------------------------------------------
 
-            var irModule = new Middleender().run(ast, gScope);
-            if (!testOnline) {
-                IRPrinter irPrinter = new IRPrinter(filePath + "test.ll");
-                irPrinter.runOnIRModule(irModule);
-            }
+            var irModule = new Middleender().run(ast, gScope, filePath, testOnline);
 
             // -------------------------------------------------------
+
+            new ASMPreHandler().buildSkeleton(irModule);
             ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
             new BfRegAllocator().runOnASMModule(asmModule);
             new StackAllocator().runOnASMModule(asmModule);

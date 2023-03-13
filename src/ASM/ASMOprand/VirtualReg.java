@@ -1,11 +1,12 @@
 package ASM.ASMOprand;
 
+import ASM.ASMFn;
+
 public class VirtualReg extends Register {
-    public static int virtualRegCnt = 0;
     public int id;
 
-    public VirtualReg() {
-        this.id = virtualRegCnt++;
+    public VirtualReg(ASMFn asmFn) {
+        this.id = asmFn.virRegCnt++;
     }
 
     @Override

@@ -12,6 +12,7 @@ import IR.IRValue.IRUser.ConsValue.ConsData.StrConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.GlobalVariable;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.IRBaseInst;
+import IR.IRValue.IRUser.IRInst.MoveInst;
 import Share.Pass.IRPass.IRBlockPass;
 import Share.Pass.IRPass.IRFnPass;
 import Share.Pass.IRPass.IRModulePass;
@@ -83,9 +84,15 @@ public class IRPrinter implements IRModulePass, IRFnPass, IRBlockPass {
     }
 
     private void printInst(IRBaseInst inst) {
-        var defString = inst.defToString() + "\n";
-        if (!(inst.valueType instanceof IRVoidType))
-            defString = '%' + inst.getName() + " = " + defString;
+        String defString;
+        if (inst instanceof MoveInst) {
+            defString = '%' + inst.getOprand(0).getName();
+            defString += " = " + inst.defToString() + '\n';
+        } else {
+            defString = inst.defToString() + "\n";
+            if (!(inst.valueType instanceof IRVoidType))
+                defString = '%' + inst.getName() + " = " + defString;
+        }
         System.out.print(tab + defString);
     }
 

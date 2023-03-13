@@ -4,8 +4,10 @@ import java.util.ArrayList;
 
 import IR.IRModule;
 import IR.IRValue.IRBasicBlock;
+import IR.IRValue.IRVReg;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.JumpInst;
+import IR.IRValue.IRUser.IRInst.MoveInst;
 import Share.Pass.IRPass.IRFnPass;
 import Share.Pass.IRPass.IRModulePass;
 
@@ -20,6 +22,7 @@ public class PhiElimination implements IRModulePass, IRFnPass {
     @Override
     public void runOnIRFn(IRFn fn) {
         splitCriticalEdge(fn);
+        addMovement(fn);
     }
 
     public void splitCriticalEdge(IRFn fn) {
@@ -65,5 +68,21 @@ public class PhiElimination implements IRModulePass, IRFnPass {
         }
 
         fn.blockList.addAll(tmpAddList);
+    }
+
+    public void addMovement(IRFn fn) {
+        for (var block : fn.blockList) {
+            for (var phiInst : block.phiList) {
+                var temp = new IRVReg(phiInst.valueType);
+                for (int i = 0; i < phiInst.getOprandNum(); i += 2) {
+                    var preBlock = (IRBasicBlock) phiInst.getOprand(i);
+                    var res = phiInst.getOprand(i + 1);
+                    var mvInst = new MoveInst(temp, res);
+                    preBlock.addInstBeforeTerminal(mvInst);
+                }
+                var mvBack = new MoveInst(phiInst, temp);
+                block.instList.add(0, mvBack);
+            }
+        }
     }
 }
