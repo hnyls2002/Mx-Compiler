@@ -10,6 +10,7 @@ import IR.IRValue.IRUser.IRInst.IRBaseInst;
 import IR.IRValue.IRUser.IRInst.JumpInst;
 import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
+import Middleend.IROptimize.DominateTree.DTreeNode;
 import Share.MyException;
 
 public class IRBasicBlock extends IRBaseValue {
@@ -23,6 +24,9 @@ public class IRBasicBlock extends IRBaseValue {
 
     // for CFG
     public ArrayList<IRBasicBlock> sucList = new ArrayList<>(), preList = new ArrayList<>();
+
+    // for mem2reg
+    public DTreeNode dtNode = new DTreeNode();
 
     public IRBasicBlock(IRFn fn, int loopDepth) {
         super(new IRType(IRTypeId.LabelTypeId));

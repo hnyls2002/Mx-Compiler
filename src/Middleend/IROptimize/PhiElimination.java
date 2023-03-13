@@ -71,7 +71,10 @@ public class PhiElimination implements IRModulePass, IRFnPass {
     }
 
     public void addMovement(IRFn fn) {
-        for (var block : fn.blockList) {
+        ArrayList<IRBasicBlock> tmpBlockList = new ArrayList<>(fn.blockList);
+        tmpBlockList.add(fn.retBlock);
+
+        for (var block : tmpBlockList) {
             for (var phiInst : block.phiList) {
                 var temp = new IRVReg(phiInst.valueType);
                 for (int i = 0; i < phiInst.getOprandNum(); i += 2) {

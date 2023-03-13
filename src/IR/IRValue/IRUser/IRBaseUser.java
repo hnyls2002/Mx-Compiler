@@ -6,7 +6,7 @@ import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
 
 public abstract class IRBaseUser extends IRBaseValue {
-    public ArrayList<IRBaseValue> oprandList = new ArrayList<>();
+    private ArrayList<IRBaseValue> oprandList = new ArrayList<>();
 
     public IRBaseUser(IRType userType) {
         super(userType);
@@ -14,6 +14,7 @@ public abstract class IRBaseUser extends IRBaseValue {
 
     public void appendOprand(IRBaseValue oprand) {
         oprandList.add(oprand);
+        oprand.userList.add(this);
     }
 
     public IRBaseValue getOprand(int idx) {
@@ -21,7 +22,14 @@ public abstract class IRBaseUser extends IRBaseValue {
     }
 
     public void setOprand(int idx, IRBaseValue oprand) {
+        oprandList.get(idx).userList.remove(this);
         oprandList.set(idx, oprand);
+        oprand.userList.add(this);
+    }
+
+    public void insertOprand(int idx, IRBaseValue oprand) {
+        oprandList.add(idx, oprand);
+        oprand.userList.add(this);
     }
 
     public int getOprandNum() {

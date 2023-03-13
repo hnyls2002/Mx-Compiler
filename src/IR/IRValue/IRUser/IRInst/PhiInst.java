@@ -7,6 +7,8 @@ import Share.Visitors.IRInstVisitor;
 
 public class PhiInst extends IRBaseInst {
 
+    public AllocaInst belongAlloca = null;
+
     public PhiInst(IRType valuType, IRBasicBlock curBlock) {
         super(valuType);
         curBlock.phiList.add(this);

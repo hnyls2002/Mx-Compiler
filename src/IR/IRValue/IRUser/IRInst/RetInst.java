@@ -19,8 +19,13 @@ public class RetInst extends IRBaseInst {
         block.setTerminal(this);
     }
 
+    public RetInst(IRBasicBlock block) {
+        super(new IRVoidType());
+        block.setTerminal(this);
+    }
+
     public static void createVoidRetInst(IRBasicBlock block) {
-        var retInst = new RetInst(null, block);
+        var retInst = new RetInst(block);
         retInst.isVoid = true;
     }
 

@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import AST.ASTNode;
 import AST.Scopes.GlobalScope;
 import IR.IRModule;
+import Middleend.IROptimize.DominateTree;
+import Middleend.IROptimize.Mem2Reg;
 import Middleend.IROptimize.PhiElimination;
 
 public class Middleender {
@@ -14,7 +16,31 @@ public class Middleender {
         IRModule irModule = irBuilder.buildIR();
         IRRenamer renamer = new IRRenamer();
 
+        new DominateTree().runOnIRModule(irModule);
+        new Mem2Reg().runOnIRModule(irModule);
+
         renamer.runOnIRModule(irModule);
+
+        // // -------------- debug --------------------
+        // var root = irModule.globalFnList.get(0).blockList.get(0);
+        // for (var bb : root.dtNode.slaveSet) {
+        // System.err.println(bb.getName());
+
+        // System.err.println("slaveSet : ");
+        // for (var slave : bb.dtNode.slaveSet)
+        // System.err.println(slave.getName());
+
+        // System.err.println("masterSet : ");
+        // for (var master : bb.dtNode.masterSet)
+        // System.err.println(master.getName());
+
+        // System.err.println("frontier : ");
+        // for (var frontier : bb.dtNode.frontier)
+        // System.err.println(frontier.getName());
+
+        // System.err.println("\n-----------------------------------");
+        // }
+
         if (!testOnline) {
             IRPrinter irPrinter = new IRPrinter(filePath + "test.ll");
             irPrinter.runOnIRModule(irModule);

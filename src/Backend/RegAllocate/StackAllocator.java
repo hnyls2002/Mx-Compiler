@@ -6,6 +6,7 @@ import ASM.ASMInst.ASMCalcInst;
 import ASM.ASMInst.ASMLoadInst;
 import ASM.ASMInst.ASMStoreInst;
 import ASM.ASMOprand.Immediate;
+import ASM.ASMOprand.PhysicalReg;
 import ASM.ASMOprand.VirtualOffset;
 import Share.Pass.ASMPass.ASMFnPass;
 import Share.Pass.ASMPass.ASMModulePass;
@@ -53,12 +54,15 @@ public class StackAllocator implements ASMModulePass, ASMFnPass {
     public void runOnASMFn(ASMFn asmFn) {
         curFn = asmFn;
         totStackUse = curFn.spilledArgMax + curFn.stackRegCnt + curFn.allocaCnt + curFn.phiStackCnt + 1;
-
-        ASMCalcInst loSP = (ASMCalcInst) curFn.blockList.get(0).instList.get(0);
-
         int totBlock = curFn.blockList.size();
-        int totInst = curFn.blockList.get(totBlock - 1).instList.size();
-        ASMCalcInst upSP = (ASMCalcInst) curFn.blockList.get(totBlock - 1).instList.get(totInst - 2);
+
+        ASMCalcInst loSP = null, upSP = null;
+        for (var inst : curFn.blockList.get(0).instList)
+            if (inst instanceof ASMCalcInst cInst && cInst.rd == PhysicalReg.getPhyReg("sp"))
+                loSP = cInst;
+        for (var inst : curFn.blockList.get(totBlock - 1).instList)
+            if (inst instanceof ASMCalcInst cInst && cInst.rd == PhysicalReg.getPhyReg("sp"))
+                upSP = cInst;
 
         loSP.imm = new Immediate(-totStackUse * 4);
         upSP.imm = new Immediate(totStackUse * 4);

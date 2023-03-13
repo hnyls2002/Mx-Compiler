@@ -716,7 +716,7 @@ public class IRBuilder implements ASTVisitor {
                 Boolean isMemberFunction = cur.whoseMember != null;
                 it.funcCall.accept(this);
                 if (isMemberFunction)
-                    ((CallInst) it.funcCall.irValue).oprandList.add(0, it.expr.irValue);
+                    ((CallInst) it.funcCall.irValue).insertOprand(0, it.expr.irValue);
                 it.irValue = it.funcCall.irValue;
             }
         }

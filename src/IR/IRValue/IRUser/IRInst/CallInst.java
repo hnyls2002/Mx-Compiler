@@ -12,7 +12,8 @@ public class CallInst extends IRBaseInst {
 
     public CallInst(IRFnType calledFnType, ArrayList<IRBaseValue> argList, IRBasicBlock block) {
         super(calledFnType.retType);
-        this.oprandList = argList;
+        for (int i = 0; i < argList.size(); ++i)
+            appendOprand(argList.get(i));
         this.calledFnType = calledFnType;
         block.addInst(this);
     }
@@ -21,7 +22,7 @@ public class CallInst extends IRBaseInst {
         super(calledFnType.retType);
         this.calledFnType = calledFnType;
         for (var arg : argList)
-            this.oprandList.add(arg);
+            appendOprand(arg);
         block.addInst(this);
     }
 
@@ -29,9 +30,11 @@ public class CallInst extends IRBaseInst {
     public String defToString() {
         var ret = "call " + valueType.toString() + ' ';
         ret += calledFnType.getFnName() + "(";
-        for (var arg : oprandList)
+        for (int i = 0; i < getOprandNum(); ++i) {
+            var arg = getOprand(i);
             ret += arg.useToStringWithType() + ", ";
-        if (!oprandList.isEmpty())
+        }
+        if (getOprandNum() != 0)
             ret = ret.substring(0, ret.length() - 2);
         ret += ")";
         return ret;

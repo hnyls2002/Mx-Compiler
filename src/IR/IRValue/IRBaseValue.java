@@ -1,18 +1,34 @@
 package IR.IRValue;
 
+import java.util.ArrayList;
+
 import ASM.ASMOprand.BaseOprand;
 import IR.IRType.IRType;
+import IR.IRValue.IRUser.IRBaseUser;
 import Share.MyException;
 
 public abstract class IRBaseValue {
     public IRType valueType;
     public String nameString;
+    public ArrayList<IRBaseUser> userList = new ArrayList<>();
 
     // for assembly
     public BaseOprand asOprand;
 
     public IRBaseValue(IRType valueType) {
         this.valueType = valueType;
+    }
+
+    public void replaceAllUseWith(IRBaseValue nVal) {
+        if (this == nVal)
+            return;
+        ArrayList<IRBaseUser> tmpUserList = new ArrayList<>(userList);
+        for (var user : tmpUserList) {
+            for (int i = 0; i < user.getOprandNum(); ++i) {
+                if (user.getOprand(i) == this)
+                    user.setOprand(i, nVal);
+            }
+        }
     }
 
     @Override

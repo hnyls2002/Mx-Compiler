@@ -23,7 +23,6 @@ import ASM.ASMOprand.VirtualReg;
 import ASM.ASMOprand.ASMGlobal.ASMGlobalData;
 import IR.IRModule;
 import IR.IRType.IRArrayType;
-import IR.IRType.IRFnType;
 import IR.IRType.IRIntType;
 import IR.IRType.IRStructType;
 import IR.IRType.IRVoidType;
@@ -110,20 +109,13 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         irfn.blockList.forEach(this::runOnIRBlock);
         runOnIRBlock(irfn.retBlock);
 
-        // ret block, load ra, upper sp
-        int siz = cur.block.instList.size();
-        cur.block.instList.remove(siz - 1);
-        if (!(((IRFnType) irfn.valueType).retType instanceof IRVoidType)) {
-            ASMLoadInst ld = (ASMLoadInst) cur.block.instList.get(siz - 2);
-            new ASMMoveInst(PhysicalReg.getPhyReg("a0"), ld.rd, cur.block);
-        }
-
         // backup callee-save registers
         // for (var toSave : PhysicalReg.calleeSavedReg) {
         // var savePos = backupReg.get(toSave);
         // new ASMMoveInst(toSave, savePos, cur.block);
         // }
 
+        // ret block, load ra, upper sp
         new ASMLoadInst(ra, sp, new VirtualOffset(SPLabel.ra, 0), BitWidth.w, cur.block);
         new ASMCalcInst(BinaryImOp.addi, sp, sp, null, new Immediate(0), cur.block);
         new ASMRetInst(cur.block);
@@ -176,7 +168,10 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
     @Override
     public void visit(CallInst inst) {
         // all imm should be in register to pass arguments
-        inst.oprandList.forEach(arg -> ifConstThenLoad(arg, cur.block));
+        for (int i = 0; i < inst.getOprandNum(); ++i) {
+            var arg = inst.getOprand(i);
+            ifConstThenLoad(arg, cur.block);
+        }
 
         // a0 - a7
         for (int i = 0; i < Math.min(inst.getOprandNum(), RV32.MAX_ARG_NUM); ++i) {
@@ -272,7 +267,10 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     @Override
     public void visit(RetInst inst) {
-        new ASMRetInst(cur.block);
+        if (inst.getOprandNum() != 0) {
+            ifConstThenLoad(inst.getOprand(0), cur.block);
+            new ASMMoveInst(PhysicalReg.getPhyReg("a0"), (Register) inst.getOprand(0).asOprand, cur.block);
+        }
     }
 
     @Override
@@ -297,17 +295,37 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     // when val could be intConst, null
     private void ifConstThenLoad(IRBaseValue val, ASMBlock loadBlock) {
-        if (val.asOprand == null) {
-            if (val instanceof IntConst t) {
-                Register rd = new VirtualReg(cur.fn);
-                new ASMLiInst(rd, new Immediate(t.constValue), loadBlock);
-                val.asOprand = rd;
-            } else if (val instanceof NullConst) {
-                Register rd = new VirtualReg(cur.fn);
-                new ASMLiInst(rd, new Immediate(0), loadBlock);
-                val.asOprand = rd;
-            } else
-                throw new MyException("Unknow value (no oprand)");
+        // if (val.asOprand == null) {
+        // if (val instanceof IntConst t) {
+        // Register rd = new VirtualReg(cur.fn);
+        // new ASMLiInst(rd, new Immediate(t.constValue), loadBlock);
+        // val.asOprand = rd;
+        // } else if (val instanceof NullConst) {
+        // Register rd = new VirtualReg(cur.fn);
+        // new ASMLiInst(rd, new Immediate(0), loadBlock);
+        // val.asOprand = rd;
+        // } else
+        // throw new MyException("Unknow value (no oprand)");
+        // }
+
+        /*
+         * When several const value are actually referring to the same location,
+         * then the asOprand is the same, which means
+         * at position 1, the constant value is loaded into a register,
+         * at position 2, I guess the register containing the constant value,
+         * however, position 2 may run before position 1.
+         * 
+         * remove the null check
+         */
+
+        if (val instanceof IntConst t) {
+            Register rd = new VirtualReg(cur.fn);
+            new ASMLiInst(rd, new Immediate(t.constValue), loadBlock);
+            val.asOprand = rd;
+        } else if (val instanceof NullConst) {
+            Register rd = new VirtualReg(cur.fn);
+            new ASMLiInst(rd, new Immediate(0), loadBlock);
+            val.asOprand = rd;
         }
     }
 
