@@ -8,6 +8,8 @@ public class ASMJInst extends ASMBaseInst {
 
     public ASMJInst(ASMBlock jumpBlock, ASMBlock block) {
         this.jumpBlock = jumpBlock;
+        block.sucList.add(jumpBlock);
+        jumpBlock.preList.add(block);
         block.instList.add(this);
     }
 

@@ -11,6 +11,8 @@ public class ASMBrInst extends ASMBaseInst {
     public ASMBrInst(Register condition, ASMBlock trueBlock, ASMBlock curBlock) {
         this.rs1 = condition;
         this.trueBlock = trueBlock;
+        curBlock.sucList.add(trueBlock);
+        trueBlock.preList.add(curBlock);
         curBlock.instList.add(this);
     }
 
