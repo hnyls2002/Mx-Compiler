@@ -1,9 +1,10 @@
 package Middleend;
 
-import java.util.HashMap;
+import java.util.HashSet;
 
 import IR.IRModule;
 import IR.IRType.IRType.IRTypeId;
+import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.IRBaseInst;
@@ -13,15 +14,19 @@ import Share.Pass.IRPass.IRFnPass;
 import Share.Pass.IRPass.IRModulePass;
 
 public class IRRenamer implements IRModulePass, IRFnPass, IRBlockPass {
+    private HashSet<IRBaseValue> renamed = new HashSet<>();
+
     private class Allocator {
         public int cnt = 0;
 
-        public String getNewName() {
-            return String.valueOf(cnt++);
+        public void rename(IRBaseValue value) {
+            if (!renamed.contains(value)) {
+                value.setName(String.valueOf(cnt++));
+                renamed.add(value);
+            }
         }
     }
 
-    HashMap<IRFn, Allocator> fnAllocatorMap = new HashMap<>();
     Allocator curAllocator;
 
     @Override
@@ -32,18 +37,15 @@ public class IRRenamer implements IRModulePass, IRFnPass, IRBlockPass {
 
     @Override
     public void runOnIRFn(IRFn fn) {
-        if (!fnAllocatorMap.containsKey(fn))
-            fnAllocatorMap.put(fn, new Allocator());
-        curAllocator = fnAllocatorMap.get(fn);
-        fn.paraList.forEach(para -> para.setName(curAllocator.getNewName()));
+        curAllocator = new Allocator();
+        fn.paraList.forEach(curAllocator::rename);
         fn.blockList.forEach(this::runOnIRBlock);
         runOnIRBlock(fn.retBlock);
     }
 
     @Override
     public void runOnIRBlock(IRBasicBlock block) {
-        if (block.nameString == null)
-            block.setName(curAllocator.getNewName());
+        curAllocator.rename(block);
         block.phiList.forEach(this::renameInst);
         block.instList.forEach(this::renameInst);
     }
@@ -51,14 +53,10 @@ public class IRRenamer implements IRModulePass, IRFnPass, IRBlockPass {
     private void renameInst(IRBaseInst inst) {
         if (inst.valueType.typeId == IRTypeId.VoidTypeId)
             return;
-        if (inst instanceof MoveInst mvInst) {
-            if (mvInst.getOprand(0).nameString == null)
-                mvInst.getOprand(0).setName(curAllocator.getNewName());
-            return;
-        }
-
-        if (inst.nameString == null)
-            inst.setName(curAllocator.getNewName());
+        if (inst instanceof MoveInst mvInst)
+            curAllocator.rename(mvInst.getOprand(0));
+        else
+            curAllocator.rename(inst);
     }
 
 }

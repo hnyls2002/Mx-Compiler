@@ -14,12 +14,11 @@ public class Middleender {
             throws FileNotFoundException {
         IRBuilder irBuilder = new IRBuilder(ast, gScope);
         IRModule irModule = irBuilder.buildIR();
-        IRRenamer renamer = new IRRenamer();
 
         new DominateTree().runOnIRModule(irModule);
         new Mem2Reg().runOnIRModule(irModule);
 
-        renamer.runOnIRModule(irModule);
+        new IRRenamer().runOnIRModule(irModule);
 
         // // -------------- debug --------------------
         // var root = irModule.globalFnList.get(0).blockList.get(0);
@@ -48,7 +47,7 @@ public class Middleender {
 
         new PhiElimination().runOnIRModule(irModule);
 
-        renamer.runOnIRModule(irModule);
+        new IRRenamer().runOnIRModule(irModule);
         if (!testOnline) {
             IRPrinter irPrinter = new IRPrinter(filePath + "test_fake.ll");
             irPrinter.runOnIRModule(irModule);
