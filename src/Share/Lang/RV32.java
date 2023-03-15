@@ -12,7 +12,7 @@ public class RV32 {
     }
 
     public enum SPLabel {
-        alloca, virtualReg, putSpilledArg, getSpilledArg, phi, ra
+        spilledReg, putSpilledArg, getSpilledArg, ra
     }
 
     public interface ASMOp {

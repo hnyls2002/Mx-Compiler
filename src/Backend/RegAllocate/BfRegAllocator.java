@@ -28,8 +28,8 @@ public class BfRegAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass {
 
     private PhysicalReg regAllocateRead(Register reg, PhysicalReg a) {
         if (reg instanceof VirtualReg t) {
-            cur.fn.stackRegCnt = Math.max(cur.fn.stackRegCnt, t.id + 1);
-            new ASMLoadInst(a, sp, new VirtualOffset(SPLabel.virtualReg, t.id), BitWidth.w, cur.block);
+            cur.fn.spilledRegCnt = Math.max(cur.fn.spilledRegCnt, t.id + 1);
+            new ASMLoadInst(a, sp, new VirtualOffset(SPLabel.spilledReg, t.id), BitWidth.w, cur.block);
             return a;
         }
         return (PhysicalReg) reg;
@@ -37,8 +37,8 @@ public class BfRegAllocator implements ASMModulePass, ASMFnPass, ASMBlockPass {
 
     private PhysicalReg regAllocateWrite(Register reg, PhysicalReg a) {
         if (reg instanceof VirtualReg t) {
-            cur.fn.stackRegCnt = Math.max(cur.fn.stackRegCnt, t.id + 1);
-            new ASMStoreInst(sp, a, new VirtualOffset(SPLabel.virtualReg, t.id), BitWidth.w, cur.block);
+            cur.fn.spilledRegCnt = Math.max(cur.fn.spilledRegCnt, t.id + 1);
+            new ASMStoreInst(sp, a, new VirtualOffset(SPLabel.spilledReg, t.id), BitWidth.w, cur.block);
             return a;
         }
         return (PhysicalReg) reg;

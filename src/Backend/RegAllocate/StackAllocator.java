@@ -17,10 +17,6 @@ public class StackAllocator implements ASMModulePass, ASMFnPass {
      * --------
      * ra
      * --------
-     * phi
-     * --------
-     * alloc
-     * --------
      * vreg
      * --------
      * arg
@@ -33,11 +29,9 @@ public class StackAllocator implements ASMModulePass, ASMFnPass {
     private int stackAllocate(Immediate imm) {
         if (imm instanceof VirtualOffset vOffset) {
             int immInt = switch (vOffset.label) {
-                case alloca -> curFn.spilledArgMax + curFn.stackRegCnt + vOffset.rank;
                 case getSpilledArg -> totStackUse + vOffset.rank;
                 case putSpilledArg -> vOffset.rank;
-                case phi -> curFn.spilledArgMax + curFn.stackRegCnt + curFn.allocaCnt + vOffset.rank;
-                case virtualReg -> curFn.spilledArgMax + vOffset.rank;
+                case spilledReg -> curFn.spilledArgCnt + vOffset.rank;
                 case ra -> totStackUse - 1;
             };
             return immInt * 4;
@@ -53,7 +47,7 @@ public class StackAllocator implements ASMModulePass, ASMFnPass {
     @Override
     public void runOnASMFn(ASMFn asmFn) {
         curFn = asmFn;
-        totStackUse = curFn.spilledArgMax + curFn.stackRegCnt + curFn.allocaCnt + curFn.phiStackCnt + 1;
+        totStackUse = curFn.spilledArgCnt + curFn.spilledRegCnt + 1;
         int totBlock = curFn.blockList.size();
 
         ASMCalcInst loSP = null, upSP = null;

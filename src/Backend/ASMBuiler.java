@@ -1,5 +1,7 @@
 package Backend;
 
+import java.util.HashMap;
+
 import org.antlr.v4.runtime.misc.Pair;
 
 import ASM.ASMBlock;
@@ -31,7 +33,6 @@ import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
 import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
-import IR.IRValue.IRUser.IRInst.AllocaInst;
 import IR.IRValue.IRUser.IRInst.BinaryInst;
 import IR.IRValue.IRUser.IRInst.BrInst;
 import IR.IRValue.IRUser.IRInst.CallInst;
@@ -41,7 +42,6 @@ import IR.IRValue.IRUser.IRInst.IcmpInst;
 import IR.IRValue.IRUser.IRInst.JumpInst;
 import IR.IRValue.IRUser.IRInst.LoadInst;
 import IR.IRValue.IRUser.IRInst.MoveInst;
-import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
 import Share.MyException;
@@ -98,22 +98,22 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         }
 
         // save callee-save registers
-        // HashMap<Register, Register> backupReg = new HashMap<>();
-        // for (var toSave : PhysicalReg.calleeSavedReg) {
-        // var savePos = new VirtualReg();
-        // backupReg.put(toSave, savePos);
-        // new ASMMoveInst(savePos, toSave, cur.block);
-        // }
+        HashMap<Register, Register> backupReg = new HashMap<>();
+        for (var toSave : PhysicalReg.calleeSavedReg) {
+            var savePos = new VirtualReg(cur.fn);
+            backupReg.put(toSave, savePos);
+            new ASMMoveInst(savePos, toSave, cur.block);
+        }
 
         // runOnBlock
         irfn.blockList.forEach(this::runOnIRBlock);
         runOnIRBlock(irfn.retBlock);
 
         // backup callee-save registers
-        // for (var toSave : PhysicalReg.calleeSavedReg) {
-        // var savePos = backupReg.get(toSave);
-        // new ASMMoveInst(toSave, savePos, cur.block);
-        // }
+        for (var toSave : PhysicalReg.calleeSavedReg) {
+            var savePos = backupReg.get(toSave);
+            new ASMMoveInst(toSave, savePos, cur.block);
+        }
 
         // ret block, load ra, upper sp
         new ASMLoadInst(ra, sp, new VirtualOffset(SPLabel.ra, 0), BitWidth.w, cur.block);
@@ -125,10 +125,6 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
     public void runOnIRBlock(IRBasicBlock irBlock) {
         cur.block = (ASMBlock) irBlock.asOprand;
         irBlock.instList.forEach(inst -> inst.accept(this));
-    }
-
-    @Override
-    public void visit(AllocaInst inst) {
     }
 
     @Override
@@ -186,7 +182,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
             var value = (Register) inst.getOprand(i).asOprand;
             new ASMStoreInst(sp, value, vOffset, BitWidth.w, cur.block);
         }
-        cur.fn.spilledArgMax = Math.max(cur.fn.spilledArgMax, Math.max(inst.getOprandNum() - RV32.MAX_ARG_NUM, 0));
+        cur.fn.spilledArgCnt = Math.max(cur.fn.spilledArgCnt, Math.max(inst.getOprandNum() - RV32.MAX_ARG_NUM, 0));
 
         new ASMCallInst(inst.calledFnType.fnNameString, inst.getOprandNum(), cur.block);
 
@@ -351,7 +347,4 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         new ASMMoveInst(des, src, cur.block);
     }
 
-    @Override
-    public void visit(PhiInst inst) {
-    }
 }

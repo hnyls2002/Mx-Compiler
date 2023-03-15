@@ -3,7 +3,6 @@ package Backend;
 import ASM.ASMBlock;
 import ASM.ASMFn;
 import ASM.ASMModule;
-import ASM.ASMOprand.VirtualOffset;
 import ASM.ASMOprand.VirtualReg;
 import ASM.ASMOprand.ASMGlobal.ASMConstStr;
 import ASM.ASMOprand.ASMGlobal.ASMGlobalVar;
@@ -12,7 +11,6 @@ import IR.IRType.IRVoidType;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRVReg;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
-import IR.IRValue.IRUser.IRInst.AllocaInst;
 import IR.IRValue.IRUser.IRInst.BinaryInst;
 import IR.IRValue.IRUser.IRInst.BrInst;
 import IR.IRValue.IRUser.IRInst.CallInst;
@@ -25,7 +23,6 @@ import IR.IRValue.IRUser.IRInst.MoveInst;
 import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
-import Share.Lang.RV32.SPLabel;
 import Share.Pass.IRPass.IRBlockPass;
 import Share.Pass.IRPass.IRFnPass;
 import Share.Pass.IRPass.IRModulePass;
@@ -103,17 +100,8 @@ public class ASMPreHandler implements IRModulePass, IRFnPass, IRBlockPass, IRIns
     }
 
     @Override
-    public void visit(AllocaInst inst) {
-        inst.asOprand = new VirtualOffset(SPLabel.alloca, cur.fn.allocaCnt++);
-    }
-
-    @Override
     public void visit(BinaryInst inst) {
         inst.asOprand = new VirtualReg(cur.fn);
-    }
-
-    @Override
-    public void visit(BrInst inst) {
     }
 
     @Override
@@ -121,11 +109,6 @@ public class ASMPreHandler implements IRModulePass, IRFnPass, IRBlockPass, IRIns
         // preload the return value
         if (!(inst.calledFnType.retType instanceof IRVoidType))
             inst.asOprand = new VirtualReg(cur.fn);
-    }
-
-    @Override
-    public void visit(CastInst inst) {
-        // NO USE ?
     }
 
     @Override
@@ -144,18 +127,6 @@ public class ASMPreHandler implements IRModulePass, IRFnPass, IRBlockPass, IRIns
     }
 
     @Override
-    public void visit(RetInst inst) {
-    }
-
-    @Override
-    public void visit(StoreInst inst) {
-    }
-
-    @Override
-    public void visit(JumpInst inst) {
-    }
-
-    @Override
     public void visit(MoveInst inst) {
         var dest = inst.getOprand(0);
 
@@ -169,7 +140,23 @@ public class ASMPreHandler implements IRModulePass, IRFnPass, IRBlockPass, IRIns
     }
 
     @Override
-    public void visit(PhiInst inst) {
+    public void visit(RetInst inst) {
+    }
+
+    @Override
+    public void visit(JumpInst inst) {
+    }
+
+    @Override
+    public void visit(BrInst inst) {
+    }
+
+    @Override
+    public void visit(StoreInst inst) {
+    }
+
+    @Override
+    public void visit(CastInst inst) {
     }
 
 }

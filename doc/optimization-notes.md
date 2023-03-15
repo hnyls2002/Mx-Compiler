@@ -159,14 +159,17 @@ split critical edge 就是为了把新加的指令放到edge上面，而不是�
 
 ### 图染色
 
-##### 图染色的 calling convention
-- call 指令会用到argument register ($a_x$)， 这是use
-- 跨越call依然活跃的变量，希望全部是callee save，所以call指令会def所有的caller save（和跨越的变量冲突）
-- 每个函数的开头存下callee save register，函数结束的时候恢复，用 move 的方式来copy到一个新的虚拟寄存器，不用做栈分配。
-  **TO THINK :**
-  - 多用move到虚拟寄存器的思想，反正后面看情况溢出到栈上。
-  - 虚拟栈空间分配的思想(现在用的stackOffset)和寄存器结构改变(统一的结构，rd，rs1，rs2)
+##### 图染色的 calling convention (special attention !)
 
+- call 指令会用到argument register ($a_x$)， 这就是传统的use
+- **这里只做callee save，要保证caller可以自由地使用一些寄存器**，callee需要主动保存和恢复。（用move inst）
+- **要保证callee可以自由地使用caller save的寄存器**，caller本来是需要将所有的caller save寄存器保存再恢复的，但是其实只有**跨越调用活跃的变量**分配到caller save上面的时候才会有问题，不妨让**所有的跨越活跃的变量和caller save寄存器相冲突**。
+  - 如何让它们相冲突：在callInst上面def上所有的caller save寄存器，这样build冲突图的时候会连边。
+
+##### physical register
+度数要记得设置成inf。
+##### function arguments
+先move到临时虚拟寄存器上（物理寄存器的liveness不能太大）
 ##### 变量的活跃性
 
 $$
@@ -177,3 +180,7 @@ $$
 $$
 
 按照虎书图染色就好。
+
+##### 合并溢出的节点
+
+- 对于spilled到栈上的点，可以再次合并：不同的spill可能可以用到同一个栈上的位置，这样可以减少栈的开销。
