@@ -32,7 +32,7 @@ public class LivenessAnalysis implements ASMFnPass {
         asmFn.blockList.forEach(ASMBlock::getDefUseSet);
 
         // calculate block's liveness
-        while (workList.isEmpty()) {
+        while (!workList.isEmpty()) {
             var curBlock = workList.poll();
             isInList.remove(curBlock);
 
