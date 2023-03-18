@@ -173,7 +173,7 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
             var live = new HashSet<Register>(block.liveOutSet);
             for (int i = block.instList.size() - 1; i >= 0; --i) {
                 var inst = block.instList.get(i);
-                if (inst instanceof ASMMoveInst mvInst) {
+                if (inst instanceof ASMMoveInst mvInst && mvInst.rs1 != PhysicalReg.getPhyReg("zero")) {
                     live.removeAll(mvInst.getUse());
                     HashSet<Register> mvReg = new HashSet<>(mvInst.getUse());
                     mvReg.addAll(mvInst.getDef());

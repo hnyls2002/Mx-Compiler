@@ -1,5 +1,6 @@
 package Backend;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.antlr.v4.runtime.misc.Pair;
@@ -43,7 +44,9 @@ import IR.IRValue.IRUser.IRInst.MoveInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
 import Share.MyException;
+import Share.Lang.LLVMIR;
 import Share.Lang.RV32;
+import Share.Lang.LLVMIR.ICMPOP;
 import Share.Lang.RV32.ASMOp;
 import Share.Lang.RV32.BinaryImOp;
 import Share.Lang.RV32.BinaryRegOp;
@@ -129,47 +132,84 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     @Override
     public void visit(BinaryInst inst) {
-        ASMOp op = switch (inst.opCode) {
-            case add -> BinaryRegOp.add;
-            case sub -> BinaryRegOp.sub;
-            case mul -> BinaryRegOp.mul;
-            case sdiv -> BinaryRegOp.div;
-            case srem -> BinaryRegOp.rem;
-            case shl -> BinaryRegOp.sll;
-            case ashr -> BinaryRegOp.sra;
-            case or -> BinaryRegOp.or;
-            case and -> BinaryRegOp.and;
-            case xor -> BinaryRegOp.xor;
+        // if the opcode is commutative, swap the const to the second oprand
+        inst.swapOprandForConst();
+
+        Register val1 = loadVal(inst.getOprand(0));
+        var val2 = lazyLoadVal(inst.getOprand(1));
+        Register rd = (Register) inst.asOprand;
+
+        var op = switch (inst.opCode) {
+            case add -> val2 instanceof Immediate ? BinaryImOp.addi : BinaryRegOp.add;
+            case or -> val2 instanceof Immediate ? BinaryImOp.ori : BinaryRegOp.or;
+            case and -> val2 instanceof Immediate ? BinaryImOp.andi : BinaryRegOp.and;
+            case xor -> val2 instanceof Immediate ? BinaryImOp.xori : BinaryRegOp.xor;
+            case shl -> val2 instanceof Immediate ? BinaryImOp.slli : BinaryRegOp.sll;
+            case ashr -> val2 instanceof Immediate ? BinaryImOp.srai : BinaryRegOp.sra;
+            case sub -> {
+                if (val2 instanceof Immediate imm && RV32.inLowerImmRange(-imm.immInt)) {
+                    val2 = new Immediate(-imm.immInt);
+                    yield BinaryImOp.addi;
+                } else {
+                    val2 = loadVal(inst.getOprand(1));
+                    yield BinaryRegOp.sub;
+                }
+            }
+            default -> {
+                val2 = loadVal(inst.getOprand(1));
+                yield switch (inst.opCode) {
+                    case mul -> BinaryRegOp.mul;
+                    case sdiv -> BinaryRegOp.div;
+                    case srem -> BinaryRegOp.rem;
+                    default -> throw new MyException("Hello World!");
+                };
+            }
         };
-        ifConstThenLoad(inst.getOprand(0), cur.block);
-        ifConstThenLoad(inst.getOprand(1), cur.block);
-        Register rd = (Register) inst.asOprand, rs1 = (Register) inst.getOprand(0).asOprand,
-                rs2 = (Register) inst.getOprand(1).asOprand;
-        new ASMCalcInst(op, rd, rs1, rs2, null, cur.block);
+        if (val2 instanceof Immediate)
+            new ASMCalcInst(op, rd, val1, null, (Immediate) val2, cur.block);
+        else
+            new ASMCalcInst(op, rd, val1, (Register) val2, null, cur.block);
     }
 
     @Override
     public void visit(BrInst inst) {
-        ifConstThenLoad(inst.getOprand(0), cur.block);
-        if (inst.getOprand(0) instanceof IcmpInst icmpInst) {
-            ifConstThenLoad(icmpInst.getOprand(0), cur.block);
-            ifConstThenLoad(icmpInst.getOprand(1), cur.block);
-            var rs1 = (Register) icmpInst.getOprand(0).asOprand;
-            var rs2 = (Register) icmpInst.getOprand(1).asOprand;
-            var trueBlock = (ASMBlock) inst.getOprand(1).asOprand;
-            switch (icmpInst.opCode) {
-                case eq -> new ASMBrInst(BranchOp.beq, rs1, rs2, trueBlock, cur.block);
-                case ne -> new ASMBrInst(BranchOp.bne, rs1, rs2, trueBlock, cur.block);
-                case slt -> new ASMBrInst(BranchOp.blt, rs1, rs2, trueBlock, cur.block);
-                case sgt -> new ASMBrInst(BranchOp.bgt, rs1, rs2, trueBlock, cur.block);
-                case sle -> new ASMBrInst(BranchOp.ble, rs1, rs2, trueBlock, cur.block);
-                case sge -> new ASMBrInst(BranchOp.bge, rs1, rs2, trueBlock, cur.block);
-            }
-        } else {
-            new ASMBrInst(BranchOp.bne, (Register) inst.getOprand(0).asOprand, zero,
-                    (ASMBlock) inst.getOprand(1).asOprand,
-                    cur.block);
+        var block1 = (ASMBlock) inst.getOprand(1).asOprand;
+        var block2 = (ASMBlock) inst.getOprand(2).asOprand;
+
+        // if the condition is constant, then jump to the corresponding block
+        if (inst.getOprand(0).asOprand instanceof Immediate imm) {
+            new ASMJInst(imm.immInt == 0 ? block2 : block1, cur.block);
+            return;
         }
+
+        if (inst.getOprand(0) instanceof IcmpInst icmpInst) {
+            // two immediate -> constant folding : may be useless after IR's optimization
+            if (icmpInst.getOprand(0).asOprand instanceof Immediate imm1
+                    && icmpInst.getOprand(1).asOprand instanceof Immediate imm2) {
+                boolean res = switch (icmpInst.opCode) {
+                    case eq -> imm1.immInt == imm2.immInt;
+                    case ne -> imm1.immInt != imm2.immInt;
+                    case sge -> imm1.immInt >= imm2.immInt;
+                    case sgt -> imm1.immInt > imm2.immInt;
+                    case sle -> imm1.immInt <= imm2.immInt;
+                    case slt -> imm1.immInt < imm2.immInt;
+                };
+                new ASMJInst(res ? block1 : block2, cur.block);
+                return;
+            }
+            var rs1 = (Register) loadVal(icmpInst.getOprand(0));
+            var rs2 = (Register) loadVal(icmpInst.getOprand(1));
+            switch (icmpInst.opCode) {
+                case eq -> new ASMBrInst(BranchOp.beq, rs1, rs2, block1, cur.block);
+                case ne -> new ASMBrInst(BranchOp.bne, rs1, rs2, block1, cur.block);
+                case slt -> new ASMBrInst(BranchOp.blt, rs1, rs2, block1, cur.block);
+                case sgt -> new ASMBrInst(BranchOp.bgt, rs1, rs2, block1, cur.block);
+                case sle -> new ASMBrInst(BranchOp.ble, rs1, rs2, block1, cur.block);
+                case sge -> new ASMBrInst(BranchOp.bge, rs1, rs2, block1, cur.block);
+            }
+        } else
+            new ASMBrInst(BranchOp.bne, (Register) inst.getOprand(0).asOprand, zero, block1, cur.block);
+
         new ASMJInst((ASMBlock) inst.getOprand(2).asOprand, cur.block);
     }
 
@@ -181,23 +221,20 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
     @Override
     public void visit(CallInst inst) {
         // all imm should be in register to pass arguments
-        for (int i = 0; i < inst.getOprandNum(); ++i) {
-            var arg = inst.getOprand(i);
-            ifConstThenLoad(arg, cur.block);
-        }
+        ArrayList<Register> args = new ArrayList<>();
+        for (int i = 0; i < inst.getOprandNum(); ++i)
+            args.add(loadVal(inst.getOprand(i)));
 
         // a0 - a7
         for (int i = 0; i < Math.min(inst.getOprandNum(), RV32.MAX_ARG_NUM); ++i) {
             var rd = PhysicalReg.getPhyReg("a" + i);
-            var rs = (Register) inst.getOprand(i).asOprand;
-            new ASMMoveInst(rd, rs, cur.block);
+            new ASMMoveInst(rd, args.get(i), cur.block);
         }
 
         // on stack
         for (int i = RV32.MAX_ARG_NUM; i < inst.getOprandNum(); ++i) {
             var vOffset = new VirtualOffset(SPLabel.putSpilledArg, i - RV32.MAX_ARG_NUM);
-            var value = (Register) inst.getOprand(i).asOprand;
-            new ASMStoreInst(sp, value, vOffset, BitWidth.w, cur.block);
+            new ASMStoreInst(sp, args.get(i), vOffset, BitWidth.w, cur.block);
         }
         cur.fn.spilledArgCnt = Math.max(cur.fn.spilledArgCnt, Math.max(inst.getOprandNum() - RV32.MAX_ARG_NUM, 0));
 
@@ -222,14 +259,25 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
             new ASMLiInst(rs2, imm, cur.block);
             new ASMCalcInst(BinaryRegOp.add, rd, startAddr, rs2, null, cur.block);
         } else { // array
-            Register rd = (Register) inst.asOprand, rs2 = new VirtualReg(cur.fn);
-            ifConstThenLoad(inst.getIdx(0), cur.block);
-            Register id = (Register) inst.getIdx(0).asOprand;
-            // ----------------- add twice = mul * 4 --------------------
-            new ASMCalcInst(BinaryRegOp.add, rs2, id, id, null, cur.block);
-            new ASMCalcInst(BinaryRegOp.add, rs2, rs2, rs2, null, cur.block);
-            // ----------------- add twice = mul * 4 --------------------
-            new ASMCalcInst(BinaryRegOp.add, rd, startAddr, rs2, null, cur.block);
+
+            Register rd = (Register) inst.asOprand;
+            if (inst.getIdx(0).asOprand instanceof Register idx) {
+                var id = new VirtualReg(cur.fn);
+                // id = (idx + idx) + (idx + idx) <==> id = idx * 4
+                new ASMCalcInst(BinaryRegOp.add, id, idx, idx, null, cur.block);
+                new ASMCalcInst(BinaryRegOp.add, id, id, id, null, cur.block);
+                new ASMCalcInst(BinaryRegOp.add, rd, startAddr, id, null, cur.block);
+            } else {
+                int offset = ((IntConst) inst.getIdx(0)).constValue * 4;
+                if (RV32.inLowerImmRange(offset))
+                    new ASMCalcInst(BinaryImOp.addi, rd, startAddr, null, new Immediate(offset),
+                            cur.block);
+                else {
+                    var id = new VirtualReg(cur.fn);
+                    new ASMLiInst(id, new Immediate(offset), cur.block);
+                    new ASMCalcInst(BinaryRegOp.add, rd, startAddr, id, null, cur.block);
+                }
+            }
         }
     }
 
@@ -240,11 +288,18 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         if (inst.onlyInBranch)
             return;
 
-        ifConstThenLoad(inst.getOprand(0), cur.block);
-        ifConstThenLoad(inst.getOprand(1), cur.block);
-        Register rs1 = (Register) inst.getOprand(0).asOprand;
-        Register rs2 = (Register) inst.getOprand(1).asOprand;
         Register rd = (Register) inst.asOprand;
+        var rs1 = loadVal(inst.getOprand(0));
+        var val2 = lazyLoadVal(inst.getOprand(1));
+
+        if (inst.opCode == ICMPOP.slt && val2 instanceof Immediate imm) {
+            new ASMCalcInst(BinaryImOp.slti, rd, rs1, null, imm, cur.block);
+            return;
+        }
+
+        var rs2 = val2 instanceof Register ? (Register) val2 : loadVal(inst.getOprand(1));
+
+        // can do constant folding, but it's useless
 
         switch (inst.opCode) {
             case slt -> new ASMCalcInst(BinaryRegOp.slt, rd, rs1, rs2, null, cur.block);
@@ -278,16 +333,15 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
     @Override
     public void visit(RetInst inst) {
         if (inst.getOprandNum() != 0) {
-            ifConstThenLoad(inst.getOprand(0), cur.block);
-            new ASMMoveInst(PhysicalReg.getPhyReg("a0"), (Register) inst.getOprand(0).asOprand, cur.block);
+            var reg = loadVal(inst.getOprand(0));
+            new ASMMoveInst(PhysicalReg.getPhyReg("a0"), reg, cur.block);
         }
     }
 
     @Override
     public void visit(StoreInst inst) {
-        ifConstThenLoad(inst.getOprand(0), cur.block);
+        Register rs = loadVal(inst.getOprand(0));
         var addr = toAddr(inst.getOprand(1).asOprand);
-        Register rs = (Register) inst.getOprand(0).asOprand;
         new ASMStoreInst(addr.a, rs, addr.b, BitWidth.w, cur.block);
     }
 
@@ -303,31 +357,38 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
             throw new MyException("if global then load wrong");
     }
 
-    // when val could be intConst, null
-    // private BaseOprand loadVal(IRBaseValue val, ASMBlock loadBlock) {
-    // if (val.asOprand instanceof Register)
-    // return val.asOprand;
-    // if (val.asOprand instanceof Immediate imm) {
-    // if (RV32.inLowerImmRange(imm.immInt))
-    // return val.asOprand;
-    // VirtualReg rd = new VirtualReg(cur.fn);
-    // new ASMLiInst(rd, imm, loadBlock);
-    // return rd;
-    // } else
-    // throw new MyException("load val error");
+    // when in range of imm, return the imm, else load the imm to a register
+    private BaseOprand lazyLoadVal(IRBaseValue val) {
+        if (val.asOprand instanceof Register)
+            return val.asOprand;
+        if (val.asOprand instanceof Immediate imm) {
+            if (imm.immInt == 0)
+                return zero;
+            if (RV32.inLowerImmRange(imm.immInt))
+                return val.asOprand;
+            VirtualReg rd = new VirtualReg(cur.fn);
+            new ASMLiInst(rd, imm, cur.block);
+            return rd;
+        } else
+            throw new MyException("lazy load val error");
 
-    // }
+    }
 
-    private void ifConstThenLoad(IRBaseValue val, ASMBlock loadBlock) {
-        if (val instanceof IntConst t) {
-            Register rd = new VirtualReg(cur.fn);
-            new ASMLiInst(rd, new Immediate(t.constValue), loadBlock);
-            val.asOprand = rd;
-        } else if (val instanceof NullConst) {
-            Register rd = new VirtualReg(cur.fn);
-            new ASMLiInst(rd, new Immediate(0), loadBlock);
-            val.asOprand = rd;
-        }
+    // direct load the const value to a register
+    private Register loadVal(IRBaseValue val) {
+        if (val.asOprand instanceof Register)
+            return (Register) val.asOprand;
+        if (val.asOprand instanceof Immediate imm) {
+            if (imm.immInt == 0)
+                return zero;
+            VirtualReg ret = new VirtualReg(cur.fn);
+            if (RV32.inLowerImmRange(imm.immInt))
+                new ASMCalcInst(BinaryImOp.addi, ret, zero, null, imm, cur.block);
+            else
+                new ASMLiInst(ret, imm, cur.block);
+            return ret;
+        } else
+            throw new MyException("load val error");
     }
 
     private Pair<Register, Immediate> toAddr(BaseOprand oprand) {
@@ -345,10 +406,8 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     @Override
     public void visit(MoveInst inst) {
-        ifConstThenLoad(inst.getOprand(0), cur.block);
-        ifConstThenLoad(inst.getOprand(1), cur.block);
         Register des = (Register) inst.getOprand(0).asOprand;
-        Register src = (Register) inst.getOprand(1).asOprand;
+        Register src = loadVal(inst.getOprand(1));
         new ASMMoveInst(des, src, cur.block);
     }
 

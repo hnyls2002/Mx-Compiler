@@ -1,9 +1,11 @@
 package IR.IRValue.IRUser.IRInst;
 
+import ASM.ASMOprand.Immediate;
 import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import Share.MyException;
+import Share.Lang.LLVMIR;
 import Share.Lang.LLVMIR.BOP;
 import Share.Visitors.IRInstVisitor;
 
@@ -21,6 +23,14 @@ public class BinaryInst extends IRBaseInst {
             throw new MyException(
                     "Binary " + this.opCode + " " + lType.formatType() + " " + rType.formatType() + " not match");
         block.addInst(this);
+    }
+
+    public void swapOprandForConst() {
+        if (LLVMIR.commutative.contains(opCode) && getOprand(0).asOprand instanceof Immediate) {
+            var tmp = getOprand(0);
+            setOprand(0, getOprand(1));
+            setOprand(1, tmp);
+        }
     }
 
     @Override
