@@ -11,13 +11,13 @@ public class IntConst extends BaseConstData {
     }
 
     @Override
-    public String useToString() {
+    public String formatUse() {
         return String.valueOf(constValue);
     }
 
     @Override
-    public String useToStringWithType() {
-        return valueType.toString() + ' ' + constValue;
+    public String formatUseWithType() {
+        return valueType.formatType() + ' ' + constValue;
     }
 
 }

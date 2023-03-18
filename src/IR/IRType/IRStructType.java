@@ -33,10 +33,10 @@ public class IRStructType extends IRType {
         return "%" + className;
     }
 
-    public String typeDefToString() {
+    public String formatDef() {
         var ret = "type { ";
         for (var fieldType : fieldTypeList)
-            ret += fieldType.toString() + ", ";
+            ret += fieldType.formatType() + ", ";
         if (!fieldTypeList.isEmpty())
             ret = ret.substring(0, ret.length() - 2);
         ret += " }";
@@ -44,7 +44,7 @@ public class IRStructType extends IRType {
     }
 
     @Override
-    public String toString() {
+    public String formatType() {
         return getClassName();
     }
 

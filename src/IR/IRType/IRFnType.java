@@ -36,10 +36,10 @@ public class IRFnType extends IRType {
     }
 
     @Override
-    public String toString() {
-        var ret = "declare " + retType.toString() + ' ' + getFnName() + '(';
+    public String formatType() {
+        var ret = "declare " + retType.formatType() + ' ' + getFnName() + '(';
         for (var para : paraTypeList)
-            ret += para.toString() + ", ";
+            ret += para.formatType() + ", ";
         if (!paraTypeList.isEmpty())
             ret = ret.substring(0, ret.length() - 2);
         ret += ')';

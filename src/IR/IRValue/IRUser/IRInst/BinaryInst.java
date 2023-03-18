@@ -19,14 +19,14 @@ public class BinaryInst extends IRBaseInst {
         IRType lType = lhs.valueType, rType = rhs.valueType;
         if (!lType.equals(rType))
             throw new MyException(
-                    "Binary " + this.opCode + " " + lType.toString() + " " + rType.toString() + " not match");
+                    "Binary " + this.opCode + " " + lType.formatType() + " " + rType.formatType() + " not match");
         block.addInst(this);
     }
 
     @Override
-    public String defToString() {
-        var ret = opCode.toString() + ' ' + valueType.toString() + ' ';
-        ret += getOprand(0).useToString() + ", " + getOprand(1).useToString();
+    public String formatDef() {
+        var ret = opCode.name() + ' ' + valueType.formatType() + ' ';
+        ret += getOprand(0).formatUse() + ", " + getOprand(1).formatUse();
         return ret;
     }
 

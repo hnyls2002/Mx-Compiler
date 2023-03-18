@@ -10,7 +10,7 @@ public abstract class BaseConstData extends BaseConstValue {
     }
 
     @Override
-    public String defToString() {
+    public String formatDef() {
         throw new MyException("int and null have no def");
     }
 }

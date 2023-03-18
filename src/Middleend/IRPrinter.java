@@ -33,7 +33,7 @@ public class IRPrinter implements IRModulePass, IRFnPass, IRBlockPass {
     public void runOnIRModule(IRModule irModule) {
         System.out.print(ExternInfo.getExternInfo());
         System.out.print('\n');
-        irModule.builtinFnList.forEach(fnType -> System.out.println(fnType.toString()));
+        irModule.builtinFnList.forEach(fnType -> System.out.println(fnType.formatType()));
         System.out.print('\n');
         irModule.classList.forEach(this::printClassDef);
         if (!irModule.classList.isEmpty())
@@ -52,7 +52,7 @@ public class IRPrinter implements IRModulePass, IRFnPass, IRBlockPass {
 
     @Override
     public void runOnIRFn(IRFn fn) {
-        System.out.print(fn.defToString());
+        System.out.print(fn.formatDef());
         System.out.print("{\n");
         fn.blockList.forEach(block -> {
             runOnIRBlock(block);
@@ -64,32 +64,32 @@ public class IRPrinter implements IRModulePass, IRFnPass, IRBlockPass {
 
     @Override
     public void runOnIRBlock(IRBasicBlock block) {
-        System.out.print(block.defToString() + '\n');
+        System.out.print(block.formatDef() + '\n');
         block.phiList.forEach(this::printInst);
         block.instList.forEach(this::printInst);
     }
 
     private void printClassDef(IRStructType classDef) {
-        System.out.print(classDef.getClassName() + " = " + classDef.typeDefToString() + '\n');
+        System.out.print(classDef.getClassName() + " = " + classDef.formatDef() + '\n');
     }
 
     private void printConstStr(StrConst constStr) {
         System.out.print('@' + constStr.getName() + " = constant ");
-        System.out.print(constStr.defToString() + '\n');
+        System.out.print(constStr.formatDef() + '\n');
     }
 
     private void printGVar(GlobalVariable gVar) {
         System.out.print('@' + gVar.getName() + " = global ");
-        System.out.print(gVar.defToString() + '\n');
+        System.out.print(gVar.formatDef() + '\n');
     }
 
     private void printInst(IRBaseInst inst) {
         String defString;
         if (inst instanceof MoveInst) {
             defString = '%' + inst.getOprand(0).getName();
-            defString += " = " + inst.defToString() + '\n';
+            defString += " = " + inst.formatDef() + '\n';
         } else {
-            defString = inst.defToString() + "\n";
+            defString = inst.formatDef() + "\n";
             if (!(inst.valueType instanceof IRVoidType))
                 defString = '%' + inst.getName() + " = " + defString;
         }

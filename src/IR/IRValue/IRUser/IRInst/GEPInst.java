@@ -33,11 +33,11 @@ public class GEPInst extends IRBaseInst {
     }
 
     @Override
-    public String defToString() {
-        var ret = "getelementptr " + startType.toString() + ", ";
-        ret += getOprand(0).valueType.toString() + ' ' + getOprand(0).useToString();
+    public String formatDef() {
+        var ret = "getelementptr " + startType.formatType() + ", ";
+        ret += getOprand(0).valueType.formatType() + ' ' + getOprand(0).formatUse();
         for (int i = 1; i < getOprandNum(); ++i)
-            ret += ", " + getOprand(i).useToStringWithType();
+            ret += ", " + getOprand(i).formatUseWithType();
         return ret;
     }
 

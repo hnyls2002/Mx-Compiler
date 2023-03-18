@@ -26,7 +26,7 @@ public class MoveInst extends IRBaseInst {
     }
 
     @Override
-    public String defToString() {
-        return getOprand(1).useToStringWithType();
+    public String formatDef() {
+        return getOprand(1).formatUseWithType();
     }
 }

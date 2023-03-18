@@ -20,6 +20,10 @@ public class IRType {
         this.typeId = typeId;
     }
 
+    public String formatType() {
+        return typeId.name();
+    }
+
     static IRType getLabelType() {
         return new IRType(IRTypeId.LabelTypeId);
     }

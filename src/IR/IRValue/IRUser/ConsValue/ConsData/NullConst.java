@@ -11,7 +11,7 @@ public class NullConst extends BaseConstData {
     }
 
     @Override
-    public String useToString() {
+    public String formatUse() {
         return "null";
     }
 

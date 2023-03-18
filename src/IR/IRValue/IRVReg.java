@@ -20,12 +20,12 @@ public class IRVReg extends IRBaseValue {
     }
 
     @Override
-    public String defToString() {
+    public String formatDef() {
         throw new MyException("VReg don't need to be defined");
     }
 
     @Override
-    public String useToString() {
+    public String formatUse() {
         return '%' + getName();
     }
 }

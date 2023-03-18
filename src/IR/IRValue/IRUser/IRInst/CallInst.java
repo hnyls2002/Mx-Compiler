@@ -27,12 +27,12 @@ public class CallInst extends IRBaseInst {
     }
 
     @Override
-    public String defToString() {
-        var ret = "call " + valueType.toString() + ' ';
+    public String formatDef() {
+        var ret = "call " + valueType.formatType() + ' ';
         ret += calledFnType.getFnName() + "(";
         for (int i = 0; i < getOprandNum(); ++i) {
             var arg = getOprand(i);
-            ret += arg.useToStringWithType() + ", ";
+            ret += arg.formatUseWithType() + ", ";
         }
         if (getOprandNum() != 0)
             ret = ret.substring(0, ret.length() - 2);

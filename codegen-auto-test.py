@@ -46,7 +46,7 @@ for judge in judge_list:
     output_fp.close()
     std_fp.close()
 
-    print("\033[34m Loading finish. Start to run LLVM IR.")
+    print("\033[34m Loading finish. Start to run Code Gen.")
 
     os.system(command.format(code_file=code_file,
               input_file=input_file, output_file=output_file))

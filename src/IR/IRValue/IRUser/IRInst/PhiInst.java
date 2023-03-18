@@ -21,10 +21,10 @@ public class PhiInst extends IRBaseInst {
     }
 
     @Override
-    public String defToString() {
-        var ret = "phi " + valueType.toString() + " ";
+    public String formatDef() {
+        var ret = "phi " + valueType.formatType() + " ";
         for (int i = 0; i < getOprandNum(); i += 2) {
-            ret += "[ " + getOprand(i + 1).useToString() + ", " + getOprand(i).useToString() +
+            ret += "[ " + getOprand(i + 1).formatUse() + ", " + getOprand(i).formatUse() +
                     (i == getOprandNum() - 2 ? " ]" : " ], ");
         }
         return ret;

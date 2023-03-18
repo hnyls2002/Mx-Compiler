@@ -43,13 +43,13 @@ public class IRFn extends BaseGlobalValue {
     }
 
     @Override
-    public String defToString() {
+    public String formatDef() {
         if (valueType instanceof IRFnType fnType) {
             var ret = "define ";
-            ret += fnType.retType.toString() + ' ';
+            ret += fnType.retType.formatType() + ' ';
             ret += '@' + getName() + '(';
             for (var para : paraList)
-                ret += para.defToString() + ", ";
+                ret += para.formatDef() + ", ";
             if (!fnType.paraTypeList.isEmpty())
                 ret = ret.substring(0, ret.length() - 2);
             ret += ')';

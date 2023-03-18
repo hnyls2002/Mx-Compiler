@@ -30,9 +30,9 @@ public class GlobalVariable extends BaseGlobalValue {
     }
 
     @Override
-    public String defToString() {
+    public String formatDef() {
         // null const don't have a type
-        return derefType.toString() + ' ' + initValue.useToString();
+        return derefType.formatType() + ' ' + initValue.formatUse();
     }
 
 }

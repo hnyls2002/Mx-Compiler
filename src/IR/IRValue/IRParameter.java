@@ -14,12 +14,12 @@ public class IRParameter extends IRBaseValue {
     }
 
     @Override
-    public String defToString() {
-        return valueType.toString() + ' ' + '%' + getName();
+    public String formatDef() {
+        return valueType.formatType() + ' ' + '%' + getName();
     }
 
     @Override
-    public String useToString() {
+    public String formatUse() {
         return '%' + getName();
     }
 }

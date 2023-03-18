@@ -30,9 +30,9 @@ public class CastInst extends IRBaseInst {
     }
 
     @Override
-    public String defToString() {
-        var ret = opCode.toString() + ' ' + getOprand(0).useToStringWithType() + " to ";
-        ret += targetType.toString();
+    public String formatDef() {
+        var ret = opCode.name() + ' ' + getOprand(0).formatUseWithType() + " to ";
+        ret += targetType.formatType();
         return ret;
     }
 

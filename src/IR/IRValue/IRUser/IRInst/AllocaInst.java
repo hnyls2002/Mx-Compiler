@@ -23,8 +23,8 @@ public class AllocaInst extends IRBaseInst {
     }
 
     @Override
-    public String defToString() {
-        return "alloca " + elementType.toString();
+    public String formatDef() {
+        return "alloca " + elementType.formatType();
     }
 
     @Override

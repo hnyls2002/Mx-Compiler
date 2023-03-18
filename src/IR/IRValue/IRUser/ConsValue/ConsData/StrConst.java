@@ -17,8 +17,8 @@ public class StrConst extends BaseConstData {
     }
 
     @Override
-    public String defToString() {
-        return derefType.toString() + ' ' + 'c' + "\"" + data + "\\00" + "\"";
+    public String formatDef() {
+        return derefType.formatType() + ' ' + 'c' + "\"" + data + "\\00" + "\"";
     }
 
 }

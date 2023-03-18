@@ -30,10 +30,10 @@ public class RetInst extends IRBaseInst {
     }
 
     @Override
-    public String defToString() {
+    public String formatDef() {
         if (isVoid())
             return "ret void";
-        return "ret" + ' ' + getOprand(0).useToStringWithType();
+        return "ret" + ' ' + getOprand(0).formatUseWithType();
     }
 
     @Override

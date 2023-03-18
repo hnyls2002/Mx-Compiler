@@ -26,11 +26,11 @@ public class BrInst extends IRBaseInst {
     }
 
     @Override
-    public String defToString() {
+    public String formatDef() {
         var ret = "br ";
-        ret += getOprand(0).useToStringWithType() + ", ";
-        ret += getOprand(1).useToStringWithType() + ", ";
-        ret += getOprand(2).useToStringWithType();
+        ret += getOprand(0).formatUseWithType() + ", ";
+        ret += getOprand(1).formatUseWithType() + ", ";
+        ret += getOprand(2).formatUseWithType();
         return ret;
     }
 

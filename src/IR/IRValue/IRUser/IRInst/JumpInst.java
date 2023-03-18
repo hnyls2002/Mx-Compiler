@@ -26,9 +26,9 @@ public class JumpInst extends IRBaseInst {
     }
 
     @Override
-    public String defToString() {
+    public String formatDef() {
         var ret = "br ";
-        ret += getOprand(0).useToStringWithType();
+        ret += getOprand(0).formatUseWithType();
         return ret;
     }
 

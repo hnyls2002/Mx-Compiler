@@ -39,18 +39,18 @@ public class StoreInst extends IRBaseInst {
     }
 
     @Override
-    public String defToString() {
+    public String formatDef() {
         var ret = "store ";
         // stored value can be null
         var storedType = getOprand(0).valueType;
         var derefType = ((IRPtType) getOprand(1).valueType).derefType();
         if (!(getOprand(0) instanceof NullConst) && !storedType.equals(derefType))
             throw new MyException(
-                    "stored : [" + storedType.toString() + "] and address deref : [" + derefType.toString()
+                    "stored : [" + storedType.formatType() + "] and address deref : [" + derefType.formatType()
                             + "] not match!");
 
-        ret += ((IRPtType) getOprand(1).valueType).derefType().toString() + ' ' + getOprand(0).useToString() + ", ";
-        ret += getOprand(1).useToStringWithType();
+        ret += ((IRPtType) getOprand(1).valueType).derefType().formatType() + ' ' + getOprand(0).formatUse() + ", ";
+        ret += getOprand(1).formatUseWithType();
         return ret;
     }
 

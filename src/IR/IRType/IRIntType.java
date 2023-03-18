@@ -13,7 +13,7 @@ public class IRIntType extends IRType {
     }
 
     @Override
-    public String toString() {
+    public String formatType() {
         return "i" + intLen;
     }
 

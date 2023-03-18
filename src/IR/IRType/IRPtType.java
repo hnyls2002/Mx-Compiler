@@ -28,8 +28,8 @@ public class IRPtType extends IRType {
     }
 
     @Override
-    public String toString() {
-        return atomicType.toString() + "*".repeat(refNum);
+    public String formatType() {
+        return atomicType.formatType() + "*".repeat(refNum);
     }
 
     @Override

@@ -31,11 +31,6 @@ public abstract class IRBaseValue {
         }
     }
 
-    @Override
-    public String toString() {
-        throw new MyException("Value cannot toString");
-    }
-
     public final String getName() {
         if (nameString == null)
             throw new MyException("NullName");
@@ -48,12 +43,12 @@ public abstract class IRBaseValue {
 
     // we don't present the name, name was handled during IRPrinter
     // def means when the value is created
-    public abstract String defToString();
+    public abstract String formatDef();
 
-    public abstract String useToString();
+    public abstract String formatUse();
 
-    public String useToStringWithType() {
-        return valueType.toString() + ' ' + useToString();
+    public String formatUseWithType() {
+        return valueType.formatType() + ' ' + formatUse();
     }
 
 }

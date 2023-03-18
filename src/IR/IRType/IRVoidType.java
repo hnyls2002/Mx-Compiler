@@ -6,7 +6,7 @@ public class IRVoidType extends IRType {
     }
 
     @Override
-    public String toString() {
+    public String formatType() {
         return "void";
     }
 }

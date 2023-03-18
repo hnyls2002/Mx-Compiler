@@ -14,9 +14,9 @@ public class LoadInst extends IRBaseInst {
     }
 
     @Override
-    public String defToString() {
-        var ret = "load " + valueType.toString() + ", ";
-        ret += getOprand(0).useToStringWithType();
+    public String formatDef() {
+        var ret = "load " + valueType.formatType() + ", ";
+        ret += getOprand(0).formatUseWithType();
         return ret;
     }
 

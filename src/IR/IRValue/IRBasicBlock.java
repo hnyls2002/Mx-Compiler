@@ -81,17 +81,17 @@ public class IRBasicBlock extends IRBaseValue {
     }
 
     @Override
-    public String useToStringWithType() {
+    public String formatUseWithType() {
         return "label %" + getName();
     }
 
     @Override
-    public String defToString() {
+    public String formatDef() {
         return getName() + ":";
     }
 
     @Override
-    public String useToString() {
+    public String formatUse() {
         return "%" + getName();
     }
 }

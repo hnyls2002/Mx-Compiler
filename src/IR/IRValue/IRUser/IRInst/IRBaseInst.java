@@ -14,7 +14,7 @@ public abstract class IRBaseInst extends IRBaseUser {
     }
 
     @Override
-    public String useToString() {
+    public String formatUse() {
         return '%' + getName();
     }
 

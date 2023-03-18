@@ -9,7 +9,7 @@ public abstract class BaseConstValue extends IRBaseUser {
     }
 
     @Override
-    public String useToString() {
+    public String formatUse() {
         return '@' + getName();
     }
 }
