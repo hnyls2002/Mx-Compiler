@@ -251,7 +251,6 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
                 new ASMCalcInst(BinaryZeroOp.snez, rd, rd, null, null, cur.block);
             }
         }
-        ;
     }
 
     @Override
@@ -290,30 +289,21 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
     }
 
     // when val could be intConst, null
+    // private BaseOprand loadVal(IRBaseValue val, ASMBlock loadBlock) {
+    // if (val.asOprand instanceof Register)
+    // return val.asOprand;
+    // if (val.asOprand instanceof Immediate imm) {
+    // if (RV32.inLowerImmRange(imm.immInt))
+    // return val.asOprand;
+    // VirtualReg rd = new VirtualReg(cur.fn);
+    // new ASMLiInst(rd, imm, loadBlock);
+    // return rd;
+    // } else
+    // throw new MyException("load val error");
+
+    // }
+
     private void ifConstThenLoad(IRBaseValue val, ASMBlock loadBlock) {
-        // if (val.asOprand == null) {
-        // if (val instanceof IntConst t) {
-        // Register rd = new VirtualReg(cur.fn);
-        // new ASMLiInst(rd, new Immediate(t.constValue), loadBlock);
-        // val.asOprand = rd;
-        // } else if (val instanceof NullConst) {
-        // Register rd = new VirtualReg(cur.fn);
-        // new ASMLiInst(rd, new Immediate(0), loadBlock);
-        // val.asOprand = rd;
-        // } else
-        // throw new MyException("Unknow value (no oprand)");
-        // }
-
-        /*
-         * When several const value are actually referring to the same location,
-         * then the asOprand is the same, which means
-         * at position 1, the constant value is loaded into a register,
-         * at position 2, I guess the register containing the constant value,
-         * however, position 2 may run before position 1.
-         * 
-         * remove the null check
-         */
-
         if (val instanceof IntConst t) {
             Register rd = new VirtualReg(cur.fn);
             new ASMLiInst(rd, new Immediate(t.constValue), loadBlock);

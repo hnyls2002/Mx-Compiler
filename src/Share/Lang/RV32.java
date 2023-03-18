@@ -5,7 +5,10 @@ import java.util.Arrays;
 
 public class RV32 {
     public static final int MAX_ARG_NUM = 8;
-    public static final int LO_IMM_LIMIT = (1 << 12) - 1;
+
+    public static boolean inLowerImmRange(int imm) {
+        return -2048 <= imm && imm < 2048;
+    }
 
     public enum BitWidth {
         b, h, w

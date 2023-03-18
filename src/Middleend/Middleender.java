@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import AST.ASTNode;
 import AST.Scopes.GlobalScope;
 import IR.IRModule;
-import Middleend.IROptimize.DominateTree;
+import Middleend.Analyzers.DominateTree;
 import Middleend.IROptimize.Mem2Reg;
 import Middleend.IROptimize.PhiElimination;
 

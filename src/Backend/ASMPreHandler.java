@@ -3,6 +3,7 @@ package Backend;
 import ASM.ASMBlock;
 import ASM.ASMFn;
 import ASM.ASMModule;
+import ASM.ASMOprand.Immediate;
 import ASM.ASMOprand.VirtualReg;
 import ASM.ASMOprand.ASMGlobal.ASMConstStr;
 import ASM.ASMOprand.ASMGlobal.ASMGlobalVar;
@@ -10,6 +11,8 @@ import IR.IRModule;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRVReg;
+import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
+import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.BinaryInst;
 import IR.IRValue.IRUser.IRInst.BrInst;
@@ -35,9 +38,12 @@ public class ASMPreHandler implements IRModulePass, IRFnPass, IRBlockPass, IRIns
 
     /*
      * oprand has several kinds
-     * 1. virtualReg, virtualOffset
+     * 1. virtualReg, virtualOffset : need to be pre created
      * 2. physicalReg
-     * 3. Immediate, globalVar, constStr
+     * 3. Immediate, globalVar, constStr :
+     * ----1) constant to immediate
+     * ----2) globalVar to globalVar
+     * ----3) constStr to constStr
      */
 
     public void buildSkeleton(IRModule irModule) {
@@ -96,7 +102,16 @@ public class ASMPreHandler implements IRModulePass, IRFnPass, IRBlockPass, IRIns
         cur.fn.blockList.add(cur.block);
 
         // those instructions which have a return value should be preloaded
-        irBlock.instList.forEach(inst -> inst.accept(this));
+        irBlock.instList.forEach(inst -> {
+            for (int i = 0; i < inst.getOprandNum(); ++i) {
+                var use = inst.getOprand(i);
+                if (use instanceof IntConst intConst)
+                    use.asOprand = new Immediate(intConst.constValue);
+                else if (use instanceof NullConst)
+                    use.asOprand = new Immediate(0);
+            }
+            inst.accept(this);
+        });
     }
 
     @Override

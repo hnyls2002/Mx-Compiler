@@ -1,4 +1,4 @@
-package Middleend.IROptimize;
+package Middleend.Analyzers;
 
 import java.util.HashSet;
 

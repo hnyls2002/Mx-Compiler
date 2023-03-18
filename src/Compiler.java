@@ -12,7 +12,7 @@ import Middleend.Middleender;
 public class Compiler {
     public static void main(String[] args) throws Exception {
         try {
-            boolean testManual = true;
+            boolean testManual = false;
             boolean testOnline = false;
 
             String filePath = testManual ? "./debug/" : "./autotestspace/";

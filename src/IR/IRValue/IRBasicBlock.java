@@ -10,7 +10,7 @@ import IR.IRValue.IRUser.IRInst.IRBaseInst;
 import IR.IRValue.IRUser.IRInst.JumpInst;
 import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
-import Middleend.IROptimize.DominateTree.DTreeNode;
+import Middleend.Analyzers.DominateTree.DTreeNode;
 import Share.MyException;
 
 public class IRBasicBlock extends IRBaseValue {
