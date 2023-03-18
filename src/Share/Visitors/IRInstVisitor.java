@@ -3,7 +3,6 @@ package Share.Visitors;
 import IR.IRValue.IRUser.IRInst.BinaryInst;
 import IR.IRValue.IRUser.IRInst.BrInst;
 import IR.IRValue.IRUser.IRInst.CallInst;
-import IR.IRValue.IRUser.IRInst.CastInst;
 import IR.IRValue.IRUser.IRInst.GEPInst;
 import IR.IRValue.IRUser.IRInst.IcmpInst;
 import IR.IRValue.IRUser.IRInst.JumpInst;
@@ -18,8 +17,6 @@ public interface IRInstVisitor {
     public void visit(BrInst inst);
 
     public void visit(CallInst inst);
-
-    public void visit(CastInst inst);
 
     public void visit(GEPInst inst);
 

@@ -38,7 +38,7 @@ public class CastInst extends IRBaseInst {
 
     @Override
     public void accept(IRInstVisitor visitor) {
-        visitor.visit(this);
+        throw new RuntimeException("CastInst.accept() should not be called");
     }
 
 }

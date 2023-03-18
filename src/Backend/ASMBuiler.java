@@ -35,7 +35,6 @@ import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.BinaryInst;
 import IR.IRValue.IRUser.IRInst.BrInst;
 import IR.IRValue.IRUser.IRInst.CallInst;
-import IR.IRValue.IRUser.IRInst.CastInst;
 import IR.IRValue.IRUser.IRInst.GEPInst;
 import IR.IRValue.IRUser.IRInst.IcmpInst;
 import IR.IRValue.IRUser.IRInst.JumpInst;
@@ -210,12 +209,6 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
             var rd = (Register) inst.asOprand;
             new ASMMoveInst(rd, rs, cur.block);
         }
-    }
-
-    @Override
-    public void visit(CastInst inst) {
-        ifConstThenLoad(inst.getOprand(0), cur.block);
-        inst.asOprand = inst.getOprand(0).asOprand;
     }
 
     @Override

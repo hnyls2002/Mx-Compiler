@@ -3,7 +3,6 @@ package Backend;
 import ASM.ASMBlock;
 import ASM.ASMFn;
 import ASM.ASMModule;
-import ASM.ASMOprand.Immediate;
 import ASM.ASMOprand.VirtualReg;
 import ASM.ASMOprand.ASMGlobal.ASMConstStr;
 import ASM.ASMOprand.ASMGlobal.ASMGlobalVar;
@@ -11,8 +10,6 @@ import IR.IRModule;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRVReg;
-import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
-import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.BinaryInst;
 import IR.IRValue.IRUser.IRInst.BrInst;
@@ -101,15 +98,26 @@ public class ASMPreHandler implements IRModulePass, IRFnPass, IRBlockPass, IRIns
         cur.block = (ASMBlock) irBlock.asOprand;
         cur.fn.blockList.add(cur.block);
 
+        // remove castInst
+        var it = irBlock.instList.iterator();
+        while (it.hasNext()) {
+            if (it.next() instanceof CastInst castInst) {
+                castInst.replaceAllUseWith(castInst.getOprand(0));
+                it.remove();
+            }
+        }
+
         // those instructions which have a return value should be preloaded
         irBlock.instList.forEach(inst -> {
-            for (int i = 0; i < inst.getOprandNum(); ++i) {
-                var use = inst.getOprand(i);
-                if (use instanceof IntConst intConst)
-                    use.asOprand = new Immediate(intConst.constValue);
-                else if (use instanceof NullConst)
-                    use.asOprand = new Immediate(0);
-            }
+            /*
+             * for (int i = 0; i < inst.getOprandNum(); ++i) {
+             * var use = inst.getOprand(i);
+             * if (use instanceof IntConst intConst)
+             * use.asOprand = new Immediate(intConst.constValue);
+             * else if (use instanceof NullConst)
+             * use.asOprand = new Immediate(0);
+             * }
+             */
             inst.accept(this);
         });
     }
@@ -172,10 +180,6 @@ public class ASMPreHandler implements IRModulePass, IRFnPass, IRBlockPass, IRIns
 
     @Override
     public void visit(StoreInst inst) {
-    }
-
-    @Override
-    public void visit(CastInst inst) {
     }
 
 }
