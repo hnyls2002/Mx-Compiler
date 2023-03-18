@@ -11,6 +11,7 @@ import Share.Visitors.IRInstVisitor;
 public class IcmpInst extends IRBaseInst {
 
     public ICMPOP opCode;
+    public boolean onlyInBranch = false;
 
     public IcmpInst(ICMPOP opCode, IRBaseValue lhs, IRBaseValue rhs, IRBasicBlock block) {
         super(new IRIntType(1));

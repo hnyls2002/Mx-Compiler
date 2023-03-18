@@ -164,6 +164,10 @@ public class ASMPreHandler implements IRModulePass, IRFnPass, IRBlockPass, IRIns
 
     @Override
     public void visit(BrInst inst) {
+        // if the condition is an icmp instruction, then flag it
+        var condition = inst.getOprand(0);
+        if (condition instanceof IcmpInst && condition.userList.size() == 1 && condition.userList.contains(inst))
+            ((IcmpInst) condition).onlyInBranch = true;
     }
 
     @Override

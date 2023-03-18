@@ -2,14 +2,17 @@ package ASM.ASMInst;
 
 import ASM.ASMBlock;
 import ASM.ASMOprand.Register;
+import Share.Lang.RV32.BranchOp;
 import Share.Visitors.ASMInstVisitor;
 
 public class ASMBrInst extends ASMBaseInst {
-    // the condition is rs1
     public ASMBlock trueBlock;
+    public BranchOp opCode;
 
-    public ASMBrInst(Register condition, ASMBlock trueBlock, ASMBlock curBlock) {
-        this.rs1 = condition;
+    public ASMBrInst(BranchOp opCode, Register rs1, Register rs2, ASMBlock trueBlock, ASMBlock curBlock) {
+        this.opCode = opCode;
+        this.rs1 = rs1;
+        this.rs2 = rs2;
         this.trueBlock = trueBlock;
         curBlock.sucList.add(trueBlock);
         trueBlock.preList.add(curBlock);
@@ -23,6 +26,6 @@ public class ASMBrInst extends ASMBaseInst {
 
     @Override
     public String format() {
-        return String.format("\tbnez\t%s, %s\n", rs1.format(), trueBlock.format());
+        return String.format("\t%s\t%s, %s, %s\n", opCode.format(), rs1.format(), rs2.format(), trueBlock.format());
     }
 }

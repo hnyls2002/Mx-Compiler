@@ -25,7 +25,6 @@ import ASM.ASMOprand.VirtualReg;
 import ASM.ASMOprand.ASMGlobal.ASMGlobalData;
 import IR.IRModule;
 import IR.IRType.IRArrayType;
-import IR.IRType.IRIntType;
 import IR.IRType.IRStructType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBaseValue;
@@ -51,6 +50,7 @@ import Share.Lang.RV32.BinaryImOp;
 import Share.Lang.RV32.BinaryRegOp;
 import Share.Lang.RV32.BinaryZeroOp;
 import Share.Lang.RV32.BitWidth;
+import Share.Lang.RV32.BranchOp;
 import Share.Lang.RV32.SPLabel;
 import Share.Pass.IRPass.IRBlockPass;
 import Share.Pass.IRPass.IRFnPass;
@@ -64,6 +64,7 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     static final PhysicalReg sp = PhysicalReg.getPhyReg("sp");
     static final PhysicalReg ra = PhysicalReg.getPhyReg("ra");
+    static final PhysicalReg zero = PhysicalReg.getPhyReg("zero");
 
     public ASMModule buildAsm(IRModule irModule) {
         cur.module = irModule.asmModule;
@@ -150,9 +151,26 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     @Override
     public void visit(BrInst inst) {
-        assert inst.getOprand(0).valueType instanceof IRIntType t && t.intLen == 1;
         ifConstThenLoad(inst.getOprand(0), cur.block);
-        new ASMBrInst((Register) inst.getOprand(0).asOprand, (ASMBlock) inst.getOprand(1).asOprand, cur.block);
+        if (inst.getOprand(0) instanceof IcmpInst icmpInst) {
+            ifConstThenLoad(icmpInst.getOprand(0), cur.block);
+            ifConstThenLoad(icmpInst.getOprand(1), cur.block);
+            var rs1 = (Register) icmpInst.getOprand(0).asOprand;
+            var rs2 = (Register) icmpInst.getOprand(1).asOprand;
+            var trueBlock = (ASMBlock) inst.getOprand(1).asOprand;
+            switch (icmpInst.opCode) {
+                case eq -> new ASMBrInst(BranchOp.beq, rs1, rs2, trueBlock, cur.block);
+                case ne -> new ASMBrInst(BranchOp.bne, rs1, rs2, trueBlock, cur.block);
+                case slt -> new ASMBrInst(BranchOp.blt, rs1, rs2, trueBlock, cur.block);
+                case sgt -> new ASMBrInst(BranchOp.bgt, rs1, rs2, trueBlock, cur.block);
+                case sle -> new ASMBrInst(BranchOp.ble, rs1, rs2, trueBlock, cur.block);
+                case sge -> new ASMBrInst(BranchOp.bge, rs1, rs2, trueBlock, cur.block);
+            }
+        } else {
+            new ASMBrInst(BranchOp.bne, (Register) inst.getOprand(0).asOprand, zero,
+                    (ASMBlock) inst.getOprand(1).asOprand,
+                    cur.block);
+        }
         new ASMJInst((ASMBlock) inst.getOprand(2).asOprand, cur.block);
     }
 
@@ -224,6 +242,10 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     @Override
     public void visit(IcmpInst inst) {
+
+        // just do cmp in branch inst
+        if (inst.onlyInBranch)
+            return;
 
         ifConstThenLoad(inst.getOprand(0), cur.block);
         ifConstThenLoad(inst.getOprand(1), cur.block);
