@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import AST.ASTNode;
 import AST.Scopes.GlobalScope;
 import IR.IRModule;
-import Middleend.Analyzers.DominateTree;
 import Middleend.IROptimize.Mem2Reg;
 import Middleend.IROptimize.PhiElimination;
 
@@ -15,7 +14,6 @@ public class Middleender {
         IRBuilder irBuilder = new IRBuilder(ast, gScope);
         IRModule irModule = irBuilder.buildIR();
 
-        new DominateTree().runOnIRModule(irModule);
         new Mem2Reg().runOnIRModule(irModule);
 
         new IRRenamer().runOnIRModule(irModule);
@@ -39,6 +37,8 @@ public class Middleender {
 
         // System.err.println("\n-----------------------------------");
         // }
+
+        // new ADCE().runOnIRModule(irModule);
 
         if (!testOnline) {
             IRPrinter irPrinter = new IRPrinter(filePath + "test.ll");

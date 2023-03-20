@@ -42,7 +42,6 @@ import IR.IRValue.IRUser.IRInst.MoveInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
 import Share.MyException;
-import Share.Lang.LLVMIR;
 import Share.Lang.RV32;
 import Share.Lang.LLVMIR.ICMPOP;
 import Share.Lang.RV32.BinaryImOp;

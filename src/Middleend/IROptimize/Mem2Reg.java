@@ -16,6 +16,7 @@ import IR.IRValue.IRUser.IRInst.AllocaInst;
 import IR.IRValue.IRUser.IRInst.LoadInst;
 import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
+import Middleend.Analyzers.DominateTree;
 import Share.Pass.IRPass.IRFnPass;
 import Share.Pass.IRPass.IRModulePass;
 
@@ -23,6 +24,7 @@ public class Mem2Reg implements IRModulePass, IRFnPass {
 
     @Override
     public void runOnIRModule(IRModule irModule) {
+        new DominateTree().buildDT(irModule, false);
         irModule.globalFnList.forEach(this::runOnIRFn);
         irModule.varInitFnList.forEach(this::runOnIRFn);
     }
