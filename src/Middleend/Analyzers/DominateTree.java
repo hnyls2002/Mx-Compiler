@@ -112,7 +112,7 @@ public class DominateTree implements IRModulePass, IRFnPass {
                 for (var suc : curBlock.sucList) {
                     // if u -> v edge exist and u doesn't dominat v
                     for (var master : curBlock.dtNode.masterSet)
-                        if (/* master == suc || */!suc.dtNode.masterSet.contains(master))
+                        if ( master == suc || !suc.dtNode.masterSet.contains(master))
                             master.dtNode.frontier.add(suc);
                 }
             }
