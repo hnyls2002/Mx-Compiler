@@ -1,6 +1,7 @@
 package IR.IRValue.IRUser.IRInst;
 
 import IR.IRValue.IRBaseValue;
+import IR.IRValue.IRBasicBlock;
 import Share.Visitors.IRInstVisitor;
 
 public class MoveInst extends IRBaseInst {
@@ -14,10 +15,14 @@ public class MoveInst extends IRBaseInst {
      * and it doesn't have "asOprand", "def"...
      */
 
-    public MoveInst(IRBaseValue dst, IRBaseValue src) {
-        super(dst.valueType);
+    public MoveInst(IRBaseValue dst, IRBaseValue src, IRBasicBlock block, boolean atEnd) {
+        super(dst.valueType, block);
         appendOprand(dst);
         appendOprand(src);
+        if (atEnd)
+            block.addInstBeforeTerminal(this);
+        else
+            block.instList.add(0, this);
     }
 
     @Override

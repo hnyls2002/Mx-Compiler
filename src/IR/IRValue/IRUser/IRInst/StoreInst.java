@@ -14,7 +14,7 @@ public class StoreInst extends IRBaseInst {
     // storedValue 0, destAddr 1
 
     public StoreInst(IRBaseValue storedValue, IRBaseValue destAddr, IRBasicBlock block) {
-        super(new IRVoidType());
+        super(new IRVoidType(), block);
 
         appendOprand(storedValue);
         appendOprand(destAddr);

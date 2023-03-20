@@ -11,7 +11,7 @@ public class AllocaInst extends IRBaseInst {
     public IRType elementType;
 
     public AllocaInst(IRType elemenType, IRFn curFn) {
-        super(new IRPtType(elemenType, 1));
+        super(new IRPtType(elemenType, 1), curFn.blockList.get(0));
         this.elementType = elemenType;
         var block = curFn.blockList.get(0);
         // insert allocaInst at the beginning of the first block

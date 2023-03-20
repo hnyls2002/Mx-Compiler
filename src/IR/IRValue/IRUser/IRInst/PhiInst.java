@@ -11,7 +11,7 @@ public class PhiInst extends IRBaseInst {
     public AllocaInst belongAlloca = null;
 
     public PhiInst(IRType valuType, IRBasicBlock curBlock) {
-        super(valuType);
+        super(valuType, curBlock);
         curBlock.phiList.add(this);
     }
 

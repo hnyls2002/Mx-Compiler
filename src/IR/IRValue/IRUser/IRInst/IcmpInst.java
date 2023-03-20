@@ -14,7 +14,7 @@ public class IcmpInst extends IRBaseInst {
     public boolean onlyInBranch = false;
 
     public IcmpInst(ICMPOP opCode, IRBaseValue lhs, IRBaseValue rhs, IRBasicBlock block) {
-        super(new IRIntType(1));
+        super(new IRIntType(1), block);
         this.opCode = opCode;
         appendOprand(lhs);
         appendOprand(rhs);

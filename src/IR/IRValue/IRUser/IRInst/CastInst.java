@@ -22,7 +22,7 @@ public class CastInst extends IRBaseInst {
     }
 
     public CastInst(IRBaseValue srcValue, IRType targetType, CastType opCode, IRBasicBlock block) {
-        super(targetType);
+        super(targetType, block);
         appendOprand(srcValue);
         this.targetType = targetType;
         this.opCode = opCode;

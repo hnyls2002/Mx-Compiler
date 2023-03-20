@@ -14,7 +14,7 @@ public class BinaryInst extends IRBaseInst {
     public BOP opCode;
 
     public BinaryInst(BOP opCode, IRBaseValue lhs, IRBaseValue rhs, IRBasicBlock block) {
-        super(lhs.valueType);
+        super(lhs.valueType, block);
         this.opCode = opCode;
         appendOprand(lhs);
         appendOprand(rhs);

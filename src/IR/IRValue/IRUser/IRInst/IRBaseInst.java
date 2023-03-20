@@ -1,6 +1,7 @@
 package IR.IRValue.IRUser.IRInst;
 
 import IR.IRType.IRType;
+import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.IRBaseUser;
 import Share.Visitors.IRInstVisitor;
 
@@ -9,8 +10,11 @@ import Share.Visitors.IRInstVisitor;
 /// store is void type!
 
 public abstract class IRBaseInst extends IRBaseUser {
-    public IRBaseInst(IRType insType) {
+    public IRBasicBlock parentBlock;
+
+    public IRBaseInst(IRType insType, IRBasicBlock parentBlock) {
         super(insType);
+        this.parentBlock = parentBlock;
     }
 
     @Override

@@ -14,13 +14,13 @@ public class RetInst extends IRBaseInst {
 
     // "ret %3" is void type ?
     public RetInst(IRBaseValue retValue, IRBasicBlock block) {
-        super(new IRVoidType());
+        super(new IRVoidType(), block);
         appendOprand(retValue);
         block.setTerminal(this);
     }
 
     public RetInst(IRBasicBlock block) {
-        super(new IRVoidType());
+        super(new IRVoidType(), block);
         block.setTerminal(this);
     }
 

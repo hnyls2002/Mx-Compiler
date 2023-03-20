@@ -7,7 +7,7 @@ import Share.Visitors.IRInstVisitor;
 
 public class LoadInst extends IRBaseInst {
     public LoadInst(IRBaseValue srcAddr, IRBasicBlock block) {
-        super(null);
+        super(null, block);
         valueType = ((IRPtType) (srcAddr.valueType)).derefType();
         appendOprand(srcAddr);
         block.addInst(this);

@@ -10,13 +10,13 @@ public class JumpInst extends IRBaseInst {
     // 1. if retInst inside -> jump to fn's retBlock
     // 2. if not inside -> jump to target block
     public JumpInst(IRBasicBlock targetBlock, IRBasicBlock curBlock) {
-        super(new IRVoidType());
+        super(new IRVoidType(), curBlock);
         appendOprand(targetBlock);
         curBlock.setTerminal(this);
     }
 
     public JumpInst(IRBasicBlock targetBlock) {
-        super(new IRVoidType());
+        super(new IRVoidType(), null);
         appendOprand(targetBlock);
     }
 

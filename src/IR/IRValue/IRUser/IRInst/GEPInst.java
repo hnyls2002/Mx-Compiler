@@ -14,7 +14,7 @@ public class GEPInst extends IRBaseInst {
     // indices 1 ~ n
 
     public GEPInst(IRBaseValue startPtr, IRType gepInstType, IRBasicBlock block, IRBaseValue... idxList) {
-        super(gepInstType);
+        super(gepInstType, block);
         appendOprand(startPtr);
         this.startType = ((IRPtType) startPtr.valueType).derefType();
         for (var idx : idxList)

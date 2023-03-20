@@ -63,6 +63,7 @@ public class PhiElimination implements IRModulePass, IRFnPass {
                         fromBlock.terminal.setOprand(i, insertBlock);
 
                 insertBlock.terminal = new JumpInst(toBlock);
+                insertBlock.terminal.parentBlock = insertBlock;
                 insertBlock.instList.add(insertBlock.terminal);
             }
         }
@@ -80,11 +81,9 @@ public class PhiElimination implements IRModulePass, IRFnPass {
                 for (int i = 0; i < phiInst.getOprandNum(); i += 2) {
                     var preBlock = (IRBasicBlock) phiInst.getOprand(i);
                     var res = phiInst.getOprand(i + 1);
-                    var mvInst = new MoveInst(temp, res);
-                    preBlock.addInstBeforeTerminal(mvInst);
+                    new MoveInst(temp, res, preBlock, true);
                 }
-                var mvBack = new MoveInst(phiInst, temp);
-                block.instList.add(0, mvBack);
+                new MoveInst(phiInst, temp, block, false);
             }
         }
     }
