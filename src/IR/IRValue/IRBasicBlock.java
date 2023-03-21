@@ -63,6 +63,24 @@ public class IRBasicBlock extends IRBaseValue {
         }
     }
 
+    public void removeTerminal() {
+        if (terminal != null) { // if terminated...
+            if (terminal instanceof JumpInst) {
+                var targetBlock = (IRBasicBlock) terminal.getOprand(0);
+                sucList.remove(targetBlock);
+                targetBlock.preList.remove(this);
+            } else if (this.terminal instanceof BrInst) {
+                var targetBlock1 = (IRBasicBlock) terminal.getOprand(1);
+                var targetBlock2 = (IRBasicBlock) terminal.getOprand(2);
+                sucList.remove(targetBlock1);
+                targetBlock1.preList.remove(this);
+                sucList.remove(targetBlock2);
+                targetBlock2.preList.remove(this);
+            }
+            this.terminal = null;
+        }
+    }
+
     public void addInst(IRBaseInst inst) {
         if (this.terminal == null) // if not terminated...
             instList.add(inst);

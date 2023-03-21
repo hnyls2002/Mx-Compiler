@@ -1,5 +1,6 @@
 package Middleend.Analyzers;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import IR.IRModule;
@@ -13,11 +14,13 @@ public class DominateTree implements IRModulePass, IRFnPass {
         public HashSet<IRBasicBlock> slaveSet = new HashSet<>();
         public HashSet<IRBasicBlock> masterSet = new HashSet<>();
         public HashSet<IRBasicBlock> frontier = new HashSet<>();
+        public IRBasicBlock idom = null;
 
         public void clear() {
             slaveSet.clear();
             masterSet.clear();
             frontier.clear();
+            idom = null;
         }
     }
 
@@ -97,9 +100,11 @@ public class DominateTree implements IRModulePass, IRFnPass {
         }
 
         // get the dominance frontier
+        var blockList = new ArrayList<>(fn.blockList);
+        blockList.add(fn.retBlock);
 
         if (isPostDominate) {
-            for (var curBlock : fn.blockList) {
+            for (var curBlock : blockList) {
                 for (var pre : curBlock.preList) {
                     // if u -> v edge exist and u doesn't dominat v
                     for (var master : curBlock.dtNode.masterSet)
@@ -108,15 +113,56 @@ public class DominateTree implements IRModulePass, IRFnPass {
                 }
             }
         } else {
-            for (var curBlock : fn.blockList) {
+            for (var curBlock : blockList) {
                 for (var suc : curBlock.sucList) {
                     // if u -> v edge exist and u doesn't dominat v
                     for (var master : curBlock.dtNode.masterSet)
-                        if ( master == suc || !suc.dtNode.masterSet.contains(master))
+                        if (master == suc || !suc.dtNode.masterSet.contains(master))
                             master.dtNode.frontier.add(suc);
                 }
             }
         }
 
+        // get the immediate dominator
+        for (var block : blockList) {
+            if (block == root)
+                continue;
+            int minSize = Integer.MAX_VALUE;
+            for (var master : block.dtNode.masterSet) {
+                if (master != block && master.dtNode.slaveSet.size() < minSize) {
+                    minSize = master.dtNode.slaveSet.size();
+                    block.dtNode.idom = master;
+                }
+            }
+        }
+    }
+
+    public void debug(IRModule irModule, boolean isPostDominate) {
+        // -------------- debug --------------------
+        IRBasicBlock root;
+        if (isPostDominate)
+            root = irModule.globalFnList.get(0).retBlock;
+        else
+            root = irModule.globalFnList.get(0).blockList.get(0);
+        for (var bb : root.dtNode.slaveSet) {
+            System.err.println("block : " + bb.getName());
+
+            System.err.println("slaveSet : ");
+            for (var slave : bb.dtNode.slaveSet)
+                System.err.println(slave.getName());
+
+            System.err.println("masterSet : ");
+            for (var master : bb.dtNode.masterSet)
+                System.err.println(master.getName());
+
+            System.err.println("frontier : ");
+            for (var frontier : bb.dtNode.frontier)
+                System.err.println(frontier.getName());
+
+            if (bb.dtNode.idom != null)
+                System.err.println("idom : " + bb.dtNode.idom.getName());
+
+            System.err.println("\n-----------------------------------");
+        }
     }
 }

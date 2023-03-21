@@ -10,7 +10,6 @@ import ASM.ASMOprand.ASMGlobal.ASMGlobalVar;
 import IR.IRModule;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBasicBlock;
-import IR.IRValue.IRVReg;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
 import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
@@ -23,7 +22,6 @@ import IR.IRValue.IRUser.IRInst.IcmpInst;
 import IR.IRValue.IRUser.IRInst.JumpInst;
 import IR.IRValue.IRUser.IRInst.LoadInst;
 import IR.IRValue.IRUser.IRInst.MoveInst;
-import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
 import Share.Pass.IRPass.IRBlockPass;
@@ -154,15 +152,11 @@ public class ASMPreHandler implements IRModulePass, IRFnPass, IRBlockPass, IRIns
 
     @Override
     public void visit(MoveInst inst) {
-        var dest = inst.getOprand(0);
-
-        // when dest is a IRVReg, it should be preloaded
-        if (dest instanceof IRVReg && dest.asOprand == null)
-            dest.asOprand = new VirtualReg(cur.fn);
-
-        // phi node should be created
-        if (dest instanceof PhiInst && dest.asOprand == null)
-            dest.asOprand = new VirtualReg(cur.fn);
+        for (int i = 0; i < inst.getOprandNum(); ++i) {
+            var oprand = inst.getOprand(i);
+            if (oprand.asOprand == null)
+                oprand.asOprand = new VirtualReg(cur.fn);
+        }
     }
 
     @Override

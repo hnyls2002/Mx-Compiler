@@ -28,6 +28,7 @@ How to build the control dependence graph?
 - build the post dominator tree
 - if v is u's post domination frontier, then v -> u is a control dependence edge
 - **special case** : if u dominates v and v is connected to u in the reverse CFG, then u -> u is a control dependence edge
+  (oh!, because it's not strict domination relationship)
 
 ### ASM optimization list
 
