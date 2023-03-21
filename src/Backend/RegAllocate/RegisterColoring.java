@@ -73,6 +73,10 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
     @Override
     public void runOnASMModule(ASMModule asmModule) {
         asmModule.fnList.forEach(this::runOnASMFn);
+        int totalSpilledReg = 0;
+        for (var fn : asmModule.fnList)
+            totalSpilledReg += fn.spilledRegCnt;
+        System.err.println("Spilled " + totalSpilledReg + " registers");
     }
 
     private void InfoInit(ASMFn asmFn) {
@@ -467,8 +471,6 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
         adjSet.clear();
 
         // then all the information should be prepared for the next round of coloring
-
-        System.err.println("spilled " + asmFn.spilledRegCnt + " registers");
     }
 
     private void printRegSet(HashSet<Register> set, String name) {

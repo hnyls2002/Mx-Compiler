@@ -1,5 +1,6 @@
 package Middleend.IROptimize;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -56,6 +57,7 @@ public class ADCE implements IRModulePass, IRFnPass {
         new DominateTree().buildDT(irModule, true);
         irModule.globalFnList.forEach(this::runOnIRFn);
         irModule.varInitFnList.forEach(this::runOnIRFn);
+        new CFGTransformer().simplify(irModule);
         System.err.println("ADCE: " + totDeletedInst + " insts deleted");
     }
 
@@ -142,7 +144,10 @@ public class ADCE implements IRModulePass, IRFnPass {
         }
 
         // remove dead inst
-        for (var block : irFn.blockList) {
+        var tempBlockList = new ArrayList<>(irFn.blockList);
+        tempBlockList.add(irFn.retBlock);
+
+        for (var block : tempBlockList) {
             var it1 = block.instList.iterator();
             while (it1.hasNext()) {
                 var inst = it1.next();

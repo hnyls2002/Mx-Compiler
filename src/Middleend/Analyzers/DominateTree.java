@@ -6,6 +6,7 @@ import java.util.HashSet;
 import IR.IRModule;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
+import Middleend.IROptimize.CFGTransformer;
 import Share.Pass.IRPass.IRFnPass;
 import Share.Pass.IRPass.IRModulePass;
 
@@ -39,21 +40,7 @@ public class DominateTree implements IRModulePass, IRFnPass {
 
     @Override
     public void runOnIRFn(IRFn fn) {
-        // delete the never accessed block
-        while (true) {
-            boolean flag = false;
-            for (int i = 1; i < fn.blockList.size(); ++i) {
-                var blk = fn.blockList.get(i);
-                if (blk.preList.isEmpty()) {
-                    flag = true;
-                    for (var suc : blk.sucList)
-                        suc.preList.remove(blk);
-                    fn.blockList.remove(blk);
-                }
-            }
-            if (!flag)
-                break;
-        }
+        new CFGTransformer().simplify(fn);
 
         // clear all the DT infomation
         fn.blockList.forEach(block -> block.dtNode.clear());
