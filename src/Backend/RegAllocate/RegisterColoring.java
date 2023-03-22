@@ -19,7 +19,6 @@ import ASM.ASMOprand.VirtualOffset;
 import ASM.ASMOprand.VirtualReg;
 import Share.MyException;
 import Share.Lang.RV32.BitWidth;
-import Share.Lang.RV32.SPLabel;
 import Share.Pass.ASMPass.ASMFnPass;
 import Share.Pass.ASMPass.ASMModulePass;
 
@@ -45,6 +44,7 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
 
     // other
     HashSet<Pair<Register, Register>> adjSet = new HashSet<>();
+    HashSet<Register> newTemps = new HashSet<>();
 
     class NodeInfo {
         int degree;
@@ -69,14 +69,15 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
     HashMap<Register, NodeInfo> nodeInfoMap = new HashMap<>();
 
     static final int K = PhysicalReg.assignableSet.size();
+    int totSpilledCnt = 0;
 
     @Override
     public void runOnASMModule(ASMModule asmModule) {
         asmModule.fnList.forEach(this::runOnASMFn);
-        int totalSpilledReg = 0;
+        int totSpilledPos = 0;
         for (var fn : asmModule.fnList)
-            totalSpilledReg += fn.spilledRegCnt;
-        System.err.println("Spilled " + totalSpilledReg + " registers");
+            totSpilledPos += fn.spilledRegCnt;
+        System.err.println("Spilled " + totSpilledCnt + " regs at " + totSpilledPos + " pos ");
     }
 
     private void InfoInit(ASMFn asmFn) {
@@ -392,12 +393,25 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
         double minCost = Double.MAX_VALUE;
         Register minCostNode = null;
         for (var n : spillWorkList) {
+            // if (newTemps.contains(n))
+            // continue;
             double cost = nodeInfoMap.get(n).loopCost / nodeInfoMap.get(n).degree;
             if (cost < minCost) {
                 minCost = cost;
                 minCostNode = n;
             }
         }
+
+        if (minCostNode == null) {
+            for (var n : spillWorkList) {
+                double cost = nodeInfoMap.get(n).loopCost / nodeInfoMap.get(n).degree;
+                if (cost < minCost) {
+                    minCost = cost;
+                    minCostNode = n;
+                }
+            }
+        }
+
         spillWorkList.remove(minCostNode);
         simplifyWorkList.add(minCostNode);
         freezeMoves(minCostNode);
@@ -423,10 +437,14 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
     }
 
     private void rewriteProgram(ASMFn asmFn) {
-        for (var v : spilledNodes)
-            nodeInfoMap.get(v).spillPlace = new VirtualOffset(SPLabel.spilledReg, asmFn.spilledRegCnt++);
+        // for (var v : spilledNodes)
+        // nodeInfoMap.get(v).spillPlace = new VirtualOffset(SPLabel.spilledReg,
+        // asmFn.spilledRegCnt++);
 
-        HashSet<Register> newTemps = new HashSet<>();
+        totSpilledCnt += spilledNodes.size();
+        new SpilledColoring().run(this, asmFn);
+
+        newTemps.clear();
 
         for (var block : asmFn.blockList) {
             var rawList = new ArrayList<>(block.instList);
