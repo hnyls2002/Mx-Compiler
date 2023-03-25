@@ -1,4 +1,4 @@
-package Middleend.Analyzers;
+package Middleend.IROptimize.Tools;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -6,11 +6,10 @@ import java.util.HashSet;
 import IR.IRModule;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
-import Middleend.IROptimize.CFGTransformer;
 import Share.Pass.IRPass.IRFnPass;
 import Share.Pass.IRPass.IRModulePass;
 
-public class DominateTree implements IRModulePass, IRFnPass {
+public class DTBuilder implements IRModulePass, IRFnPass {
     public static class DTreeNode {
         public HashSet<IRBasicBlock> slaveSet = new HashSet<>();
         public HashSet<IRBasicBlock> masterSet = new HashSet<>();
@@ -40,7 +39,7 @@ public class DominateTree implements IRModulePass, IRFnPass {
 
     @Override
     public void runOnIRFn(IRFn fn) {
-        new CFGTransformer().simplify(fn);
+        new CFGSimplifier().simplify(fn);
 
         // clear all the DT infomation
         fn.blockList.forEach(block -> block.dtNode.clear());

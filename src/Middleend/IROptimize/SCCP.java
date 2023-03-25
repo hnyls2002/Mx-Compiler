@@ -27,6 +27,7 @@ import IR.IRValue.IRUser.IRInst.MoveInst;
 import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
+import Middleend.IROptimize.Tools.CriticalSpliter;
 import Share.MyException;
 import Share.Lang.LLVMIR.ICMPOP;
 import Share.Pass.IRPass.IRFnPass;
@@ -44,7 +45,7 @@ public class SCCP implements IRModulePass, IRFnPass, IRInstVisitor {
     public void runOnIRModule(IRModule irModule) {
         // using edge splitting to make sure that
         // a phi's predecessor edges can be uniquely identified by a basic block
-        new CFGTransformer().splitCriticalEdge(irModule);
+        new CriticalSpliter().splitCriticalEdge(irModule);
         irModule.globalFnList.forEach(this::runOnIRFn);
         irModule.varInitFnList.forEach(this::runOnIRFn);
     }

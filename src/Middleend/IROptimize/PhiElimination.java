@@ -7,6 +7,7 @@ import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRVReg;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.MoveInst;
+import Middleend.IROptimize.Tools.CriticalSpliter;
 import Share.Pass.IRPass.IRFnPass;
 import Share.Pass.IRPass.IRModulePass;
 
@@ -14,7 +15,7 @@ public class PhiElimination implements IRModulePass, IRFnPass {
 
     @Override
     public void runOnIRModule(IRModule irModule) {
-        new CFGTransformer().splitCriticalEdge(irModule);
+        new CriticalSpliter().splitCriticalEdge(irModule);
         irModule.globalFnList.forEach(this::runOnIRFn);
         irModule.varInitFnList.forEach(this::runOnIRFn);
     }

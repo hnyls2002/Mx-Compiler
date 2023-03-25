@@ -16,7 +16,8 @@ import IR.IRValue.IRUser.IRInst.JumpInst;
 import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
-import Middleend.Analyzers.DominateTree;
+import Middleend.IROptimize.Tools.CFGSimplifier;
+import Middleend.IROptimize.Tools.DTBuilder;
 import Share.Pass.IRPass.IRFnPass;
 import Share.Pass.IRPass.IRModulePass;
 
@@ -55,10 +56,10 @@ public class ADCE implements IRModulePass, IRFnPass {
 
     @Override
     public void runOnIRModule(IRModule irModule) {
-        new DominateTree().buildDT(irModule, true);
+        new DTBuilder().buildDT(irModule, true);
         irModule.globalFnList.forEach(this::runOnIRFn);
         irModule.varInitFnList.forEach(this::runOnIRFn);
-        new CFGTransformer().simplify(irModule);
+        new CFGSimplifier().simplify(irModule);
         System.err.println("ADCE: " + totDeletedInst + " insts deleted");
     }
 
