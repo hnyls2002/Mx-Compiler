@@ -8,6 +8,7 @@ import IR.IRModule;
 import Middleend.IROptimize.ADCE;
 import Middleend.IROptimize.Mem2Reg;
 import Middleend.IROptimize.PhiElimination;
+import Middleend.IROptimize.SCCP;
 
 public class Middleender {
     public IRModule run(ASTNode ast, GlobalScope gScope, String filePath, boolean testOnline)
@@ -17,9 +18,12 @@ public class Middleender {
 
         new Mem2Reg().runOnIRModule(irModule);
 
-        new IRRenamer().runOnIRModule(irModule);
+        for (int i = 0; i < 2; ++i) {
+            new ADCE().runOnIRModule(irModule);
+            new SCCP().runOnIRModule(irModule);
+        }
 
-        new ADCE().runOnIRModule(irModule);
+        new IRRenamer().runOnIRModule(irModule);
 
         if (!testOnline) {
             IRPrinter irPrinter = new IRPrinter(filePath + "test.ll");

@@ -2,7 +2,7 @@
 #### aggressive stack allocation
 #### spare conditional constant propagation
 
-Lattice value (only upwards): BOTTOM -> CONST -> TOP
+Lattice value (only upwards): undefined -> constant -> unknown
 
 Worklist algorithm
 - Block executable worklist

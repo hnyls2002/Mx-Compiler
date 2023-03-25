@@ -3,7 +3,6 @@ package IR.IRValue.IRUser.IRInst;
 import IR.IRType.IRType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
-import Share.MyException;
 import Share.Visitors.IRInstVisitor;
 
 public class PhiInst extends IRBaseInst {
@@ -32,6 +31,6 @@ public class PhiInst extends IRBaseInst {
 
     @Override
     public void accept(IRInstVisitor visitor) {
-        throw new MyException("PhiInst.accept() should not be called");
+        visitor.visit(this);
     }
 }

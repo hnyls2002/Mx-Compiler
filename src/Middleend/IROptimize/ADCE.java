@@ -8,6 +8,7 @@ import java.util.Queue;
 import IR.IRModule;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
+import IR.IRValue.IRUser.IRBaseUser;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.CallInst;
 import IR.IRValue.IRUser.IRInst.IRBaseInst;
@@ -123,15 +124,6 @@ public class ADCE implements IRModulePass, IRFnPass {
             addInst(ft.terminal);
     }
 
-    // dead inst : none of its users are live
-    // it's oprands may be live
-    private void removeInstOprands(IRBaseInst inst) {
-        for (int i = 0; i < inst.getOprandNum(); ++i) {
-            var oprand = inst.getOprand(i);
-            oprand.userList.remove(inst);
-        }
-    }
-
     @Override
     public void runOnIRFn(IRFn irFn) {
         initWorkList(irFn);
@@ -147,12 +139,15 @@ public class ADCE implements IRModulePass, IRFnPass {
         var tempBlockList = new ArrayList<>(irFn.blockList);
         tempBlockList.add(irFn.retBlock);
 
+        // when removing an inst, remove its oprands : connections 1
+        // this inst is an oprand of other insts : connections 2
+        // connections 2 is no need to be removed here
         for (var block : tempBlockList) {
             var it1 = block.instList.iterator();
             while (it1.hasNext()) {
                 var inst = it1.next();
                 if (!liveInst.contains(inst)) {
-                    removeInstOprands(inst);
+                    IRBaseUser.removeOpAllConnection(inst);
                     it1.remove();
                     ++totDeletedInst;
                 }
@@ -161,7 +156,7 @@ public class ADCE implements IRModulePass, IRFnPass {
             while (it2.hasNext()) {
                 var inst = it2.next();
                 if (!liveInst.contains(inst)) {
-                    removeInstOprands(inst);
+                    IRBaseUser.removeOpAllConnection(inst);
                     it2.remove();
                     ++totDeletedInst;
                 }
@@ -178,6 +173,7 @@ public class ADCE implements IRModulePass, IRFnPass {
                     newTarget = newTarget.dtNode.idom;
                 block.removeTerminal();
                 new JumpInst(newTarget, block);
+                --totDeletedInst;
             }
         }
     }

@@ -22,6 +22,7 @@ import IR.IRValue.IRUser.IRInst.IcmpInst;
 import IR.IRValue.IRUser.IRInst.JumpInst;
 import IR.IRValue.IRUser.IRInst.LoadInst;
 import IR.IRValue.IRUser.IRInst.MoveInst;
+import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
 import Share.Pass.IRPass.IRBlockPass;
@@ -179,4 +180,13 @@ public class ASMPreHandler implements IRModulePass, IRFnPass, IRBlockPass, IRIns
     public void visit(StoreInst inst) {
     }
 
+    @Override
+    public void visit(PhiInst inst) {
+        throw new UnsupportedOperationException("Unimplemented method 'visit'");
+    }
+
+    @Override
+    public void visit(CastInst inst) {
+        throw new UnsupportedOperationException("Unimplemented method 'visit'");
+    }
 }

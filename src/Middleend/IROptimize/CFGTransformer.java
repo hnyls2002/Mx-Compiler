@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import IR.IRModule;
 import IR.IRValue.IRBasicBlock;
+import IR.IRValue.IRUser.IRBaseUser;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.JumpInst;
 
@@ -34,6 +35,8 @@ public class CFGTransformer {
                 var blk = irFn.blockList.get(i);
                 if (blk.preList.isEmpty()) {
                     flag = true;
+                    for (var inst : blk.instList)
+                        IRBaseUser.removeOpAllConnection(inst);
                     for (var suc : blk.sucList)
                         suc.preList.remove(blk);
                     irFn.blockList.remove(blk);
@@ -48,8 +51,11 @@ public class CFGTransformer {
             var it = block.phiList.iterator();
             while (it.hasNext()) {
                 var phiInst = it.next();
-                if (phiInst.getOprandNum() == 2)
+                if (phiInst.getOprandNum() == 2) {
+                    // discard the phiInst
+                    phiInst.replaceAllUseWith(phiInst.getOprand(1));
                     it.remove();
+                }
             }
         });
 
@@ -69,6 +75,7 @@ public class CFGTransformer {
 
                 // merge inst into next
                 block.instList.remove(block.terminal);
+                IRBaseUser.removeOpAllConnection(block.terminal);
                 block.instList.forEach(inst -> inst.parentBlock = next);
                 block.instList.addAll(next.instList);
                 next.instList = block.instList;
