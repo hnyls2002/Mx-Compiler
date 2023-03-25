@@ -9,11 +9,12 @@ import IR.IRValue.IRUser.IRInst.JumpInst;
 
 public class CriticalSpliter {
     public void splitCriticalEdge(IRModule irModule) {
+        new InfosRebuilder().rebuildCFG(irModule);
         irModule.globalFnList.forEach(this::splitCriticalEdge);
         irModule.varInitFnList.forEach(this::splitCriticalEdge);
     }
 
-    public void splitCriticalEdge(IRFn fn) {
+    private void splitCriticalEdge(IRFn fn) {
         ArrayList<IRBasicBlock> tmpAddList = new ArrayList<>();
         for (var fromBlock : fn.blockList) {
             if (fromBlock.sucList.size() <= 1)

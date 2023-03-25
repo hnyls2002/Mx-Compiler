@@ -2,11 +2,12 @@ package Middleend.IROptimize.Tools;
 
 import IR.IRModule;
 import IR.IRValue.IRBasicBlock;
-import IR.IRValue.IRUser.IRBaseUser;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 
 public class CFGSimplifier {
     public void simplify(IRModule irModule) {
+        new InfosRebuilder().rebuildCFG(irModule);
+        new InfosRebuilder().rebuildDefUse(irModule);
         irModule.globalFnList.forEach(irFn -> simplify(irFn));
         irModule.varInitFnList.forEach(irFn -> simplify(irFn));
     }
@@ -19,7 +20,7 @@ public class CFGSimplifier {
         return false;
     }
 
-    public void simplify(IRFn irFn) {
+    private void simplify(IRFn irFn) {
         // delete the never accessed block
         while (true) {
             boolean flag = false;
@@ -27,8 +28,6 @@ public class CFGSimplifier {
                 var blk = irFn.blockList.get(i);
                 if (blk.preList.isEmpty()) {
                     flag = true;
-                    for (var inst : blk.instList)
-                        IRBaseUser.removeOpAllConnection(inst);
                     for (var suc : blk.sucList)
                         suc.preList.remove(blk);
                     irFn.blockList.remove(blk);
@@ -67,7 +66,6 @@ public class CFGSimplifier {
 
                 // merge inst into next
                 block.instList.remove(block.terminal);
-                IRBaseUser.removeOpAllConnection(block.terminal);
                 block.instList.forEach(inst -> inst.parentBlock = next);
                 block.instList.addAll(next.instList);
                 next.instList = block.instList;

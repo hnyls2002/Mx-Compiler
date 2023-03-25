@@ -33,13 +33,14 @@ public class DTBuilder implements IRModulePass, IRFnPass {
 
     @Override
     public void runOnIRModule(IRModule irModule) {
+        new CFGSimplifier().simplify(irModule);
+        new InfosRebuilder().rebuildCFG(irModule);
         irModule.varInitFnList.forEach(this::runOnIRFn);
         irModule.globalFnList.forEach(this::runOnIRFn);
     }
 
     @Override
     public void runOnIRFn(IRFn fn) {
-        new CFGSimplifier().simplify(fn);
 
         // clear all the DT infomation
         fn.blockList.forEach(block -> block.dtNode.clear());

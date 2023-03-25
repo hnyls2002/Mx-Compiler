@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import IR.IRType.IRType;
 import IR.IRType.IRType.IRTypeId;
-import IR.IRValue.IRUser.IRBaseUser;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.BrInst;
 import IR.IRValue.IRUser.IRInst.IRBaseInst;
@@ -67,7 +66,6 @@ public class IRBasicBlock extends IRBaseValue {
     public void removeTerminal() {
         if (terminal != null) { // if terminated...
             // remove the inst
-            IRBaseUser.removeOpAllConnection(terminal);
 
             // remove the CFG edges
             if (terminal instanceof JumpInst) {

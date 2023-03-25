@@ -32,19 +32,8 @@ public abstract class IRBaseUser extends IRBaseValue {
         oprand.userList.add(this);
     }
 
-    // clear the connection
-    public static void removeOp1Connection(IRBaseUser user, int idx) {
-        user.oprandList.get(idx).userList.remove(user);
-    }
-
-    // clear all the connection
-    public static void removeOpAllConnection(IRBaseUser user) {
-        for (int i = 0; i < user.getOprandNum(); ++i)
-            removeOp1Connection(user, i);
-    }
-
-    public static void deleteOp1(IRBaseUser user, int idx) {
-        user.oprandList.remove(idx);
+    public void removeOp(int idx) {
+        oprandList.remove(idx);
     }
 
     public int getOprandNum() {

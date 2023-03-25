@@ -8,9 +8,9 @@ import java.util.Queue;
 
 import IR.IRModule;
 import IR.IRType.IRIntType;
+import IR.IRType.IRPtType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
-import IR.IRValue.IRUser.IRBaseUser;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
 import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
@@ -28,6 +28,7 @@ import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
 import Middleend.IROptimize.Tools.CriticalSpliter;
+import Middleend.IROptimize.Tools.InfosRebuilder;
 import Share.MyException;
 import Share.Lang.LLVMIR.ICMPOP;
 import Share.Pass.IRPass.IRFnPass;
@@ -46,6 +47,7 @@ public class SCCP implements IRModulePass, IRFnPass, IRInstVisitor {
         // using edge splitting to make sure that
         // a phi's predecessor edges can be uniquely identified by a basic block
         new CriticalSpliter().splitCriticalEdge(irModule);
+        new InfosRebuilder().rebuildDefUse(irModule);
         irModule.globalFnList.forEach(this::runOnIRFn);
         irModule.varInitFnList.forEach(this::runOnIRFn);
     }
@@ -108,8 +110,12 @@ public class SCCP implements IRModulePass, IRFnPass, IRInstVisitor {
         latticeMap.forEach((val, lat) -> {
             if (lat == 1) {
                 var constValue = constantMap.get(val);
-                var type = (IRIntType) val.valueType;
-                val.replaceAllUseWith(new IntConst(constValue, type.intLen));
+                if (val.valueType instanceof IRIntType intType)
+                    val.replaceAllUseWith(new IntConst(constValue, intType.intLen));
+                else if (constValue == 0 && val.valueType instanceof IRPtType)
+                    val.replaceAllUseWith(new NullConst());
+                else
+                    throw new MyException("SCCP: unknown const type to replace");
             }
         });
 
@@ -134,10 +140,8 @@ public class SCCP implements IRModulePass, IRFnPass, IRInstVisitor {
                             var pred = inst.getOprand(i);
                             if (!availableBBSet.contains(pred)) {
                                 flag = true;
-                                IRBaseUser.removeOp1Connection(inst, i);
-                                IRBaseUser.removeOp1Connection(inst, i + 1);
-                                IRBaseUser.deleteOp1(inst, i);
-                                IRBaseUser.deleteOp1(inst, i);
+                                inst.removeOp(i);
+                                inst.removeOp(i);
                                 break;
                             }
                         }

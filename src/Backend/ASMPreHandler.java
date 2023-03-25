@@ -25,6 +25,7 @@ import IR.IRValue.IRUser.IRInst.MoveInst;
 import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
+import Middleend.IROptimize.Tools.InfosRebuilder;
 import Share.Pass.IRPass.IRBlockPass;
 import Share.Pass.IRPass.IRFnPass;
 import Share.Pass.IRPass.IRModulePass;
@@ -54,6 +55,7 @@ public class ASMPreHandler implements IRModulePass, IRFnPass, IRBlockPass, IRIns
     @Override
     public void runOnIRModule(IRModule irModule) {
         // precreate the constStr and globalVar as oprand
+        new InfosRebuilder().rebuildDefUse(irModule);
         irModule.constStrList.forEach(constStr -> {
             ASMConstStr t = new ASMConstStr(constStr);
             cur.module.constStrList.add(t);
