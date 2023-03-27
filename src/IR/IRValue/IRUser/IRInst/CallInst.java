@@ -5,22 +5,23 @@ import java.util.ArrayList;
 import IR.IRType.IRFnType;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
+import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import Share.Visitors.IRInstVisitor;
 
 public class CallInst extends IRBaseInst {
-    public IRFnType calledFnType = null;
+    public IRFn callee = null;
 
-    public CallInst(IRFnType calledFnType, ArrayList<IRBaseValue> argList, IRBasicBlock block) {
-        super(calledFnType.retType, block);
+    public CallInst(IRFn callee, ArrayList<IRBaseValue> argList, IRBasicBlock block) {
+        super(((IRFnType) callee.valueType).retType, block);
+        this.callee = callee;
         for (int i = 0; i < argList.size(); ++i)
             appendOprand(argList.get(i));
-        this.calledFnType = calledFnType;
         block.addInst(this);
     }
 
-    public CallInst(IRFnType calledFnType, IRBasicBlock block, IRBaseValue... argList) {
-        super(calledFnType.retType, block);
-        this.calledFnType = calledFnType;
+    public CallInst(IRFn callee, IRBasicBlock block, IRBaseValue... argList) {
+        super(((IRFnType) callee.valueType).retType, block);
+        this.callee = callee;
         for (var arg : argList)
             appendOprand(arg);
         block.addInst(this);
@@ -29,7 +30,7 @@ public class CallInst extends IRBaseInst {
     @Override
     public String formatDef() {
         var ret = "call " + valueType.formatType() + ' ';
-        ret += calledFnType.getFnName() + "(";
+        ret += '@' + callee.getName() + "(";
         for (int i = 0; i < getOprandNum(); ++i) {
             var arg = getOprand(i);
             ret += arg.formatUseWithType() + ", ";

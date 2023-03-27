@@ -103,15 +103,16 @@ public class IRBuilder implements ASTVisitor {
                 topModule.classList.add(structType);
                 classTypeInfo.funMap.forEach((fuNameString, fnInfo) -> {
                     fnInfo.inWhichClass = classTypeInfo;
-                    fnInfo.fnType = Transfer.fnTypeTransfer(fnInfo);
+                    fnInfo.irFn = new IRFn(fnInfo);
                 });
                 if (classTypeInfo.haveConst) {
-                    structType.constructFnType = Transfer.constructorTransfer(structType);
+                    var constructType = Transfer.constructorTransfer(structType);
+                    structType.constructFn = new IRFn(constructType, false);
                 }
             }
         });
         gScope.funMap.forEach((funNameString, funcInfo) -> {
-            funcInfo.fnType = Transfer.fnTypeTransfer(funcInfo);
+            funcInfo.irFn = new IRFn(funcInfo);
         });
     }
 
@@ -184,7 +185,7 @@ public class IRBuilder implements ASTVisitor {
 
         // 1. build the function information
         var funcInfo = cur.scope.getFuncInfo(it.funcNameString, null);
-        IRFn nowFn = new IRFn(funcInfo);
+        IRFn nowFn = funcInfo.irFn;
 
         // 2. add it to topModule and set the current status
         topModule.globalFnList.add(nowFn);
@@ -194,7 +195,7 @@ public class IRBuilder implements ASTVisitor {
 
         // *** call the builtin function
         if (it.funcNameString.equals("main"))
-            topModule.varInitFnList.forEach(initFn -> new CallInst((IRFnType) initFn.valueType, cur.block));
+            topModule.varInitFnList.forEach(initFn -> new CallInst(initFn, cur.block));
 
         // 2.1 add retBlock and retAddr
         nowFn.retBlock = new IRBasicBlock(0);
@@ -226,7 +227,7 @@ public class IRBuilder implements ASTVisitor {
     }
 
     private IRBaseValue arrMalloc(IRPtType addrType, ArrayList<ExprNode> dimList, int k) {
-        IRFnType fnType = getFnType("__malloc");
+        IRFn fn = getBuiltInFn("__malloc");
 
         dimList.get(k).accept(this);
         IRBaseValue arrLength = new BinaryInst(BOP.add, dimList.get(k).irValue, new IntConst(1, 32),
@@ -234,7 +235,7 @@ public class IRBuilder implements ASTVisitor {
         IRBaseValue arrSize = new BinaryInst(BOP.mul, arrLength,
                 new IntConst(addrType.derefType().getSize(topModule), 32), cur.block);
 
-        var i8Ptr = new CallInst(fnType, cur.block, arrSize);
+        var i8Ptr = new CallInst(fn, cur.block, arrSize);
 
         var i32Ptr = new CastInst(i8Ptr, new IRPtType(new IRIntType(32), 1), CastType.bitcast, cur.block);
         new StoreInst(dimList.get(k).irValue, i32Ptr, cur.block);
@@ -294,25 +295,25 @@ public class IRBuilder implements ASTVisitor {
     public void visit(CreatorExprNode it) {
         IRType pt = Transfer.typeTransfer(it.typeName);
         if (it.dimenSize.size() == 0) {
-            IRFnType fnType = getFnType("__malloc");
+            IRFn fn = getBuiltInFn("__malloc");
             IRBaseValue size = new IntConst((((IRPtType) pt).derefType()).getSize(topModule), 32);
-            it.irValue = new CallInst(fnType, cur.block, size);
+            it.irValue = new CallInst(fn, cur.block, size);
 
             var classInfo = (ClassType) gScope.typeMap.get(it.typeName.typeNameString);
             if (classInfo.haveConst) {
-                IRFnType constructorType = classInfo.structType.constructFnType;
+                IRFn constructor = classInfo.structType.constructFn;
                 it.irValue = new CastInst(it.irValue, pt, CastType.bitcast, cur.block);
-                it.irValue = new CallInst(constructorType, cur.block, it.irValue);
+                it.irValue = new CallInst(constructor, cur.block, it.irValue);
             }
         } else {
             it.irValue = arrMalloc((IRPtType) pt, it.dimenSize, 0);
         }
     }
 
-    private IRFnType getFnType(String funcNameString) {
-        for (var fnType : topModule.builtinFnList) {
-            if (fnType.fnNameString.equals(funcNameString))
-                return (IRFnType) fnType;
+    private IRFn getBuiltInFn(String funcNameString) {
+        for (var fn : topModule.builtinFnList) {
+            if (fn.nameString.equals(funcNameString))
+                return fn;
         }
         return null;
     }
@@ -323,19 +324,19 @@ public class IRBuilder implements ASTVisitor {
         var binaryOpCode = Transfer.binaryArthTransfer(it.opcode);
         var icmpOpCode = Transfer.binaryCmpTransfer(it.opcode);
         if (binaryOpCode == BOP.add)
-            it.irValue = new CallInst(getFnType("__str_plus"), cur.block, it.lhs.irValue, it.rhs.irValue);
+            it.irValue = new CallInst(getBuiltInFn("__str_plus"), cur.block, it.lhs.irValue, it.rhs.irValue);
         if (icmpOpCode == ICMPOP.eq)
-            it.irValue = new CallInst(getFnType("__str_eq"), cur.block, it.lhs.irValue, it.rhs.irValue);
+            it.irValue = new CallInst(getBuiltInFn("__str_eq"), cur.block, it.lhs.irValue, it.rhs.irValue);
         if (icmpOpCode == ICMPOP.ne)
-            it.irValue = new CallInst(getFnType("__str_ne"), cur.block, it.lhs.irValue, it.rhs.irValue);
+            it.irValue = new CallInst(getBuiltInFn("__str_ne"), cur.block, it.lhs.irValue, it.rhs.irValue);
         if (icmpOpCode == ICMPOP.slt)
-            it.irValue = new CallInst(getFnType("__str_lt"), cur.block, it.lhs.irValue, it.rhs.irValue);
+            it.irValue = new CallInst(getBuiltInFn("__str_lt"), cur.block, it.lhs.irValue, it.rhs.irValue);
         if (icmpOpCode == ICMPOP.sle)
-            it.irValue = new CallInst(getFnType("__str_le"), cur.block, it.lhs.irValue, it.rhs.irValue);
+            it.irValue = new CallInst(getBuiltInFn("__str_le"), cur.block, it.lhs.irValue, it.rhs.irValue);
         if (icmpOpCode == ICMPOP.sgt)
-            it.irValue = new CallInst(getFnType("__str_gt"), cur.block, it.lhs.irValue, it.rhs.irValue);
+            it.irValue = new CallInst(getBuiltInFn("__str_gt"), cur.block, it.lhs.irValue, it.rhs.irValue);
         if (icmpOpCode == ICMPOP.sge)
-            it.irValue = new CallInst(getFnType("__str_ge"), cur.block, it.lhs.irValue, it.rhs.irValue);
+            it.irValue = new CallInst(getBuiltInFn("__str_ge"), cur.block, it.lhs.irValue, it.rhs.irValue);
     }
 
     @Override
@@ -470,11 +471,11 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(FuncCallExprNode it) {
-        IRFnType calledFnType = null;
+        IRFn calledFn = null;
         ArrayList<IRBaseValue> argList = new ArrayList<>();
 
-        calledFnType = cur.whoseMember == null ? cur.scope.getFuncInfo(it.FuncNameString, null).fnType
-                : cur.whoseMember.getFunc(it.FuncNameString, null).fnType;
+        calledFn = cur.whoseMember == null ? cur.scope.getFuncInfo(it.FuncNameString, null).irFn
+                : cur.whoseMember.getFunc(it.FuncNameString, null).irFn;
 
         // you can still get the member-function when using cur.scope
         // as innner function call each other
@@ -482,7 +483,7 @@ public class IRBuilder implements ASTVisitor {
 
         // if calledFn is a member function
         // && you don't get it from a whoseMember scope(no using "this")
-        if (calledFnType.methodFrom != null && cur.whoseMember == null) {
+        if (((IRFnType) calledFn.valueType).methodFrom != null && cur.whoseMember == null) {
             var thisPara = cur.fn.paraList.get(0);
             argList.add(new LoadInst(thisPara.storedAddr, cur.block));
         }
@@ -494,7 +495,7 @@ public class IRBuilder implements ASTVisitor {
             argList.add(argExpr.irValue);
         });
 
-        it.irValue = new CallInst(calledFnType, argList, cur.block);
+        it.irValue = new CallInst(calledFn, argList, cur.block);
     }
 
     @Override
@@ -502,8 +503,8 @@ public class IRBuilder implements ASTVisitor {
         // since we have got the fnType information
 
         // 1. build the function information
-        var constructType = ((ClassType) gScope.typeMap.get(it.consNameString)).structType.constructFnType;
-        IRFn constructor = new IRFn(constructType);
+        IRFn constructor = ((ClassType) gScope.typeMap.get(it.consNameString)).structType.constructFn;
+        var constructType = (IRFnType) constructor.valueType;
 
         // 2. add it to topModule and set the current status
         topModule.globalFnList.add(constructor);

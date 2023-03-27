@@ -3,6 +3,7 @@ package IR.IRType;
 import java.util.ArrayList;
 
 import IR.IRModule;
+import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import Share.MyException;
 
 // reference to https://llvm.org/doxygen/classllvm_1_1StructType.html
@@ -15,7 +16,7 @@ public class IRStructType extends IRType {
     public boolean isSolid = false;
     public ArrayList<IRType> fieldTypeList = new ArrayList<>();
 
-    public IRFnType constructFnType = null;
+    public IRFn constructFn = null;
 
     public IRStructType(String className) {
         super(IRTypeId.StructTypeId);
@@ -60,7 +61,7 @@ public class IRStructType extends IRType {
             if (solidStructType == null)
                 throw new MyException("Can not find struct " + className);
             this.isSolid = true;
-            this.constructFnType = solidStructType.constructFnType;
+            this.constructFn = solidStructType.constructFn;
             this.fieldTypeList = solidStructType.fieldTypeList;
         }
         int sum = 0;

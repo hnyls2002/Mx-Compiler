@@ -8,6 +8,7 @@ import ASM.ASMOprand.VirtualReg;
 import ASM.ASMOprand.ASMGlobal.ASMConstStr;
 import ASM.ASMOprand.ASMGlobal.ASMGlobalVar;
 import IR.IRModule;
+import IR.IRType.IRFnType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
@@ -134,7 +135,8 @@ public class ASMPreHandler implements IRModulePass, IRFnPass, IRBlockPass, IRIns
     @Override
     public void visit(CallInst inst) {
         // preload the return value
-        if (!(inst.calledFnType.retType instanceof IRVoidType))
+        var fnType = (IRFnType) inst.callee.valueType;
+        if (!(fnType.retType instanceof IRVoidType))
             inst.asOprand = new VirtualReg(cur.fn);
     }
 

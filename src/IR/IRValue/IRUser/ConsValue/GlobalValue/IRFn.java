@@ -13,6 +13,7 @@ import Middleend.IROptimize.Tools.LoopAnalyzer.Loop;
 import Share.MyException;
 
 public class IRFn extends BaseGlobalValue {
+    public boolean isBuiltIn = false;
     public ArrayList<IRParameter> paraList = new ArrayList<>();
     public ArrayList<IRBasicBlock> blockList = new ArrayList<>();
     public IRBaseValue retValueAddr = null;
@@ -27,13 +28,14 @@ public class IRFn extends BaseGlobalValue {
     public IRFn(FuncInfo fnInfo) {
         // 1. build the IRFn
         super(Transfer.fnTypeTransfer(fnInfo));
-        this.nameString = fnInfo.fnType.fnNameString;
-        fnInfo.fnType = (IRFnType) this.valueType;
+        this.nameString = ((IRFnType) valueType).fnNameString;
+        fnInfo.irFn = this;
     }
 
-    public IRFn(IRFnType constructorType) {
-        super(constructorType);
-        this.nameString = constructorType.fnNameString;
+    public IRFn(IRFnType fnType, boolean isBuiltIn) {
+        super(fnType);
+        this.nameString = fnType.fnNameString;
+        this.isBuiltIn = isBuiltIn;
     }
 
     private IRFn(IRFnType fnType, String fnNameString) {

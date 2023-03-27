@@ -33,7 +33,7 @@ public class IRPrinter implements IRModulePass, IRFnPass, IRBlockPass {
     public void runOnIRModule(IRModule irModule) {
         System.out.print(ExternInfo.getExternInfo());
         System.out.print('\n');
-        irModule.builtinFnList.forEach(fnType -> System.out.println(fnType.formatType()));
+        irModule.builtinFnList.forEach(fn -> System.out.println(fn.valueType.formatType()));
         System.out.print('\n');
         irModule.classList.forEach(this::printClassDef);
         if (!irModule.classList.isEmpty())

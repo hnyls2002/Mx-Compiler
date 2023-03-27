@@ -4,14 +4,14 @@ import java.util.ArrayList;
 
 import AST.Util.Position;
 import AST.Util.TypeName;
-import IR.IRType.IRFnType;
+import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 
 public class FuncInfo {
     public TypeName retType;
     public String funcName;
     public ArrayList<TypeIdPair> paraList = new ArrayList<>();
     public Position pos;
-    public IRFnType fnType;
+    public IRFn irFn;
     public ClassType inWhichClass = null;
 
     public FuncInfo(TypeName ty, String funcName, Position pos) {

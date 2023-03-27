@@ -26,6 +26,7 @@ import ASM.ASMOprand.VirtualReg;
 import ASM.ASMOprand.ASMGlobal.ASMGlobalData;
 import IR.IRModule;
 import IR.IRType.IRArrayType;
+import IR.IRType.IRFnType;
 import IR.IRType.IRStructType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBasicBlock;
@@ -236,10 +237,11 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
         }
         cur.fn.spilledArgCnt = Math.max(cur.fn.spilledArgCnt, Math.max(inst.getOprandNum() - RV32.MAX_ARG_NUM, 0));
 
-        new ASMCallInst(inst.calledFnType.fnNameString, inst.getOprandNum(), cur.block);
+        new ASMCallInst(inst.callee.getName(), inst.getOprandNum(), cur.block);
 
         // get ret value
-        if (!(inst.calledFnType.retType instanceof IRVoidType)) {
+        var fnType = (IRFnType) inst.callee.valueType;
+        if (!(fnType.retType instanceof IRVoidType)) {
             PhysicalReg rs = PhysicalReg.getPhyReg("a0");
             var rd = (Register) inst.asOprand;
             new ASMMoveInst(rd, rs, cur.block);
