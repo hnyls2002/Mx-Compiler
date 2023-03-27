@@ -9,6 +9,7 @@ import IR.IRValue.IRParameter;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import IR.Util.Transfer;
+import Middleend.IROptimize.Tools.LoopAnalyzer.Loop;
 import Share.MyException;
 
 public class IRFn extends BaseGlobalValue {
@@ -16,6 +17,9 @@ public class IRFn extends BaseGlobalValue {
     public ArrayList<IRBasicBlock> blockList = new ArrayList<>();
     public IRBaseValue retValueAddr = null;
     public IRBasicBlock retBlock = null;
+
+    // for loop analysis
+    public ArrayList<Loop> topLoopList = new ArrayList<>();
 
     // asm
     public ASMFn asmFn = null;

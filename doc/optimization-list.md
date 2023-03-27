@@ -1,5 +1,22 @@
 ### IR optimization list
-#### aggressive stack allocation
+#### function inlining
+
+#### loop analysis
+
+formal definition
+- single entry point : header
+- back edge : tail -> head &&  head dominates tail
+- **in reducible form : back edges = retreating edges**
+  - back edge : in loop's definition
+  - retreating edge : in dfs tree, from descendant to ancestor
+
+how to find loops
+- build the dominator tree
+- identify the back edges
+- find the natural loops associated with the back edges
+
+#### loop invariant code motion
+
 #### spare conditional constant propagation
 
 Lattice value (only upwards): undefined -> constant -> unknown
@@ -8,8 +25,8 @@ Worklist algorithm
 - Block executable worklist
 - Variable status worklist
 
-#### constant folding
-#### constant condition elimination
+constant folding can be done in this phase
+
 #### copy propagation
 #### common subexpression elimination
 #### Aggressive Dead Code Elimination
@@ -31,6 +48,7 @@ How to build the control dependence graph?
   (oh!, because it's not strict domination relationship)
 
 ### ASM optimization list
+#### aggressive stack allocation
 
 #### coalesce moves
 if rd and rs are the same, then the move is redundant
