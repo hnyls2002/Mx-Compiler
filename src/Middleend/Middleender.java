@@ -17,6 +17,13 @@ public class Middleender {
         IRBuilder irBuilder = new IRBuilder(ast, gScope);
         IRModule irModule = irBuilder.buildIR();
 
+        new IRRenamer().runOnIRModule(irModule);
+
+        if (!testOnline) {
+            IRPrinter irPrinter = new IRPrinter(filePath + "test_not_mem2reg.ll");
+            irPrinter.runOnIRModule(irModule);
+        }
+
         new Mem2Reg().runOnIRModule(irModule);
 
         for (int i = 0; i < 2; ++i) {
@@ -37,7 +44,7 @@ public class Middleender {
 
         new IRRenamer().runOnIRModule(irModule);
         if (!testOnline) {
-            IRPrinter irPrinter = new IRPrinter(filePath + "test_fake.ll");
+            IRPrinter irPrinter = new IRPrinter(filePath + "test_no_phi.ll");
             irPrinter.runOnIRModule(irModule);
         }
 
