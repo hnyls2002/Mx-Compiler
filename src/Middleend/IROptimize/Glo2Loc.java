@@ -56,16 +56,16 @@ public class Glo2Loc implements IRModulePass, IRFnPass {
         }
 
         // for debug
-        System.err.println("fn: " + fn.nameString);
-        fn.callInfo.callInst.forEach(call -> {
-            System.err.println("--------------------------------");
-            storeBeforeCall.get(call).forEach(glo -> System.err.println("store: " +
-                    glo.nameString));
-            System.err.println(call.formatDef());
-            loadAfterCall.get(call).forEach(glo -> System.err.println("load: " +
-                    glo.nameString));
-            System.err.println("--------------------------------\n");
-        });
+        // System.err.println("fn: " + fn.nameString);
+        // fn.callInfo.callInst.forEach(call -> {
+        // System.err.println("--------------------------------");
+        // storeBeforeCall.get(call).forEach(glo -> System.err.println("store: " +
+        // glo.nameString));
+        // System.err.println(call.formatDef());
+        // loadAfterCall.get(call).forEach(glo -> System.err.println("load: " +
+        // glo.nameString));
+        // System.err.println("--------------------------------\n");
+        // });
 
         // create alloca for every global var in this function
         for (var glo : fn.callInfo.gloSet) {

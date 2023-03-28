@@ -45,6 +45,7 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
     // other
     HashSet<Pair<Register, Register>> adjSet = new HashSet<>();
     HashSet<Register> newTemps = new HashSet<>();
+    HashSet<Register> newIntroduced = new HashSet<>();
 
     class NodeInfo {
         int degree;
@@ -393,8 +394,8 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
         double minCost = Double.MAX_VALUE;
         Register minCostNode = null;
         for (var n : spillWorkList) {
-            // if (newTemps.contains(n))
-            // continue;
+            if (newIntroduced.contains(n))
+                continue;
             double cost = nodeInfoMap.get(n).loopCost / nodeInfoMap.get(n).degree;
             if (cost < minCost) {
                 minCost = cost;
@@ -477,6 +478,7 @@ public class RegisterColoring implements ASMModulePass, ASMFnPass {
         initial.addAll(coloredNodes);
         coloredNodes.clear();
         coalescedNodes.clear();
+        newIntroduced.addAll(newTemps);
 
         // clear the move lists
         coalescedMoves.clear();

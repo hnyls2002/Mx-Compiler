@@ -29,6 +29,7 @@ public class SpilledColoring {
     HashSet<ASMMoveInst> waitingMoves = new HashSet<>();
     HashSet<Pair<Register, Register>> adjSet = new HashSet<>();
     ArrayList<Register> selectStack = new ArrayList<>();
+    int colorUpperBound = 0;
 
     public void run(RegisterColoring RCInfo, ASMFn fn) {
         spilledNodes.addAll(RCInfo.spilledNodes);
@@ -62,6 +63,8 @@ public class SpilledColoring {
             info.spillPlace = new VirtualOffset(SPLabel.spilledReg, findColor(reg, fn));
         }
 
+        fn.spilledRegCnt += colorUpperBound;
+
         for (var reg : spilledNodes) {
             var alias = getAlias(reg);
             if (alias == reg)
@@ -81,8 +84,8 @@ public class SpilledColoring {
         int color = 0;
         while (colorSet.contains(color))
             ++color;
-        asmFn.spilledRegCnt = Math.max(asmFn.spilledRegCnt, color + 1);
-        return color;
+        colorUpperBound = Math.max(colorUpperBound, color + 1);
+        return color + asmFn.spilledRegCnt;
     }
 
     private void rebuildInfo(Register v) {
