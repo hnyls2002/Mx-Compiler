@@ -9,6 +9,7 @@ import IR.IRValue.IRParameter;
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
 import IR.Util.Transfer;
+import Middleend.IROptimize.Tools.CallGraphAnalyzer.CallInfo;
 import Middleend.IROptimize.Tools.LoopAnalyzer.Loop;
 import Share.MyException;
 
@@ -24,6 +25,9 @@ public class IRFn extends BaseGlobalValue {
 
     // asm
     public ASMFn asmFn = null;
+
+    // for call graph
+    public CallInfo callInfo = new CallInfo();
 
     public IRFn(FuncInfo fnInfo) {
         // 1. build the IRFn

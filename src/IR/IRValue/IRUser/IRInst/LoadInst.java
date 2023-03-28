@@ -13,6 +13,13 @@ public class LoadInst extends IRBaseInst {
         block.addInst(this);
     }
 
+    public LoadInst(IRBaseValue srcAddr, IRBasicBlock block, int insertIdx) {
+        super(null, block);
+        valueType = ((IRPtType) (srcAddr.valueType)).derefType();
+        appendOprand(srcAddr);
+        block.instList.add(insertIdx, this);
+    }
+
     @Override
     public String formatDef() {
         var ret = "load " + valueType.formatType() + ", ";

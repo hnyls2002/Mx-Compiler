@@ -29,6 +29,14 @@ public class CastInst extends IRBaseInst {
         block.addInst(this);
     }
 
+    public CastInst(IRBaseValue srcValue, IRType targetType, CastType opCode, IRBasicBlock block, int insertIdx) {
+        super(targetType, block);
+        appendOprand(srcValue);
+        this.targetType = targetType;
+        this.opCode = opCode;
+        block.instList.add(insertIdx, this);
+    }
+
     @Override
     public String formatDef() {
         var ret = opCode.name() + ' ' + getOprand(0).formatUseWithType() + " to ";

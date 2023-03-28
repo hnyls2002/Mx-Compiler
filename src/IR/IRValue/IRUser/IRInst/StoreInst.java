@@ -13,12 +13,7 @@ import Share.Visitors.IRInstVisitor;
 public class StoreInst extends IRBaseInst {
     // storedValue 0, destAddr 1
 
-    public StoreInst(IRBaseValue storedValue, IRBaseValue destAddr, IRBasicBlock block) {
-        super(new IRVoidType(), block);
-
-        appendOprand(storedValue);
-        appendOprand(destAddr);
-
+    private boolean trans(IRBaseValue storedValue, IRBaseValue destAddr, IRBasicBlock block, int insertIdx) {
         var storedType = storedValue.valueType;
         var derefType = ((IRPtType) destAddr.valueType).derefType();
         if (!(storedValue instanceof NullConst) && !storedType.equals(derefType)) {
@@ -32,10 +27,36 @@ public class StoreInst extends IRBaseInst {
                     opCode = CastType.zext;
             } else
                 throw new MyException("Cast Instruction unknown error");
-            setOprand(0, new CastInst(storedValue, derefType, opCode, block));
+
+            if (insertIdx == -1)
+                setOprand(0, new CastInst(storedValue, derefType, opCode, block));
+            else
+                setOprand(0, new CastInst(storedValue, derefType, opCode, block, insertIdx));
+            return true;
         }
+        return false;
+    }
+
+    public StoreInst(IRBaseValue storedValue, IRBaseValue destAddr, IRBasicBlock block) {
+        super(new IRVoidType(), block);
+
+        appendOprand(storedValue);
+        appendOprand(destAddr);
+
+        trans(storedValue, destAddr, block, -1);
 
         block.addInst(this);
+    }
+
+    public StoreInst(IRBaseValue storedValue, IRBaseValue destAddr, IRBasicBlock block, int insertIdx) {
+        super(new IRVoidType(), block);
+
+        appendOprand(storedValue);
+        appendOprand(destAddr);
+
+        boolean isCast = trans(storedValue, destAddr, block, insertIdx);
+
+        block.instList.add(isCast ? insertIdx + 1 : insertIdx, this);
     }
 
     @Override

@@ -6,6 +6,7 @@ import AST.ASTNode;
 import AST.Scopes.GlobalScope;
 import IR.IRModule;
 import Middleend.IROptimize.ADCE;
+import Middleend.IROptimize.Glo2Loc;
 import Middleend.IROptimize.Mem2Reg;
 import Middleend.IROptimize.PhiElimination;
 import Middleend.IROptimize.SCCP;
@@ -16,6 +17,10 @@ public class Middleender {
             throws FileNotFoundException {
         IRBuilder irBuilder = new IRBuilder(ast, gScope);
         IRModule irModule = irBuilder.buildIR();
+
+        new IRRenamer().runOnIRModule(irModule);
+
+        new Glo2Loc().runOnIRModule(irModule);
 
         new IRRenamer().runOnIRModule(irModule);
 
