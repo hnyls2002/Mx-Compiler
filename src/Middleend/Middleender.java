@@ -7,18 +7,16 @@ import AST.Scopes.GlobalScope;
 import IR.IRModule;
 import Middleend.IROptimize.ADCE;
 import Middleend.IROptimize.Glo2Loc;
+import Middleend.IROptimize.LICM;
 import Middleend.IROptimize.Mem2Reg;
 import Middleend.IROptimize.PhiElimination;
 import Middleend.IROptimize.SCCP;
-import Middleend.IROptimize.Tools.LoopAnalyzer;
 
 public class Middleender {
     public IRModule run(ASTNode ast, GlobalScope gScope, String filePath, boolean testOnline)
             throws FileNotFoundException {
         IRBuilder irBuilder = new IRBuilder(ast, gScope);
         IRModule irModule = irBuilder.buildIR();
-
-        new IRRenamer().runOnIRModule(irModule);
 
         new Glo2Loc().runOnIRModule(irModule);
 
@@ -31,14 +29,13 @@ public class Middleender {
 
         new Mem2Reg().runOnIRModule(irModule);
 
-        for (int i = 0; i < 2; ++i) {
-            new ADCE().runOnIRModule(irModule);
+        for (int i = 0; i < 3; ++i) {
             new SCCP().runOnIRModule(irModule);
+            new LICM().runOnIRModule(irModule);
+            new ADCE().runOnIRModule(irModule);
         }
 
         new IRRenamer().runOnIRModule(irModule);
-
-        new LoopAnalyzer().runOnIRModule(irModule);
 
         if (!testOnline) {
             IRPrinter irPrinter = new IRPrinter(filePath + "test.ll");

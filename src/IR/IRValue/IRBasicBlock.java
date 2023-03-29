@@ -92,6 +92,7 @@ public class IRBasicBlock extends IRBaseValue {
     }
 
     public void addInstBeforeTerminal(IRBaseInst inst) {
+        inst.parentBlock = this;
         for (int i = 0; i <= instList.size(); ++i)
             if (i == instList.size() || instList.get(i) == terminal) {
                 instList.add(i, inst);

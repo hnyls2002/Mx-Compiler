@@ -342,6 +342,8 @@ public class SCCP implements IRModulePass, IRFnPass, IRInstVisitor {
             return 0;
         else if (val instanceof IRBaseInst inst && inst.valueType instanceof IRIntType)
             return constantMap.get(inst);
+        else if (val.valueType instanceof IRPtType)
+            return constantMap.get(val);
         throw new MyException("Unexpected value type in getConstInt");
     }
 

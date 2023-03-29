@@ -16,18 +16,6 @@ import Share.Pass.IRPass.IRFnPass;
 import Share.Pass.IRPass.IRModulePass;
 
 public class LoopAnalyzer implements IRModulePass, IRFnPass {
-    public class Loop {
-        public IRBasicBlock header, preHeader;
-        public HashSet<IRBasicBlock> tails = new HashSet<>();
-        public HashSet<IRBasicBlock> contents = new HashSet<>();
-        public HashSet<Loop> subLoops = new HashSet<>();
-        public Loop parentLoop = null;
-
-        public Loop(IRBasicBlock header) {
-            this.header = header;
-        }
-    }
-
     @Override
     public void runOnIRModule(IRModule irModule) {
         new DTBuilder().buildDT(irModule, false);
@@ -37,14 +25,15 @@ public class LoopAnalyzer implements IRModulePass, IRFnPass {
     }
 
     HashSet<Pair<IRBasicBlock, IRBasicBlock>> backEdgeList = new HashSet<>();
-    HashMap<IRBasicBlock, Loop> headerLoopMap = new HashMap<>();
-    Stack<Loop> loopStack = new Stack<>();
+    HashMap<IRBasicBlock, IRLoop> headerLoopMap = new HashMap<>();
+    Stack<IRLoop> loopStack = new Stack<>();
     HashSet<IRBasicBlock> visited = new HashSet<>();
 
     @Override
     public void runOnIRFn(IRFn fn) {
         // find back edges : block -> suc && suc dominates block
         // System.err.println("<" + fn.getName() + ">");
+        fn.topLoopList.clear();
 
         var tempBlockList = new ArrayList<IRBasicBlock>(fn.blockList);
         tempBlockList.add(fn.retBlock);
@@ -60,7 +49,7 @@ public class LoopAnalyzer implements IRModulePass, IRFnPass {
                     backEdgeList.add(new Pair<>(block, suc));
 
         for (var backEdge : backEdgeList)
-            buildNaturalLoop(backEdge.a, backEdge.b);
+            buildNaturalLoop(backEdge.a, backEdge.b, fn);
 
         buildLoopTree(tempBlockList.get(0), fn);
 
@@ -72,8 +61,8 @@ public class LoopAnalyzer implements IRModulePass, IRFnPass {
         // });
     }
 
-    private void buildNaturalLoop(IRBasicBlock tail, IRBasicBlock head) {
-        headerLoopMap.putIfAbsent(head, new Loop(head));
+    private void buildNaturalLoop(IRBasicBlock tail, IRBasicBlock head, IRFn fn) {
+        headerLoopMap.putIfAbsent(head, new IRLoop(head, fn));
         var loop = headerLoopMap.get(head);
         loop.contents.add(head);
         loop.contents.add(tail);
@@ -101,7 +90,7 @@ public class LoopAnalyzer implements IRModulePass, IRFnPass {
         while (!loopStack.isEmpty() && !loopStack.peek().contents.contains(block))
             loopStack.pop();
 
-        Loop parentLoop = loopStack.isEmpty() ? null : loopStack.peek();
+        IRLoop parentLoop = loopStack.isEmpty() ? null : loopStack.peek();
 
         if (headerLoopMap.containsKey(block)) {
             var loop = headerLoopMap.get(block);
@@ -111,6 +100,7 @@ public class LoopAnalyzer implements IRModulePass, IRFnPass {
             else
                 fn.topLoopList.add(loop);
             loopStack.push(loop);
+            loop.loopDepth = loopStack.size();
         }
 
         block.loopDepth = loopStack.size();

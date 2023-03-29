@@ -1,6 +1,16 @@
 ### IR optimization list
 #### function inlining
 
+#### copy propagation
+
+After mem2reg, there is no copy in the IR. Mem2reg pass actually does copy propagation.
+
+#### alias analysis
+
+- local variable : no alias(mem2reg pass has eliminated all the copy)
+- global variable : may alias
+  - directly load from global variable
+
 #### loop analysis
 
 formal definition
@@ -17,6 +27,19 @@ how to find loops
 
 #### loop invariant code motion
 
+In SSA form, how to determine if an instruction is loop invariant?
+
+- if an instruction is not in the loop, then it's loop invariant
+- all of its operands are loop invariant and cause no side effect
+  - call will use (load or store) an address, as the value in the address may be changed
+  - alloca
+  - store
+  - ret
+- unchanged in the loop : **require alias analysis**
+  - phi : not considered as loop invariant
+  - load from global variable may change
+    address is loop invariant, and the address will not been stored in the loop
+
 #### spare conditional constant propagation
 
 Lattice value (only upwards): undefined -> constant -> unknown
@@ -27,7 +50,6 @@ Worklist algorithm
 
 constant folding can be done in this phase
 
-#### copy propagation
 #### common subexpression elimination
 #### Aggressive Dead Code Elimination
 

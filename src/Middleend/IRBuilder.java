@@ -269,6 +269,7 @@ public class IRBuilder implements ASTVisitor {
             cur.block = bodyBlock;
             new StoreInst(arrMalloc((IRPtType) addrType.derefType(), dimList, k + 1), curPtr, cur.block);
             cur.block.addInst((IRBaseInst) nexPtr);
+            ((IRBaseInst) nexPtr).parentBlock = cur.block;
 
             // ((PhiInst) curPtr).block2 = cur.block;
             // ((PhiInst) curPtr).res2 = nexPtr;

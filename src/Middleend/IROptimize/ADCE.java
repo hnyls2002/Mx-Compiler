@@ -84,7 +84,7 @@ public class ADCE implements IRModulePass, IRFnPass {
             var fnName = call.callee.nameString;
             if (builtInSideEffectFn.contains(fnName))
                 return true;
-            return call.callee.callInfo.hasSideEffect;
+            return call.callee.callInfo.hasStoreInst;
         }
         if (inst instanceof StoreInst || inst instanceof RetInst)
             return true;

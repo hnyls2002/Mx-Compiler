@@ -14,8 +14,8 @@ public class CFGSimplifier {
 
     private boolean mergeJudge(IRBasicBlock block, IRFn irFn) {
         // if the block has only one suc and the suc has only one pre
-        if (block.sucList.size() == 1 && block.sucList.iterator().next().preList.size() == 1
-                && block.sucList.iterator().next() != irFn.retBlock)
+        if (block != irFn.blockList.get(0) && block.sucList.size() == 1
+                && block.sucList.iterator().next().preList.size() == 1)
             return true;
         return false;
     }

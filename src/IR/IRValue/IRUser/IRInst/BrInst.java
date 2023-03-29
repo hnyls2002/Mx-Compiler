@@ -11,7 +11,7 @@ public class BrInst extends IRBaseInst {
 
     // conditional jump
     public BrInst(IRBaseValue condition, IRBasicBlock trueBlock, IRBasicBlock falseBlock, IRBasicBlock curBlock) {
-        super(new IRVoidType(),curBlock);
+        super(new IRVoidType(), curBlock);
 
         if (condition.valueType instanceof IRIntType t && t.intLen != 1)
             condition = new CastInst(condition, new IRIntType(1), CastType.trunc, curBlock);

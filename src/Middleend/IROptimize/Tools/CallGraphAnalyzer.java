@@ -22,7 +22,7 @@ public class CallGraphAnalyzer implements IRModulePass, IRFnPass {
         public HashSet<GlobalVariable> gloSet = new HashSet<>();
         public HashSet<GlobalVariable> gloDefs = new HashSet<>(), gloUses = new HashSet<>();
         public HashSet<CallInst> callInst = new HashSet<>();
-        public boolean hasSideEffect = false;
+        public boolean hasStoreInst = false, hasLoadInst = false;
 
         public void clear() {
             gloSet.clear();
@@ -56,8 +56,13 @@ public class CallGraphAnalyzer implements IRModulePass, IRFnPass {
                 if (size0 != caller.callInfo.gloDefs.size() || size1 != caller.callInfo.gloUses.size())
                     if (!workList.contains(caller))
                         workList.offer(caller);
-                if (fn.callInfo.hasSideEffect && !caller.callInfo.hasSideEffect) {
-                    caller.callInfo.hasSideEffect = true;
+                if (fn.callInfo.hasStoreInst && !caller.callInfo.hasStoreInst) {
+                    caller.callInfo.hasStoreInst = true;
+                    if (!workList.contains(caller))
+                        workList.offer(caller);
+                }
+                if (fn.callInfo.hasLoadInst && !caller.callInfo.hasLoadInst) {
+                    caller.callInfo.hasLoadInst = true;
                     if (!workList.contains(caller))
                         workList.offer(caller);
                 }
@@ -84,7 +89,9 @@ public class CallGraphAnalyzer implements IRModulePass, IRFnPass {
                 }
 
                 if (inst instanceof StoreInst)
-                    fn.callInfo.hasSideEffect = true;
+                    fn.callInfo.hasStoreInst = true;
+                if (inst instanceof LoadInst)
+                    fn.callInfo.hasLoadInst = true;
             }
         }
     }
