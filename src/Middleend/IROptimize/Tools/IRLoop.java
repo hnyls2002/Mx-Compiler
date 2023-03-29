@@ -1,7 +1,6 @@
 package Middleend.IROptimize.Tools;
 
 import java.util.HashSet;
-import java.util.List;
 
 import IR.IRValue.IRBaseValue;
 import IR.IRValue.IRBasicBlock;
@@ -24,9 +23,6 @@ public class IRLoop {
     public IRLoop parentLoop = null;
     public IRFn parentFn = null;
     public int loopDepth = 0;
-
-    static public List<String> builtInSideEffectFn = List.of(
-            "__malloc", "print", "println", "getString", "getInt", "printInt", "printlnInt");
 
     public IRLoop(IRBasicBlock header, IRFn parentFn) {
         this.header = header;
@@ -57,12 +53,10 @@ public class IRLoop {
                 || inst instanceof StoreInst)
             return false;
 
-        if (inst instanceof CallInst call) {
-            if (builtInSideEffectFn.contains(call.callee.nameString))
-                return false;
-            if (call.callee.callInfo.hasLoadInst || call.callee.callInfo.hasStoreInst)
-                return false;
-        }
+        if (inst instanceof CallInst call && call.callee.callInfo.mayVariant())
+            return false;
+        // if (inst instanceof CallInst)
+        // return false;
 
         // check all the operands
         for (int i = 0; i < inst.getOprandNum(); ++i)

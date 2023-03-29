@@ -1,8 +1,10 @@
 package Middleend.IROptimize.Tools;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 import IR.IRModule;
@@ -18,32 +20,55 @@ public class CallGraphAnalyzer implements IRModulePass, IRFnPass {
     public static class CallInfo {
         // caller and callee : direct edge
         // defs and uses : recursive until find a fixed point
+        public IRFn parentFn;
         public HashSet<IRFn> callees = new HashSet<>(), callers = new HashSet<>();
         public HashSet<GlobalVariable> gloSet = new HashSet<>();
         public HashSet<GlobalVariable> gloDefs = new HashSet<>(), gloUses = new HashSet<>();
         public HashSet<CallInst> callInst = new HashSet<>();
-        public boolean hasStoreInst = false, hasLoadInst = false;
 
-        public void clear() {
-            gloSet.clear();
-            callees.clear();
-            callees.clear();
-            gloDefs.clear();
-            gloUses.clear();
-            callInst.clear();
+        static final List<String> outSideEffectFn = new ArrayList<String>(
+                Arrays.asList("print", "println", "printInt", "printlnInt"));
+        static public List<String> variantFn = List.of("__malloc", "print", "println", "getString", "getInt",
+                "printInt", "printlnInt");
+
+        // store , output
+        // : for ADCE
+        private boolean outSideEffectFlag = false;
+
+        // load, store, input, output, malloc
+        // : for loop variant code motion
+        private boolean mayVariantFlag = false;
+
+        public boolean hasOutSideEffect() {
+            return outSideEffectFlag || outSideEffectFn.contains(parentFn.nameString);
+        }
+
+        public boolean mayVariant() {
+            return mayVariantFlag || variantFn.contains(parentFn.nameString);
+        }
+
+        public CallInfo(IRFn fn) {
+            this.parentFn = fn;
         }
     }
 
+    public IRModule irModule;
+
     @Override
     public void runOnIRModule(IRModule irModule) {
-        irModule.globalFnList.forEach(fn -> fn.callInfo.clear());
-        irModule.varInitFnList.forEach(fn -> fn.callInfo.clear());
+        this.irModule = irModule;
+        irModule.globalFnList.forEach(fn -> fn.callInfo = new CallInfo(fn));
+        irModule.varInitFnList.forEach(fn -> fn.callInfo = new CallInfo(fn));
+        // builtin function should have callInfo
+        irModule.builtinFnList.forEach(fn -> fn.callInfo = new CallInfo(fn));
+
         irModule.globalFnList.forEach(this::runOnIRFn);
         irModule.varInitFnList.forEach(this::runOnIRFn);
 
         Queue<IRFn> workList = new LinkedList<>();
         workList.addAll(irModule.globalFnList);
         workList.addAll(irModule.varInitFnList);
+        workList.addAll(irModule.builtinFnList);
 
         // find the fixed point
         while (!workList.isEmpty()) {
@@ -56,13 +81,13 @@ public class CallGraphAnalyzer implements IRModulePass, IRFnPass {
                 if (size0 != caller.callInfo.gloDefs.size() || size1 != caller.callInfo.gloUses.size())
                     if (!workList.contains(caller))
                         workList.offer(caller);
-                if (fn.callInfo.hasStoreInst && !caller.callInfo.hasStoreInst) {
-                    caller.callInfo.hasStoreInst = true;
+                if (fn.callInfo.hasOutSideEffect() && !caller.callInfo.hasOutSideEffect()) {
+                    caller.callInfo.outSideEffectFlag = true;
                     if (!workList.contains(caller))
                         workList.offer(caller);
                 }
-                if (fn.callInfo.hasLoadInst && !caller.callInfo.hasLoadInst) {
-                    caller.callInfo.hasLoadInst = true;
+                if (fn.callInfo.mayVariant() && !caller.callInfo.mayVariant()) {
+                    caller.callInfo.mayVariantFlag = true;
                     if (!workList.contains(caller))
                         workList.offer(caller);
                 }
@@ -89,9 +114,9 @@ public class CallGraphAnalyzer implements IRModulePass, IRFnPass {
                 }
 
                 if (inst instanceof StoreInst)
-                    fn.callInfo.hasStoreInst = true;
-                if (inst instanceof LoadInst)
-                    fn.callInfo.hasLoadInst = true;
+                    fn.callInfo.outSideEffectFlag = true;
+                if (inst instanceof StoreInst || inst instanceof LoadInst)
+                    fn.callInfo.mayVariantFlag = true;
             }
         }
     }

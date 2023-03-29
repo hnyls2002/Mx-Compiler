@@ -112,7 +112,11 @@ public class IRBuilder implements ASTVisitor {
             }
         });
         gScope.funMap.forEach((funNameString, funcInfo) -> {
-            funcInfo.irFn = new IRFn(funcInfo);
+            for (var builtInFn : topModule.builtinFnList)
+                if (builtInFn.nameString.equals(funNameString))
+                    funcInfo.irFn = builtInFn;
+            if (funcInfo.irFn == null)
+                funcInfo.irFn = new IRFn(funcInfo);
         });
     }
 

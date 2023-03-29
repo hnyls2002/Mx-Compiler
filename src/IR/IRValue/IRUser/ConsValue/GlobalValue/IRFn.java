@@ -27,7 +27,7 @@ public class IRFn extends BaseGlobalValue {
     public ASMFn asmFn = null;
 
     // for call graph
-    public CallInfo callInfo = new CallInfo();
+    public CallInfo callInfo;
 
     public IRFn(FuncInfo fnInfo) {
         // 1. build the IRFn

@@ -1,10 +1,8 @@
 package Middleend.IROptimize;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 import IR.IRModule;
@@ -76,15 +74,10 @@ public class ADCE implements IRModulePass, IRFnPass {
     Queue<IRBaseValue> workList = new LinkedList<>();
     public int totDeletedInst = 0;
 
-    static final List<String> builtInSideEffectFn = new ArrayList<String>(Arrays.asList(
-            "print", "println", "printInt", "printlnInt"));
-
     private boolean isInitLive(IRBaseInst inst) {
         if (inst instanceof CallInst call) {
-            var fnName = call.callee.nameString;
-            if (builtInSideEffectFn.contains(fnName))
-                return true;
-            return call.callee.callInfo.hasStoreInst;
+            // return true;
+            return call.callee.callInfo.hasOutSideEffect();
         }
         if (inst instanceof StoreInst || inst instanceof RetInst)
             return true;
