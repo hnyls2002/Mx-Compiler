@@ -98,6 +98,8 @@ public class Glo2Loc implements IRModulePass, IRFnPass {
         // write back
         if (!fn.nameString.equals("main")) {
             for (var glo : fn.callInfo.gloSet) {
+                if (!fn.callInfo.gloDefs.contains(glo))
+                    continue;
                 var alloca = glo2locMap.get(glo);
                 var block = fn.retBlock;
                 var idx = fn.retBlock.instList.size() - 1;

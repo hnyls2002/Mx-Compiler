@@ -1,8 +1,10 @@
 package Middleend.IROptimize;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 import IR.IRModule;
@@ -16,6 +18,7 @@ import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
 import IR.IRValue.IRUser.IRInst.StoreInst;
 import Middleend.IROptimize.Tools.CFGSimplifier;
+import Middleend.IROptimize.Tools.CallGraphAnalyzer;
 import Middleend.IROptimize.Tools.DTBuilder;
 import Middleend.IROptimize.Tools.InfosRebuilder;
 import Share.Pass.IRPass.IRFnPass;
@@ -57,6 +60,7 @@ public class ADCE implements IRModulePass, IRFnPass {
     @Override
     public void runOnIRModule(IRModule irModule) {
         new DTBuilder().buildDT(irModule, true);
+        new CallGraphAnalyzer().runOnIRModule(irModule);
         new InfosRebuilder().rebuildCFG(irModule);
         new InfosRebuilder().rebuildDefUse(irModule);
         irModule.globalFnList.forEach(this::runOnIRFn);
@@ -72,10 +76,17 @@ public class ADCE implements IRModulePass, IRFnPass {
     Queue<IRBaseValue> workList = new LinkedList<>();
     public int totDeletedInst = 0;
 
+    static final List<String> builtInSideEffectFn = new ArrayList<String>(Arrays.asList(
+            "print", "println", "printInt", "printlnInt"));
+
     private boolean isInitLive(IRBaseInst inst) {
-        if (inst instanceof CallInst
-                || inst instanceof StoreInst
-                || inst instanceof RetInst)
+        if (inst instanceof CallInst call) {
+            var fnName = call.callee.nameString;
+            if (builtInSideEffectFn.contains(fnName))
+                return true;
+            return call.callee.callInfo.hasSideEffect;
+        }
+        if (inst instanceof StoreInst || inst instanceof RetInst)
             return true;
         return false;
     }
