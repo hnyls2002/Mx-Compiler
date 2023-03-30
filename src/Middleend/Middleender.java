@@ -31,8 +31,12 @@ public class Middleender {
 
         for (int i = 0; i < 3; ++i) {
             System.err.println("------------Optimize " + (i + 1) + " times------------");
+            new ADCE().runOnIRModule(irModule);
             new SCCP().runOnIRModule(irModule);
+            new ADCE().runOnIRModule(irModule);
             new LICM().runOnIRModule(irModule);
+            new ADCE().runOnIRModule(irModule);
+            new CSE().runOnIRModule(irModule);
             new ADCE().runOnIRModule(irModule);
         }
 
