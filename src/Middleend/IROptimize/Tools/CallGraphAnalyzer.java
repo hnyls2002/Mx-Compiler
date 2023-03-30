@@ -39,12 +39,18 @@ public class CallGraphAnalyzer implements IRModulePass, IRFnPass {
         // : for loop variant code motion
         private boolean mayVariantFlag = false;
 
+        private boolean willModifyMemory = false;
+
         public boolean hasOutSideEffect() {
             return outSideEffectFlag || outSideEffectFn.contains(parentFn.nameString);
         }
 
         public boolean mayVariant() {
             return mayVariantFlag || variantFn.contains(parentFn.nameString);
+        }
+
+        public boolean willModifyMemory() {
+            return willModifyMemory;
         }
 
         public CallInfo(IRFn fn) {
@@ -91,6 +97,11 @@ public class CallGraphAnalyzer implements IRModulePass, IRFnPass {
                     if (!workList.contains(caller))
                         workList.offer(caller);
                 }
+                if (fn.callInfo.willModifyMemory() && !caller.callInfo.willModifyMemory()) {
+                    caller.callInfo.willModifyMemory = true;
+                    if (!workList.contains(caller))
+                        workList.offer(caller);
+                }
             }
         }
     }
@@ -113,8 +124,10 @@ public class CallGraphAnalyzer implements IRModulePass, IRFnPass {
                     fn.callInfo.gloSet.add(glo);
                 }
 
-                if (inst instanceof StoreInst)
+                if (inst instanceof StoreInst) {
                     fn.callInfo.outSideEffectFlag = true;
+                    fn.callInfo.willModifyMemory = true;
+                }
                 if (inst instanceof StoreInst || inst instanceof LoadInst)
                     fn.callInfo.mayVariantFlag = true;
             }

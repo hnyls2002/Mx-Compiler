@@ -34,7 +34,7 @@ public class IRLoop {
             for (var inst : block.instList) {
                 if (inst instanceof StoreInst && aliasAnalyzer.mayAlias(value, inst.getOprand(1)))
                     return false;
-                if (inst instanceof CallInst call && call.callee.callInfo.mayVariant())
+                if (inst instanceof CallInst call && call.callee.callInfo.willModifyMemory())
                     return false;
             }
         }
