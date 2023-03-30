@@ -48,10 +48,13 @@ public class Glo2Loc implements IRModulePass, IRFnPass {
         init();
         for (var callInst : fn.callInfo.callInst) {
             var needStore = new HashSet<>(callInst.callee.callInfo.gloUses);
-            var needLoad = new HashSet<>(callInst.callee.callInfo.gloDefs);
             needStore.retainAll(fn.callInfo.gloSet);
-            needLoad.retainAll(fn.callInfo.gloSet);
+            needStore.retainAll(fn.callInfo.gloDefs);
             storeBeforeCall.put(callInst, needStore);
+
+            var needLoad = new HashSet<>(callInst.callee.callInfo.gloDefs);
+            needLoad.retainAll(fn.callInfo.gloSet);
+            needLoad.retainAll(fn.callInfo.gloUses);
             loadAfterCall.put(callInst, needLoad);
         }
 

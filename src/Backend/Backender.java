@@ -13,6 +13,9 @@ public class Backender {
     public void run(IRModule irModule, String filePath, boolean testOnline) throws FileNotFoundException {
         new ASMPreHandler().buildSkeleton(irModule);
         ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
+
+        System.err.println("------------Register Coloring------------");
+
         // new BfRegAllocator().runOnASMModule(asmModule);
         new RegisterColoring().runOnASMModule(asmModule);
 

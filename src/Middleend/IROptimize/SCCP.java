@@ -50,6 +50,7 @@ public class SCCP implements IRModulePass, IRFnPass, IRInstVisitor {
         new InfosRebuilder().rebuildDefUse(irModule);
         irModule.globalFnList.forEach(this::runOnIRFn);
         irModule.varInitFnList.forEach(this::runOnIRFn);
+        System.err.println("SCCP: " + constCount + " constants, " + invalidBrCount + " invalid branches");
     }
 
     // 0 -> undefined, 1 -> constant, 2 -> unknown
@@ -58,6 +59,7 @@ public class SCCP implements IRModulePass, IRFnPass, IRInstVisitor {
     HashMap<IRBaseValue, Integer> constantMap = new HashMap<>();
     HashSet<IRBasicBlock> availableBBSet = new HashSet<>();
     HashMap<BrInst, IRBasicBlock> br2jumpMap = new HashMap<>();
+    public int constCount = 0, invalidBrCount = 0;
 
     public void init(IRFn fn) {
         workList.clear();
@@ -151,6 +153,11 @@ public class SCCP implements IRModulePass, IRFnPass, IRInstVisitor {
                 }
             }
         });
+
+        // for visualizing
+        for (var val : latticeMap.values())
+            constCount += val == 1 ? 1 : 0;
+        invalidBrCount += br2jumpMap.size();
     }
 
     @Override

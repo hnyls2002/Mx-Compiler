@@ -23,6 +23,8 @@ import Share.Pass.IRPass.IRModulePass;
 public class LICM implements IRModulePass, IRFnPass, IRLoopPass {
     // loop invariant code motion
 
+    public int movableInstCnt = 0;
+
     @Override
     public void runOnIRModule(IRModule irModule) {
         new CallGraphAnalyzer().runOnIRModule(irModule);
@@ -31,6 +33,7 @@ public class LICM implements IRModulePass, IRFnPass, IRLoopPass {
         new InfosRebuilder().rebuildCFG(irModule);
         irModule.globalFnList.forEach(this::runOnIRFn);
         irModule.varInitFnList.forEach(this::runOnIRFn);
+        System.err.println("LICM: " + movableInstCnt + " insts moved");
     }
 
     @Override
@@ -49,6 +52,8 @@ public class LICM implements IRModulePass, IRFnPass, IRLoopPass {
                 if (loop.checkInvariant(inst))
                     movableInsts.add(inst);
             }
+
+        movableInstCnt += movableInsts.size();
 
         while (!movableInsts.isEmpty()) {
             var it = movableInsts.iterator();

@@ -30,6 +30,7 @@ public class Middleender {
         new Mem2Reg().runOnIRModule(irModule);
 
         for (int i = 0; i < 3; ++i) {
+            System.err.println("------------Optimize " + (i + 1) + " times------------");
             new SCCP().runOnIRModule(irModule);
             new LICM().runOnIRModule(irModule);
             new ADCE().runOnIRModule(irModule);
