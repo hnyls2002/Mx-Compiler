@@ -29,7 +29,19 @@ public class IRLoop {
         this.parentFn = parentFn;
     }
 
-    public boolean checkInvariant(IRBaseValue value) {
+    public boolean notModified(IRBaseValue value, AliasAnalyzer aliasAnalyzer) {
+        for (var block : contents) {
+            for (var inst : block.instList) {
+                if (inst instanceof StoreInst && aliasAnalyzer.mayAlias(value, inst.getOprand(1)))
+                    return false;
+                if (inst instanceof CallInst call && call.callee.callInfo.mayVariant())
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean checkInvariant(IRBaseValue value, AliasAnalyzer aliasAnalyzer) {
         // const value (const data + global var)
         // or parameter
         if (value instanceof BaseConstValue
@@ -60,11 +72,11 @@ public class IRLoop {
 
         // check all the operands
         for (int i = 0; i < inst.getOprandNum(); ++i)
-            if (!checkInvariant(inst.getOprand(i)))
+            if (!checkInvariant(inst.getOprand(i), aliasAnalyzer))
                 return false;
 
         if (inst instanceof LoadInst) // check alias
-            return false;
+            return notModified(inst.getOprand(0), aliasAnalyzer);
 
         return true;
     }

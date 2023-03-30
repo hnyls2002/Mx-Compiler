@@ -11,6 +11,7 @@ import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.BrInst;
 import IR.IRValue.IRUser.IRInst.IRBaseInst;
 import IR.IRValue.IRUser.IRInst.JumpInst;
+import Middleend.IROptimize.Tools.AliasAnalyzer;
 import Middleend.IROptimize.Tools.CallGraphAnalyzer;
 import Middleend.IROptimize.Tools.IRLoop;
 import Middleend.IROptimize.Tools.InfosRebuilder;
@@ -24,6 +25,7 @@ public class LICM implements IRModulePass, IRFnPass, IRLoopPass {
     // loop invariant code motion
 
     public int movableInstCnt = 0;
+    public AliasAnalyzer aliasAnalyzer = new AliasAnalyzer();
 
     @Override
     public void runOnIRModule(IRModule irModule) {
@@ -31,6 +33,7 @@ public class LICM implements IRModulePass, IRFnPass, IRLoopPass {
         new LoopAnalyzer().runOnIRModule(irModule);
         new InfosRebuilder().rebuildDefUse(irModule);
         new InfosRebuilder().rebuildCFG(irModule);
+        aliasAnalyzer.runOnIRModule(irModule);
         irModule.globalFnList.forEach(this::runOnIRFn);
         irModule.varInitFnList.forEach(this::runOnIRFn);
         System.err.println("LICM: " + movableInstCnt + " insts moved");
@@ -49,7 +52,7 @@ public class LICM implements IRModulePass, IRFnPass, IRLoopPass {
 
         for (var block : loop.contents)
             for (var inst : block.instList) {
-                if (loop.checkInvariant(inst))
+                if (loop.checkInvariant(inst, aliasAnalyzer))
                     movableInsts.add(inst);
             }
 
