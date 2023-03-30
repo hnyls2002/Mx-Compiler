@@ -70,6 +70,7 @@ public class CFGSimplifier {
                 block.instList.addAll(next.instList);
                 next.instList = block.instList;
                 next.phiList = block.phiList;
+                next.phiList.forEach(phiInst -> phiInst.parentBlock = next);
 
                 // modify CFG graph
                 block.preList.forEach(pre -> pre.sucList.replaceAll(x -> x == block ? next : x));
