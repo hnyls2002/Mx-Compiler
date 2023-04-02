@@ -22,7 +22,22 @@ public class BinaryInst extends IRBaseInst {
         if (!lType.equals(rType))
             throw new MyException(
                     "Binary " + this.opCode + " " + lType.formatType() + " " + rType.formatType() + " not match");
-        block.addInst(this);
+        if (block != null)
+            block.addInst(this);
+    }
+
+    public IRBaseValue lhs() {
+        return getOprand(0);
+    }
+
+    public IRBaseValue rhs() {
+        return getOprand(1);
+    }
+
+    public void swapOprand() {
+        var tmp = getOprand(0);
+        setOprand(0, getOprand(1));
+        setOprand(1, tmp);
     }
 
     public void swapOprandForConst() {

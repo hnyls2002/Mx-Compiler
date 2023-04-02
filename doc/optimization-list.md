@@ -40,6 +40,34 @@ In SSA form, how to determine if an instruction is loop invariant?
   - load from global variable may change
     address is loop invariant, and the address will not been stored in the loop
 
+#### induction variable analysis & strength reduction
+
+- basic induction variable : `x = x + c` 
+  (`c` is a loop invariant)
+- derived induction variable : `y = a * x + b` 
+  (a linear function of basic induction variable, and `a` and `b` are loop invariant)
+
+Some instructions are cheaper than others.
+
+an IV can be reprsented as a tuple : `(x, a, b)`.
+
+After induction variable analysis, some multiplication can be replaced by addition.
+
+The comparison can be transformed so that basic IV can be eliminated, too.
+
+```
+i < n
+
+// k = a * i + b
+// then ...
+
+k < a * n + b
+
+// a * n + b is loop invariant
+// and we just elmimate one variable...
+```
+
+
 #### spare conditional constant propagation
 
 Lattice value (only upwards): undefined -> constant -> unknown

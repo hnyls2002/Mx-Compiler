@@ -64,7 +64,7 @@ public class ADCE implements IRModulePass, IRFnPass {
         irModule.globalFnList.forEach(this::runOnIRFn);
         irModule.varInitFnList.forEach(this::runOnIRFn);
         new CFGSimplifier().simplify(irModule);
-        System.err.println("ADCE: " + totDeletedInst + " insts deleted");
+        System.err.println("ADCE: \t" + totDeletedInst + " insts deleted");
     }
 
     HashSet<IRBasicBlock> liveBlock = new HashSet<>();

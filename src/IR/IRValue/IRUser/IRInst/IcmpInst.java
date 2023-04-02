@@ -25,6 +25,14 @@ public class IcmpInst extends IRBaseInst {
         block.addInst(this);
     }
 
+    public IRBaseValue lhs() {
+        return getOprand(0);
+    }
+
+    public IRBaseValue rhs() {
+        return getOprand(1);
+    }
+
     @Override
     public String formatDef() {
         var ret = "icmp " + opCode.name() + ' ' + getOprand(0).valueType.formatType() + ' ';

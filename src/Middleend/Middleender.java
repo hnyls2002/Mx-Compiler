@@ -38,6 +38,8 @@ public class Middleender {
             new ADCE().runOnIRModule(irModule);
             new CSE().runOnIRModule(irModule);
             new ADCE().runOnIRModule(irModule);
+            new IVT().runOnIRModule(irModule);
+            new ADCE().runOnIRModule(irModule);
         }
 
         new IRRenamer().runOnIRModule(irModule);

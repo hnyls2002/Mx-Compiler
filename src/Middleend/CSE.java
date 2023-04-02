@@ -33,7 +33,7 @@ public class CSE implements IRModulePass, IRFnPass {
         new InfosRebuilder().rebuildDefUse(irModule);
         irModule.globalFnList.forEach(this::runOnIRFn);
         irModule.varInitFnList.forEach(this::runOnIRFn);
-        System.err.println("CSE : " + CSECount + " subexpression eliminated");
+        System.err.println("CSE: \t" + CSECount + " subexpression eliminated");
     }
 
     HashSet<Pair<IRBaseInst, IRBaseInst>> workList = new HashSet<>();

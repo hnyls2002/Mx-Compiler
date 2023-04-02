@@ -50,7 +50,7 @@ public class SCCP implements IRModulePass, IRFnPass, IRInstVisitor {
         new InfosRebuilder().rebuildDefUse(irModule);
         irModule.globalFnList.forEach(this::runOnIRFn);
         irModule.varInitFnList.forEach(this::runOnIRFn);
-        System.err.println("SCCP: " + constCount + " constants, " + invalidBrCount + " invalid branches");
+        System.err.println("SCCP: \t" + constCount + " constants\n\t" + invalidBrCount + " invalid branches");
     }
 
     // 0 -> undefined, 1 -> constant, 2 -> unknown
