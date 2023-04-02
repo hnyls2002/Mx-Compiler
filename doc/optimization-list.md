@@ -1,6 +1,10 @@
 ### IR optimization list
 #### function inlining
 
+just put the callee's body in the caller's body
+
+**As the call relationship may be cyclic, we need to set a bound on the size of code of the inlined function**
+
 #### copy propagation
 
 After mem2reg, there is no copy in the IR. Mem2reg pass actually does copy propagation.
@@ -79,6 +83,19 @@ Worklist algorithm
 constant folding can be done in this phase
 
 #### common subexpression elimination
+
+for every value in LLVM IR, just check all its users, if they are exactly doing the same thing, then replace one of them with the other.
+
+if A is replaced by B, **B should be A's dominator**.
+
+use a worklist to do this repeatedly, until no more common subexpression can be found.
+
+- if they are value with non-void type, then all their operands should be the same
+- will not do IO
+- will not store to memory
+- do call graph analysis to check the above conditions recursively
+
+
 #### Aggressive Dead Code Elimination
 
 Initially, all instructions are marked as dead.
