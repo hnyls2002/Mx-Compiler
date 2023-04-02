@@ -101,6 +101,7 @@ public class IVT implements IRModulePass, IRFnPass, IRLoopPass {
 
         inst2IV.forEach((inst, iv) -> strengthReduction(loop, inst, iv));
 
+        // abort : useless
         basicIVElimination(loop);
 
         loop.subLoops.forEach(this::runOnIRLoop);
@@ -114,6 +115,10 @@ public class IVT implements IRModulePass, IRFnPass, IRLoopPass {
         for (var derive : inst2IV.entrySet()) {
             var div = derive.getValue();
             var dPhi = strengthReductionMap.get(derive.getKey());
+
+            if (dPhi == null)
+                continue;
+
             if (!div.isBasicIV && inst2IV.get(div.inst0).isBasicIV) {
                 var bivInst = (IRBaseInst) div.inst0;
                 if (eliminated.contains(bivInst))
@@ -126,11 +131,7 @@ public class IVT implements IRModulePass, IRFnPass, IRLoopPass {
                         if (loop.checkInvariant(icmp.lhs()) || loop.checkInvariant(icmp.rhs())) {
                             int idx = loop.checkInvariant(icmp.lhs()) ? 0 : 1;
                             var bound = icmp.getOprand(idx);
-                            if (div.opCode0 == BOP.add || div.opCode0 == BOP.sub) {
-                                var newBound = new BinaryInst(div.opCode0, bound, div.bias0, null);
-                                loop.preHeader.addInstBeforeTerminal(newBound);
-                                replaceMap.put(icmp, new Pair<>(idx, new Pair<>(newBound, dPhi)));
-                            } else if (div.opCode0 == BOP.mul) {
+                            if (div.opCode0 == BOP.mul) {
                                 var newBound = new BinaryInst(BOP.mul, bound, div.mul0, null);
                                 loop.preHeader.addInstBeforeTerminal(newBound);
                                 replaceMap.put(icmp, new Pair<>(idx, new Pair<>(newBound, dPhi)));
@@ -152,6 +153,8 @@ public class IVT implements IRModulePass, IRFnPass, IRLoopPass {
 
     private void strengthReduction(IRLoop loop, IRBaseInst inst, IV iv) {
         if (iv.isBasicIV)
+            return;
+        if (iv.opCode0 == BOP.add || iv.opCode0 == BOP.sub)
             return;
         var phi = new PhiInst(iv.initValue.valueType, loop.header);
         phi.addBranch(loop.preHeader, iv.initValue);
