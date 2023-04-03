@@ -16,12 +16,14 @@ public class RetInst extends IRBaseInst {
     public RetInst(IRBaseValue retValue, IRBasicBlock block) {
         super(new IRVoidType(), block);
         appendOprand(retValue);
-        block.setTerminal(this);
+        if (block != null)
+            block.setTerminal(this);
     }
 
     public RetInst(IRBasicBlock block) {
         super(new IRVoidType(), block);
-        block.setTerminal(this);
+        if (block != null)
+            block.setTerminal(this);
     }
 
     public static void createVoidRetInst(IRBasicBlock block) {
@@ -41,4 +43,10 @@ public class RetInst extends IRBaseInst {
         visitor.visit(this);
     }
 
+    @Override
+    public IRBaseInst copy() {
+        if (getOprandNum() == 0)
+            return new RetInst(null);
+        return new RetInst(getOprand(0), null);
+    }
 }

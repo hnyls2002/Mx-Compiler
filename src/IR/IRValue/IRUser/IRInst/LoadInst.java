@@ -10,7 +10,8 @@ public class LoadInst extends IRBaseInst {
         super(null, block);
         valueType = ((IRPtType) (srcAddr.valueType)).derefType();
         appendOprand(srcAddr);
-        block.addInst(this);
+        if (block != null)
+            block.addInst(this);
     }
 
     public LoadInst(IRBaseValue srcAddr, IRBasicBlock block, int insertIdx) {
@@ -32,4 +33,8 @@ public class LoadInst extends IRBaseInst {
         visitor.visit(this);
     }
 
+    @Override
+    public IRBaseInst copy() {
+        return new LoadInst(getOprand(0), null);
+    }
 }

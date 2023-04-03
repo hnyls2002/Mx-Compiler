@@ -32,4 +32,8 @@ public class JumpInst extends IRBaseInst {
         return ret;
     }
 
+    @Override
+    public IRBaseInst copy() {
+        return new JumpInst((IRBasicBlock) getOprand(0));
+    }
 }

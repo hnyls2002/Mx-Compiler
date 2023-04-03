@@ -31,4 +31,9 @@ public class AllocaInst extends IRBaseInst {
     public void accept(IRInstVisitor visitor) {
         throw new MyException("AllocaInst.accept() should not be called");
     }
+
+    @Override
+    public IRBaseInst copy() {
+        throw new MyException("No allocaInst in inlining phase");
+    }
 }

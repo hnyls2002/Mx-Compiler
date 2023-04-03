@@ -16,7 +16,8 @@ public class CallInst extends IRBaseInst {
         this.callee = callee;
         for (int i = 0; i < argList.size(); ++i)
             appendOprand(argList.get(i));
-        block.addInst(this);
+        if (block != null)
+            block.addInst(this);
     }
 
     public CallInst(IRFn callee, IRBasicBlock block, IRBaseValue... argList) {
@@ -24,7 +25,8 @@ public class CallInst extends IRBaseInst {
         this.callee = callee;
         for (var arg : argList)
             appendOprand(arg);
-        block.addInst(this);
+        if (block != null)
+            block.addInst(this);
     }
 
     @Override
@@ -44,5 +46,13 @@ public class CallInst extends IRBaseInst {
     @Override
     public void accept(IRInstVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public IRBaseInst copy() {
+        var argList = new ArrayList<IRBaseValue>();
+        for (int i = 0; i < getOprandNum(); ++i)
+            argList.add(getOprand(i));
+        return new CallInst(callee, argList, null);
     }
 }

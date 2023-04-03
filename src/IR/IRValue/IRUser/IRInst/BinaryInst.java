@@ -59,4 +59,9 @@ public class BinaryInst extends IRBaseInst {
     public void accept(IRInstVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public IRBaseInst copy() {
+        return new BinaryInst(opCode, lhs(), rhs(), null);
+    }
 }

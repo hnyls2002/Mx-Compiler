@@ -26,7 +26,8 @@ public class CastInst extends IRBaseInst {
         appendOprand(srcValue);
         this.targetType = targetType;
         this.opCode = opCode;
-        block.addInst(this);
+        if (block != null)
+            block.addInst(this);
     }
 
     public CastInst(IRBaseValue srcValue, IRType targetType, CastType opCode, IRBasicBlock block, int insertIdx) {
@@ -49,4 +50,8 @@ public class CastInst extends IRBaseInst {
         visitor.visit(this);
     }
 
+    @Override
+    public IRBaseInst copy() {
+        return new CastInst(getOprand(0), targetType, opCode, null);
+    }
 }

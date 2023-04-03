@@ -34,4 +34,9 @@ public class MoveInst extends IRBaseInst {
     public String formatDef() {
         return getOprand(1).formatUseWithType();
     }
+
+    @Override
+    public IRBaseInst copy() {
+        throw new RuntimeException("MoveInst doesn't support copy");
+    }
 }

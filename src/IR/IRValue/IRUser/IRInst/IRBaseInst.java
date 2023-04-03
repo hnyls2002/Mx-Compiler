@@ -22,5 +22,8 @@ public abstract class IRBaseInst extends IRBaseUser {
         return '%' + getName();
     }
 
+    // just create a new instance, not insert into block, not copy operands
+    public abstract IRBaseInst copy();
+
     public abstract void accept(IRInstVisitor visitor);
 }

@@ -32,6 +32,13 @@ public abstract class IRBaseUser extends IRBaseValue {
         oprand.userList.add(this);
     }
 
+    public void replaceOprand(IRBaseValue oldOp, IRBaseValue newOp) {
+        for (int i = 0; i < oprandList.size(); ++i) {
+            if (oprandList.get(i) == oldOp)
+                setOprand(i, newOp);
+        }
+    }
+
     public void removeOp(int idx) {
         oprandList.remove(idx);
     }

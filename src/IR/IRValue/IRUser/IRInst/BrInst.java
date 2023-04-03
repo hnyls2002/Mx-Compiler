@@ -22,7 +22,8 @@ public class BrInst extends IRBaseInst {
 
         assert trueBlock != null && falseBlock != null;
 
-        curBlock.setTerminal(this);
+        if (curBlock != null)
+            curBlock.setTerminal(this);
     }
 
     @Override
@@ -37,5 +38,10 @@ public class BrInst extends IRBaseInst {
     @Override
     public void accept(IRInstVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public IRBaseInst copy() {
+        return new BrInst(getOprand(0), (IRBasicBlock) getOprand(1), (IRBasicBlock) getOprand(2), null);
     }
 }

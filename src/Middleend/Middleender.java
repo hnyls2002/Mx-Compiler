@@ -7,6 +7,7 @@ import AST.Scopes.GlobalScope;
 import IR.IRModule;
 import Middleend.IROptimize.ADCE;
 import Middleend.IROptimize.CSE;
+import Middleend.IROptimize.FnInlining;
 import Middleend.IROptimize.Glo2Loc;
 import Middleend.IROptimize.IVT;
 import Middleend.IROptimize.LICM;
@@ -43,6 +44,9 @@ public class Middleender {
             new IVT().runOnIRModule(irModule);
             new ADCE().runOnIRModule(irModule);
         }
+
+        new FnInlining(false).runOnIRModule(irModule);
+        new ADCE().runOnIRModule(irModule);
 
         new IRRenamer().runOnIRModule(irModule);
 

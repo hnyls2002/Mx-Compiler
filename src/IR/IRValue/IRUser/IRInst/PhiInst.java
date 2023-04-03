@@ -11,7 +11,8 @@ public class PhiInst extends IRBaseInst {
 
     public PhiInst(IRType valuType, IRBasicBlock curBlock) {
         super(valuType, curBlock);
-        curBlock.phiList.add(this);
+        if (curBlock != null)
+            curBlock.phiList.add(this);
     }
 
     public void addBranch(IRBasicBlock block, IRBaseValue res) {
@@ -32,5 +33,13 @@ public class PhiInst extends IRBaseInst {
     @Override
     public void accept(IRInstVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public IRBaseInst copy() {
+        var ret = new PhiInst(valueType, null);
+        for (int i = 0; i < getOprandNum(); i += 2)
+            ret.addBranch((IRBasicBlock) getOprand(i), getOprand(i + 1));
+        return ret;
     }
 }

@@ -46,4 +46,11 @@ public class GEPInst extends IRBaseInst {
         visitor.visit(this);
     }
 
+    @Override
+    public IRBaseInst copy() {
+        var ret = new GEPInst(getOprand(0), valueType, null);
+        for (int i = 1; i < getOprandNum(); ++i)
+            ret.appendOprand(getOprand(i));
+        return ret;
+    }
 }

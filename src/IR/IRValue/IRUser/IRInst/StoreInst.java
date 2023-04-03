@@ -45,7 +45,8 @@ public class StoreInst extends IRBaseInst {
 
         trans(storedValue, destAddr, block, -1);
 
-        block.addInst(this);
+        if (block != null)
+            block.addInst(this);
     }
 
     public StoreInst(IRBaseValue storedValue, IRBaseValue destAddr, IRBasicBlock block, int insertIdx) {
@@ -56,7 +57,8 @@ public class StoreInst extends IRBaseInst {
 
         boolean isCast = trans(storedValue, destAddr, block, insertIdx);
 
-        block.instList.add(isCast ? insertIdx + 1 : insertIdx, this);
+        if (block != null)
+            block.instList.add(isCast ? insertIdx + 1 : insertIdx, this);
     }
 
     @Override
@@ -80,4 +82,8 @@ public class StoreInst extends IRBaseInst {
         visitor.visit(this);
     }
 
+    @Override
+    public IRBaseInst copy() {
+        return new StoreInst(getOprand(0), getOprand(1), null);
+    }
 }

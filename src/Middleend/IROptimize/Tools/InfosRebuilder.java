@@ -19,7 +19,7 @@ public class InfosRebuilder {
         irModule.varInitFnList.forEach(irFn -> rebuildCFG(irFn));
     }
 
-    private void rebuildDefUse(IRFn irFn) {
+    public void rebuildDefUse(IRFn irFn) {
         // clear all value's user lists : value can only be used in inst
         var tempList = new ArrayList<>(irFn.blockList);
         tempList.add(irFn.retBlock);
@@ -48,7 +48,7 @@ public class InfosRebuilder {
 
     }
 
-    private void rebuildCFG(IRFn irFn) {
+    public void rebuildCFG(IRFn irFn) {
         // clear CFG
         var tempList = new ArrayList<>(irFn.blockList);
         tempList.add(irFn.retBlock);

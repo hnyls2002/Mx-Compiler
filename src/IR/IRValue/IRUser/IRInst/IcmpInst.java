@@ -22,7 +22,8 @@ public class IcmpInst extends IRBaseInst {
         if (!lType.equals(rType))
             throw new MyException(
                     "icmp " + this.opCode + " " + lType.formatType() + " " + rType.formatType() + " not match");
-        block.addInst(this);
+        if (block != null)
+            block.addInst(this);
     }
 
     public IRBaseValue lhs() {
@@ -43,5 +44,10 @@ public class IcmpInst extends IRBaseInst {
     @Override
     public void accept(IRInstVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public IRBaseInst copy() {
+        return new IcmpInst(opCode, lhs(), rhs(), null);
     }
 }

@@ -7,10 +7,14 @@ import Backend.BackendOpt.CoalesceMoves;
 import Backend.RegAllocate.RegisterColoring;
 import Backend.RegAllocate.StackAllocator;
 import IR.IRModule;
+import Middleend.IROptimize.Tools.CallGraphAnalyzer;
 import Share.Builtin.BuiltinPrinter;
 
 public class Backender {
     public void run(IRModule irModule, String filePath, boolean testOnline) throws FileNotFoundException {
+        // for build the loop depth info
+        new CallGraphAnalyzer().runOnIRModule(irModule);
+
         new ASMPreHandler().buildSkeleton(irModule);
         ASMModule asmModule = new ASMBuiler().buildAsm(irModule);
 
