@@ -37,10 +37,12 @@ public class InfosRebuilder {
         // rebuild def-use chain
         tempList.forEach(block -> {
             block.phiList.forEach(inst -> {
+                inst.parentBlock = block;
                 for (int i = 0; i < inst.getOprandNum(); ++i)
                     inst.getOprand(i).userList.add(inst);
             });
             block.instList.forEach(inst -> {
+                inst.parentBlock = block;
                 for (int i = 0; i < inst.getOprandNum(); ++i)
                     inst.getOprand(i).userList.add(inst);
             });
@@ -60,6 +62,7 @@ public class InfosRebuilder {
         // rebuild CFG
         tempList.forEach(block -> {
             block.instList.forEach(inst -> {
+                inst.parentBlock = block;
                 if (inst instanceof BrInst br) {
                     block.sucList.add((IRBasicBlock) br.getOprand(1));
                     block.sucList.add((IRBasicBlock) br.getOprand(2));

@@ -43,6 +43,7 @@ public class IRBasicBlock extends IRBaseValue {
 
     // always set at the end of a block
     public void setTerminal(IRBaseInst terminal) {
+        terminal.parentBlock = this;
         if (this.terminal == null) { // if not terminated...
             this.terminal = terminal;
             instList.add(terminal);

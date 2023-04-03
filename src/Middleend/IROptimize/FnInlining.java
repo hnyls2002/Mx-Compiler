@@ -14,6 +14,7 @@ import IR.IRValue.IRUser.IRInst.IRBaseInst;
 import IR.IRValue.IRUser.IRInst.JumpInst;
 import IR.IRValue.IRUser.IRInst.PhiInst;
 import IR.IRValue.IRUser.IRInst.RetInst;
+import Middleend.IROptimize.Tools.CallGraphAnalyzer;
 import Middleend.IROptimize.Tools.InfosRebuilder;
 import Share.Pass.IRPass.IRModulePass;
 
@@ -78,11 +79,8 @@ public class FnInlining implements IRModulePass {
     private void replaceToCopies(IRBaseInst inst, HashMap<IRBaseValue, IRBaseValue> replaceMap) {
         for (int i = 0; i < inst.getOprandNum(); ++i) {
             var oprand = inst.getOprand(i);
-            if (replaceMap.containsKey(oprand)) {
-                if (replaceMap.get(oprand) == null)
-                    System.err.println("null");
+            if (replaceMap.containsKey(oprand))
                 inst.setOprand(i, replaceMap.get(oprand));
-            }
         }
     }
 
@@ -123,8 +121,13 @@ public class FnInlining implements IRModulePass {
             }
             for (var inst : block.instList) {
                 if (inst instanceof RetInst ret) {
-                    if (!ret.isVoid())
-                        replaceMap.put(call.inst, replaceMap.get(ret.getOprand(0)));
+                    if (!ret.isVoid()) {
+                        var replacingRetVal = replaceMap.get(ret.getOprand(0));
+                        if (replacingRetVal == null)
+                            replaceMap.put(call.inst, ret.getOprand(0));
+                        if (replacingRetVal != null)
+                            replaceMap.put(call.inst, replacingRetVal);
+                    }
                 } else {
                     var newInst = inst.copy();
                     newInst.parentBlock = inlinedBlock;
@@ -227,13 +230,15 @@ public class FnInlining implements IRModulePass {
         initInstNum(irModule);
 
         while (true) {
+            new CallGraphAnalyzer().runOnIRModule(irModule);
+
             var inlinableCall = collectInlinableCall(irModule);
 
             if (inlinableCall.isEmpty())
                 break;
 
             for (var call : inlinableCall) {
-                System.err.println("inline from " + call.caller.nameString + " to " + call.callee.nameString);
+                System.err.println("inline " + call.callee.nameString + " in " + call.caller.nameString);
                 inline(call);
             }
 

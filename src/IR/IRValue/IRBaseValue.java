@@ -33,6 +33,7 @@ public abstract class IRBaseValue {
 
     public final String getName() {
         if (nameString == null)
+            // return toString();
             throw new MyException("NullName");
         return nameString;
     }
