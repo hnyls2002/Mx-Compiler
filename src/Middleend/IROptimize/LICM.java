@@ -1,8 +1,12 @@
 package Middleend.IROptimize;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import IR.IRModule;
+import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.IRBaseInst;
 import Middleend.IROptimize.Tools.AliasAnalyzer;
@@ -40,25 +44,31 @@ public class LICM implements IRModulePass, IRFnPass, IRLoopPass {
         fn.topLoopList.forEach(this::runOnIRLoop);
     }
 
+    private void collectMovables(IRLoop loop, IRBasicBlock block, Queue<IRBaseInst> movableInsts,
+            HashSet<IRBasicBlock> visited) {
+        if (visited.contains(block) || !loop.contents.contains(block))
+            return;
+        visited.add(block);
+        for (var inst : block.instList) {
+            if (loop.checkInvariant(inst, aliasAnalyzer))
+                movableInsts.offer(inst);
+        }
+        for (var succ : block.sucList)
+            collectMovables(loop, succ, movableInsts, visited);
+    }
+
     @Override
     public void runOnIRLoop(IRLoop loop) {
         loop.createPreHeader();
 
-        ArrayList<IRBaseInst> movableInsts = new ArrayList<>();
-
-        for (var block : loop.contents)
-            for (var inst : block.instList) {
-                if (loop.checkInvariant(inst, aliasAnalyzer))
-                    movableInsts.add(inst);
-            }
+        Queue<IRBaseInst> movableInsts = new LinkedList<>();
+        HashSet<IRBasicBlock> visited = new HashSet<>();
+        collectMovables(loop, loop.header, movableInsts, visited);
 
         movableInstCnt += movableInsts.size();
 
         while (!movableInsts.isEmpty()) {
-            var it = movableInsts.iterator();
-            var inst = it.next();
-            // System.err.println(inst.formatDef());
-            it.remove();
+            var inst = movableInsts.poll();
             inst.parentBlock.instList.remove(inst);
             loop.preHeader.addInstBeforeTerminal(inst);
             inst.parentBlock = loop.preHeader;
