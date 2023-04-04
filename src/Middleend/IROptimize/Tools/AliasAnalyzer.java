@@ -15,7 +15,6 @@ import IR.IRValue.IRUser.IRInst.CastInst;
 import IR.IRValue.IRUser.IRInst.GEPInst;
 import IR.IRValue.IRUser.IRInst.LoadInst;
 import IR.IRValue.IRUser.IRInst.PhiInst;
-import Share.MyException;
 import Share.Pass.IRPass.IRFnPass;
 import Share.Pass.IRPass.IRModulePass;
 
