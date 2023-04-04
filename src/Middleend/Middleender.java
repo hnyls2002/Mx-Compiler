@@ -43,7 +43,7 @@ public class Middleender {
             new ADCE().runOnIRModule(irModule);
             new IVT().runOnIRModule(irModule);
             new ADCE().runOnIRModule(irModule);
-            new FnInlining(false).runOnIRModule(irModule);
+            new FnInlining(true).runOnIRModule(irModule);
             new ADCE().runOnIRModule(irModule);
         }
 

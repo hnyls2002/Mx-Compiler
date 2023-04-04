@@ -1,6 +1,7 @@
 package Middleend.IROptimize.Tools;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import IR.IRModule;
 import IR.IRValue.IRBasicBlock;
@@ -22,26 +23,33 @@ public class CFGSimplifier {
         return false;
     }
 
+    private void accessibleBlockTagger(IRBasicBlock block, HashSet<IRBasicBlock> taged) {
+        taged.add(block);
+        for (var suc : block.sucList)
+            if (!taged.contains(suc))
+                accessibleBlockTagger(suc, taged);
+    }
+
     private void simplify(IRFn irFn) {
         // delete the never accessed block
         // and remove the unaccessed predecessor in phiInst
-        while (true) {
-            boolean flag = false;
-            for (int i = 1; i < irFn.blockList.size(); ++i) {
-                var blk = irFn.blockList.get(i);
-                if (blk.preList.isEmpty()) {
-                    flag = true;
-                    for (var suc : blk.sucList) {
-                        for (var phi : suc.phiList)
-                            phi.removePre(blk);
-                        suc.preList.remove(blk);
-                    }
-                    irFn.blockList.remove(blk);
+        HashSet<IRBasicBlock> taged = new HashSet<>();
+        ArrayList<IRBasicBlock> removeBlockList = new ArrayList<>();
+        accessibleBlockTagger(irFn.blockList.get(0), taged);
+
+        for (int i = 0; i < irFn.blockList.size(); ++i) {
+            var block = irFn.blockList.get(i);
+            if (!taged.contains(block)) {
+                removeBlockList.add(block);
+                for (var suc : block.sucList) {
+                    for (var phi : suc.phiList)
+                        phi.removePre(block);
+                    suc.preList.remove(block);
                 }
             }
-            if (!flag)
-                break;
         }
+
+        irFn.blockList.removeAll(removeBlockList);
 
         // remove the phiInst if it has only one oprand
         var tempBlockList = new ArrayList<>(irFn.blockList);
