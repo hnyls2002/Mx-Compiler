@@ -182,7 +182,7 @@ public class SCCP implements IRModulePass, IRFnPass, IRInstVisitor {
             case or -> c1 | c2;
             case sdiv -> c1 / c2;
             case shl -> c1 << c2;
-            case srem -> c1 % c2;
+            case srem -> c2 == 0 ? Integer.MAX_VALUE : c1 % c2;
             case sub -> c1 - c2;
             case xor -> c1 ^ c2;
         };
