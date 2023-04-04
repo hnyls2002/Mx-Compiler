@@ -1,5 +1,7 @@
 package Middleend.IROptimize.Tools;
 
+import java.util.ArrayList;
+
 import IR.IRModule;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
@@ -22,14 +24,18 @@ public class CFGSimplifier {
 
     private void simplify(IRFn irFn) {
         // delete the never accessed block
+        // and remove the unaccessed predecessor in phiInst
         while (true) {
             boolean flag = false;
             for (int i = 1; i < irFn.blockList.size(); ++i) {
                 var blk = irFn.blockList.get(i);
                 if (blk.preList.isEmpty()) {
                     flag = true;
-                    for (var suc : blk.sucList)
+                    for (var suc : blk.sucList) {
+                        for (var phi : suc.phiList)
+                            phi.removePre(blk);
                         suc.preList.remove(blk);
+                    }
                     irFn.blockList.remove(blk);
                 }
             }
@@ -38,7 +44,9 @@ public class CFGSimplifier {
         }
 
         // remove the phiInst if it has only one oprand
-        irFn.blockList.forEach(block -> {
+        var tempBlockList = new ArrayList<>(irFn.blockList);
+        tempBlockList.add(irFn.retBlock);
+        tempBlockList.forEach(block -> {
             var it = block.phiList.iterator();
             while (it.hasNext()) {
                 var phiInst = it.next();

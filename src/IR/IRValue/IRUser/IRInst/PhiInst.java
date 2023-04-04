@@ -20,6 +20,16 @@ public class PhiInst extends IRBaseInst {
         appendOprand(res);
     }
 
+    public void removePre(IRBasicBlock preBlock) {
+        for (int i = 0; i < getOprandNum(); i += 2) {
+            if (getOprand(i) == preBlock) {
+                removeOp(i);
+                removeOp(i);
+                break;
+            }
+        }
+    }
+
     @Override
     public String formatDef() {
         var ret = "phi " + valueType.formatType() + " ";
