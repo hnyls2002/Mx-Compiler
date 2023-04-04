@@ -98,8 +98,10 @@ public class FnInlining implements IRModulePass {
 
         var inlinedBlockList = new ArrayList<IRBasicBlock>();
 
-        // for every value create a copy to replace it for avoiding some problems
+        // operand replacement map inside the inlined blocks
         HashMap<IRBaseValue, IRBaseValue> replaceMap = new HashMap<>();
+        // value to replace call inst
+        IRBaseValue callReplacement = null;
 
         // replace parameters with actual arguments
         for (int i = 0; i < callee.paraList.size(); ++i) {
@@ -124,9 +126,9 @@ public class FnInlining implements IRModulePass {
                     if (!ret.isVoid()) {
                         var replacingRetVal = replaceMap.get(ret.getOprand(0));
                         if (replacingRetVal == null)
-                            replaceMap.put(call.inst, ret.getOprand(0));
-                        if (replacingRetVal != null)
-                            replaceMap.put(call.inst, replacingRetVal);
+                            callReplacement = ret.getOprand(0);
+                        else
+                            callReplacement = replacingRetVal;
                     }
                 } else {
                     var newInst = inst.copy();
@@ -185,15 +187,16 @@ public class FnInlining implements IRModulePass {
         var lastInlinedBlock = inlinedBlockList.get(inlinedBlockList.size() - 1);
         new JumpInst(cutBlock, lastInlinedBlock);
 
-        // replace all the values
-        var newBlockList = new ArrayList<>(caller.blockList);
-        newBlockList.add(caller.retBlock);
-        for (var block : newBlockList) {
+        // replace all the values in the inlined blocks
+        for (var block : inlinedBlockList) {
             block.instList.forEach(inst -> replaceToCopies(inst, replaceMap));
             block.phiList.forEach(phi -> replaceToCopies(phi, replaceMap));
         }
+        // replace the use of call inst
+        call.inst.replaceAllUseWith(callReplacement);
 
         new InfosRebuilder().rebuildCFG(caller);
+        new InfosRebuilder().rebuildDefUse(caller);
     }
 
     private void initInstNum(IRModule irModule) {
