@@ -112,8 +112,10 @@ public class AliasAnalyzer implements IRModulePass, IRFnPass {
             if (memoryStarter.contains(addr2))
                 return mayAlias(addr2, addr1);
             // addr1 is memory starter
-            if (!(addr2 instanceof GEPInst))
-                throw new MyException("addr2 should be GEPInst here");
+            if (!(addr2 instanceof GEPInst)) {
+                return true;
+                // throw new MyException("addr2 should be GEPInst here");
+            }
             return mayAlias(addr1, ((GEPInst) addr2).getOprand(0));
         }
 

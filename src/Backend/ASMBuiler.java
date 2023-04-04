@@ -31,6 +31,7 @@ import IR.IRType.IRStructType;
 import IR.IRType.IRVoidType;
 import IR.IRValue.IRBasicBlock;
 import IR.IRValue.IRUser.ConsValue.ConsData.IntConst;
+import IR.IRValue.IRUser.ConsValue.ConsData.NullConst;
 import IR.IRValue.IRUser.ConsValue.GlobalValue.IRFn;
 import IR.IRValue.IRUser.IRInst.BinaryInst;
 import IR.IRValue.IRUser.IRInst.BrInst;
@@ -250,7 +251,9 @@ public class ASMBuiler implements IRModulePass, IRFnPass, IRBlockPass, IRInstVis
 
     @Override
     public void visit(GEPInst inst) {
-        Register startAddr = ifGlobalThenLoad(inst.getOprand(0).asOprand);
+        // Register startAddr = ifGlobalThenLoad(inst.getOprand(0).asOprand);
+        Register startAddr = inst.getOprand(0) instanceof NullConst ? zero
+                : ifGlobalThenLoad(inst.getOprand(0).asOprand);
         if (inst.startType instanceof IRArrayType) { // string
             new ASMMoveInst((Register) inst.asOprand, startAddr, cur.block);
         } else if (inst.startType instanceof IRStructType) { // struct
